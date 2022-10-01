@@ -1,0 +1,37 @@
+#include <raybox.krnk>
+#include <libs_r1.krnk>
+# ================================================================
+# FUNCTIONS
+# ================================================================
+obj action TESTLIBS(obj  rot, obj options) {
+    num a = 0;
+    num b = 0;
+    num y = 0;
+    if (!!optio7ns.toRad) {
+        a = Math.toRad((num) rot.x); # x roll
+        b = Math.toRad((num) rot.y); # y pitch krunker 
+    }
+    return {};
+}
+
+# Runs every game tick
+public action update(num delta) {
+
+}
+
+public action start() {
+    # test blandrice here
+    num test = 0;
+}
+
+
+
+# Add rendering logic in here
+public action render(num delta) {
+
+}
+
+# Player spawns in
+public action onPlayerSpawn(str id) {
+
+}

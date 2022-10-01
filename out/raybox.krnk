@@ -1,0 +1,287 @@
+# ================================================================
+# CONSTANT DEFINES 
+num MS_DURATION_UNCROUCH = 166;
+num HEIGHT_STAND = 9.5;
+num HEIGHT_CROUCH = 6.2;
+
+# ================================================================
+# FUNCTIONS
+# ================================================================
+obj action RotToVecAdjusted
+(obj  rot, obj options) {
+    num a = 0;
+    num b = 0;
+    num y = 0;
+    if (!!options.toRad) {
+        a = Math.toRad((num) rot.x); # x roll
+        b = Math.toRad((num) rot.y); # y pitch (krunker is yaw)
+        y = Math.toRad((num) rot.z); # z yaw (krunker is pitch)
+    }
+    else {
+        a = (num) rot.x; # x roll
+        b = (num) rot.y; # y pitch (krunker is yaw)
+        y = (num) rot.z; # z yaw (krunker is pitch)
+    }
+    
+    obj ux = {x: Math.cos(b)*Math.cos(y), y: Math.cos(a)*Math.sin(y)+Math.sin(a)*Math.sin(b)*Math.cos(y), z: Math.sin(a)*Math.sin(y)-Math.cos(a)*Math.sin(b)*Math.cos(y)};
+    obj uy = {x: -Math.cos(b)*Math.sin(y), y:Math.cos(a)*Math.cos(y)-Math.sin(a)*Math.sin(b)*Math.sin(y), z:Math.sin(a)*Math.cos(y)+Math.cos(a)*Math.sin(b)*Math.sin(y)};
+    obj uz = {x: Math.sin(b), y: -Math.sin(a)*Math.cos(b), z: Math.cos(a)*Math.cos(b)};
+    return {ux: ux, uy: uy, uz: uz};
+}
+
+obj action cubeBounds(obj cube){
+    num[] minB = num[];
+    num[] maxB = num[];
+    
+    addTo minB (num) cube.position.x - (num) cube.scale.x/2; # x
+    addTo minB (num) cube.position.y + 0;                    # y
+    addTo minB (num) cube.position.z - (num) cube.scale.z/2; # z
+    
+    addTo maxB (num) cube.position.x + (num) cube.scale.x/2; # x
+    addTo maxB (num) cube.position.y + (num) cube.scale.y;   # y
+    addTo maxB (num) cube.position.z + (num) cube.scale.z/2; # z
+
+    return {minB:minB,maxB:maxB};
+}
+
+# Fast Ray-Box numersection
+# by Andrew Woo
+# from "Graphics Gems", Academic Press, 1990
+bool FALSE = false;
+bool TRUE = true;
+num NUMDIM = 3;
+num RIGHT = 0;
+num LEFT = 1;
+num MIDDLE = 2;
+
+# minB[NUMDIM]  , maxB[NUMDIM];	/* box
+# origin[NUMDIM], dir[NUMDIM];	/* ray
+# coord[NUMDIM] 				/* hit point
+bool action HitBoundingBox(
+    num[] minB,num[] maxB,
+    num[] origin, num[] dir,
+    num[] coord) 
+{
+	bool inside = true;
+	num[] quadrant = num[1,2,3];
+	num i = 0;
+	num whichPlane = 0;
+	num[] maxT = num[0,0,0];
+	num[] candidatePlane = num[0,0,0];
+
+	# Find candidate planes; this loop can be avoided if
+   	# rays cast all from the eye(assume perpsective view)
+	for (i=0; i<NUMDIM; i++) {
+        if(origin[i] < minB[i]) {
+			quadrant[i] = LEFT;
+			candidatePlane[i] = minB[i];
+			inside = FALSE;
+		}else if (origin[i] > maxB[i]) {
+			quadrant[i] = RIGHT;
+			candidatePlane[i] = maxB[i];
+			inside = FALSE;
+		}else	{
+			quadrant[i] = MIDDLE;
+		}
+    }
+	# Ray origin inside bounding box 
+	if(inside)	{
+		coord = origin;
+		return (TRUE);
+	}
+    # Calculate T distances to candidate planes
+	for (i = 0; i < NUMDIM; i++) {
+        if (quadrant[i] != MIDDLE && dir[i] !=0) {
+            maxT[i] = (candidatePlane[i]-origin[i]) / dir[i];
+        } else {
+            maxT[i] = -1;
+        }
+    }
+	# Get largest of the maxT's for final choice of numersection 
+	whichPlane = 0;
+	for (i = 1; i < NUMDIM; i++) {
+        if (maxT[whichPlane] < maxT[i]) {
+            whichPlane = i;
+        }
+    }
+	# Check final candidate actually inside box 
+	if (maxT[whichPlane] < 0) {return (FALSE);}
+	for (i = 0; i < NUMDIM; i++){
+        if (whichPlane != i) {
+			coord[i] = origin[i] + maxT[whichPlane] *dir[i];
+			if (coord[i] < minB[i] || coord[i] > maxB[i]){
+                return (FALSE);
+            }
+		} else {
+			coord[i] = candidatePlane[i];
+		}
+    }
+		
+	return TRUE; # Ray hits box
+}
+
+# ================================================================
+# INITIALIZE VARIABLES
+# ================================================================
+obj ray = {};
+obj cube_tohit = {};
+# obj cube_dir_t_ux = {};
+# obj cube_dir_t_uy = {};
+# obj cube_dir_t_uz = {};
+bool plrSpawned = false;
+num tnow = 0;
+num tlastStand = 0;
+num tlastCrouch = 0;
+num shootheight = 0;
+
+# ================================================================
+# KRUNKSCRIPT GAME ACTIONS
+# ================================================================
+# Runs when the game starts
+public action start () {
+
+    str aid = "34379"; # temp fix for now
+    # GAME.SCENE.addCubeaid, "#FF0000", 0,0,0, 10,10,10, ;
+    
+    cube_tohit = GAME.SCENE.addCubeaid, "#FF0000", 0,0,0, 3,3,3, opacity:0.5;
+    # cube_dir_t_ux = GAME.SCENE.addCubeaid, "#FF0000", 0,0,0, 3,3,3, opacity:0.5;
+    # cube_dir_t_uy = GAME.SCENE.addCubeaid, "#00FF00", 0,0,0, 3,3,3, opacity:0.5;
+    # cube_dir_t_uz = GAME.SCENE.addCubeaid, "#0000FF", 0,0,0, 3,3,3, opacity:0.5;
+}
+# Runs every game tick
+public action update (num delta) {
+
+    if plrSpawned
+        
+        # cube_dir_t_ux.position.x = num ray.origin.x + num ray.dir.ux.x * 5;
+        # cube_dir_t_ux.position.y = num ray.origin.y + num ray.dir.ux.y * 5;
+        # cube_dir_t_ux.position.z = num ray.origin.z + num ray.dir.ux.z * 5;
+
+        # cube_dir_t_uy.position.x = num ray.origin.x + num ray.dir.uy.x * 5;
+        # cube_dir_t_uy.position.y = num ray.origin.y + num ray.dir.uy.y * 5;
+        # cube_dir_t_uy.position.z = num ray.origin.z + num ray.dir.uy.z * 5;
+
+        # cube_dir_t_uz.position.x = num ray.origin.x + num ray.dir.uz.x * 5;
+        # cube_dir_t_uz.position.y = num ray.origin.y + num ray.dir.uz.y * 5;
+        # cube_dir_t_uz.position.z = num ray.origin.z + num ray.dir.uz.z * 5;
+    
+    
+}
+# Add rendering logic in here
+public action render (num delta) {
+
+
+}
+# Player spawns in
+public action onPlayerSpawn (str id) {
+
+    obj plr = GAME.PLAYERS.getSelf;
+    plrSpawned = true;
+    ray = origin:x:plr.position.x,y:plr.position.y,z:plr.position.z,rotation:x:0,y:0,z:0,dir:x:0,y:0,z:0;
+}
+# Player died
+public action onPlayerDeath (str id, str killerID) {
+
+
+}
+# Player update
+public action onPlayerUpdate (str id, num delta, obj inputs) {
+
+    obj plr = GAME.PLAYERS.getSelf;
+    tnow = GAME.TIME.now;
+    # GAME.logplr;
+    # GAME.loginputs;
+
+    
+    # shootheight
+    if !!inputs.crouch 
+        tlastCrouch = tnow;
+        if tnow - tlastStand < MS_DURATION_UNCROUCH 
+            shootheight = Math.maxMath.lerpHEIGHT_STAND,HEIGHT_CROUCH,tnow - tlastStand/MS_DURATION_UNCROUCH,HEIGHT_CROUCH;
+        
+     else 
+        tlastStand = tnow;
+        shootheight = Math.minMath.lerpHEIGHT_CROUCH,HEIGHT_STAND,tnow - tlastCrouch/MS_DURATION_UNCROUCH,HEIGHT_STAND;
+     # shootheight
+
+
+    # ray origin
+    ray.origin.x = num plr.position.x;
+    ray.origin.y = num plr.position.y + shootheight;
+    ray.origin.z = num plr.position.z;
+    # ray rotation
+    ray.rotation.y = num plr.rotation.x + Math.PI/2;
+	ray.rotation.z = plr.rotation.y;
+    # ray direction
+    ray.dir = RotToVecAdjustedobjray.rotation, toRad:false;
+
+    # detect ray-box AABB hit
+    obj bounds = cubeBoundscube_tohit;
+    
+    num origin = numnumray.origin.x, numray.origin.y, numray.origin.z;
+    num dir = numnumray.dir.ux.x, numray.dir.ux.y, numray.dir.ux.z;
+    num coord = num0,0,0;
+    bool didHit = HitBoundingBoxnumbounds.minB, numbounds.maxB, origin, dir, coord;
+    if didHit
+        cube_tohit.opacity = 1;
+        GAME.logcoord;
+     else 
+        cube_tohit.opacity = 0.5;
+    
+
+    
+
+
+
+}
+# User pressed a key
+public action onKeyPress (str key, num code) {
+
+
+}
+# User released a key
+public action onKeyUp (str key, num code) {
+
+
+}
+# User held a key
+public action onKeyHeld (str key, num code) {
+
+
+}
+# User pressed a button on a controller
+public action onControllerPress (str key, num code) {
+
+
+}
+# User released a button on a controller
+public action onControllerUp (str key, num code) {
+
+
+}
+# User held a button on a controller
+public action onControllerHeld (str key, num code) {
+
+
+}
+# User clicked on screen
+public action onMouseClick (num button, num x, num y) {
+
+
+}
+# User released clicked on screen
+public action onMouseUp (num button, num x, num y) {
+
+
+}
+# User scrolled on screen
+public action onMouseScroll (num dir) {
+
+
+}
+# User clicked a DIV (ID)
+public action onDIVClicked (str id) {
+
+
+}
+# Client receives network message
