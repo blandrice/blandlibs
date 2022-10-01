@@ -1,5 +1,10 @@
+# ================================================================
+# File: testmap_client.krnk
+# Author: blandrice
+# ================================================================
 #include <raybox.krnk>
-#include <libs_r1.krnk>
+#include <float16.krnk>
+
 # ================================================================
 # FUNCTIONS
 # ================================================================
@@ -7,7 +12,7 @@ obj action TESTLIBS(obj  rot, obj options) {
     num a = 0;
     num b = 0;
     num y = 0;
-    if (!!optio7ns.toRad) {
+    if (!!options.toRad) {
         a = Math.toRad((num) rot.x); # x roll
         b = Math.toRad((num) rot.y); # y pitch krunker 
     }

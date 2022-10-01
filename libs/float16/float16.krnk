@@ -1,0 +1,151 @@
+# ================================================================
+# File: float16.krnk
+# Author: blandrice
+# ================================================================
+
+num action numToUint16(num x){
+	return (x & 0xFFFF); # cap 65536 
+}
+
+num action findMSBLoc(num v){
+	# v better be an integer u dumbo
+	num r = 0;
+	v = v >> 1;
+	while (v > 0) {
+		r++;
+		v = v >> 1;
+	}
+	return r;
+}
+	
+
+num action fmod(num x, num r){
+	return x - (r*Math.floor(x / r));	
+}
+
+num action constrainRadians(num x){
+	x = fmod(x,Math.PI2);
+	if (x < 0){
+		x += 360;
+	}
+    return x;
+}
+str action printBinary(num f){
+	str retstr = "";
+	for (num i = 32-1; i >= 0; i--) {
+		retstr += toStr (f >> i & 0x1);
+	}
+	return retstr;
+}
+num action ones(num f){
+	num retnum = 0;
+	for (num i = 0; i < f; i++){
+		retnum = (retnum << 1) | 1;
+	}
+	return retnum;	
+}
+
+num MAX_BITS = 16;
+num BITS_EXP = 3;
+num BIAS = 2**(BITS_EXP-1)-1;
+# num BITS_MANT = 12;
+num BITS_MANT = MAX_BITS - 1 - BITS_EXP;
+num SIGN_LOC = MAX_BITS-1;
+num action radToFloat16(num data) {
+	GAME.log("##### NUM --> FLOAT16 #####");
+	GAME.log("BIAS: ",BIAS);
+	# normalize to [0, 2pi]
+# 	data = constrainRadians(data);
+	# sign bit
+	num signbit = 0;
+	if (data < 0) {signbit = 1; data = -data;}
+	GAME.log("sign bit: ", signbit);
+	# Convert  whole / decimal bits to pure binary
+	num whole = Math.floor(data); # # whole number [0,2PI] noninclusive is already between 0 - 8
+	num wholebit = whole; 
+	num decimal = (data - whole > 0) ? data - whole : 0;
+	num decbit = 0x000; 
+	GAME.log("whole bit: ",wholebit);
+	# convert decimals into binary
+	 # 2 ^-7 
+	for (num i = 0; i < BITS_MANT; i++){
+		GAME.log("current decimal: ",decimal);
+		decimal *= 2;
+		num tdecbit = (decimal >= 1 ? 1 : 0);
+		decbit |=  tdecbit << (BITS_MANT-1-i); # 12 - i 
+		if (decimal >= 1) {decimal -=1;}
+		GAME.log("decimal bit ", BITS_MANT-1-i , ": ",tdecbit);
+	}
+	GAME.log("final decimal bits ", printBinary(decbit));
+	num purbinary = (wholebit << BITS_MANT) | decbit;
+	GAME.log("pure binary: ", printBinary(purbinary));
+	# normalize to determine mantissa and unbiased exponent
+	num unbiasedexp = findMSBLoc(purbinary) - BITS_MANT;
+	num biasedexp = unbiasedexp + BIAS;
+	GAME.log("unbiased exp: ", unbiasedexp);
+	GAME.log("biased exp: ", biasedexp);
+	GAME.log("biased exp bin: ", printBinary(biasedexp));
+	
+	# num mantissa = purbinary ^ (1 << (findMSBLoc(purbinary))); # remove leading 1 (MSB)
+	num mantissa = 0;
+	GAME.log("mantissa with remove leading 1: ",printBinary(mantissa));
+	# num mantissa = 0;
+	if (findMSBLoc(mantissa) > BITS_MANT-1)	{ # truncate to # of bits?
+		mantissa = mantissa >> findMSBLoc(mantissa) - (BITS_MANT-1);
+		GAME.log("mantissa truncating required: ", printBinary(mantissa));
+		# at this point rounding would be done for the last bit but I'm lazy
+	} else { # else, right pad with zeros
+		mantissa = (mantissa << (BITS_MANT - 1 - findMSBLoc(mantissa)));
+		GAME.log("mantissa padding required: ", printBinary(mantissa));
+	}
+
+	
+	num float16 = (signbit << SIGN_LOC) | (biasedexp << BITS_MANT) | ( mantissa );
+	return float16;
+}
+
+num action float16ToRad(num f) {
+	GAME.log("##### FLOAT16 --> NUM #####");
+	GAME.log("binary: ", printBinary(f));
+	GAME.log("sign bit: ", printBinary((f >> SIGN_LOC) & 0x1));	
+	# Determine sign
+	num sign = (((f >> SIGN_LOC) & 0x1) > 0) ? -1 : 1;
+	GAME.log("sign bit: ", sign);
+	# Determine exponent 2*e 
+	num exp = (f >> BITS_MANT) & ones(BITS_EXP); 
+	GAME.log("biased exp: ", exp);
+	exp -= BIAS;
+	GAME.log("unbiased exp: ", exp);
+	# Convert mantissa to denary
+	num mantissa = f & ones(BITS_MANT);
+	GAME.log("mantissa: ", printBinary(mantissa));
+	num mantden = 0;
+	for (num i = findMSBLoc(mantissa); i >=0 ; i--) {
+		num tman = 1/(2**(BITS_MANT-i)) * ((mantissa >> i) & 0x1);
+		GAME.log("mantissa ",i,": ",tman);
+# 		mantden += 1/(2**(BITS_MANT-i)) * ((mantissa >> i) & 0x1);
+		mantden += tman;
+		
+	}
+	mantden += 1; # add 1 back 
+	GAME.log("mantissaden: ", mantden);
+	num Rad = sign * mantden * (2 ** exp);
+	return Rad;
+}
+
+# Runs when the game starts
+public action start() {
+# 	num Rad = 0.09375;
+# 	num Rad = -123.3;
+# 	num Rad = 6.1;
+	num Rad = Math.PI;
+# 	num Rad = 58.5;
+	GAME.log("number: ",Rad);
+	num radfloat16 = radToFloat16(Rad);
+	num back2rad = float16ToRad(radfloat16);
+	GAME.log("number: ",Rad);
+	GAME.log("float16: ", printBinary(radfloat16));
+	GAME.log("back to number: ", back2rad);
+	
+
+}

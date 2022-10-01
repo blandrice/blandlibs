@@ -53,7 +53,7 @@ def reformatlibfile(libpath, klibname):
     with open(libpath, 'r') as flib:
         with open(templibpath, 'w') as ftemp:
             for idx, line in enumerate(flib):
-                includelines = checkinclude(line,libpath)
+                includelines = checkinclude(line, libpath)
                 if includelines:
                     ftemp.write(includelines)
                 else:
@@ -154,7 +154,7 @@ def reformatlibfile(libpath, klibname):
     return libobj
 
 
-def checkinclude(line,filepath):
+def checkinclude(line, filepath):
     # search and replace #include<lib.krnk>
     global includedlibs
     global gbl_pubactions
@@ -197,11 +197,12 @@ def main():
 
     # all includes here
     tempfilename = os.path.join(temppath, os.path.basename(args.script))
-    outputfilename = os.path.join(outpath, os.path.basename(args.script))
+    outputfilename = os.path.join(
+        outpath, "o_" + os.path.basename(args.script))
     with open(args.script, 'r') as fscript:
         with open(tempfilename, 'w') as tempscript:
             for idx, line in enumerate(fscript):
-                includelines = checkinclude(line,tempfilename)
+                includelines = checkinclude(line, tempfilename)
                 if includelines:
                     tempscript.write(includelines)
                 else:
