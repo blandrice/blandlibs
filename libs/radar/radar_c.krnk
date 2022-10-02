@@ -1,0 +1,55 @@
+# ===================================================================
+# Library: libs\radar\radar_c.krnk
+# Author: Andrii
+# ===================================================================
+
+num radS = 200; #Radar size
+num radDist = 300; #Radar Distance
+num radY = 230; #radarY ui
+num radX = 180; #radarX ui width - radarX
+num blipSize = 5;
+num radS2 = radS/2;
+num blipS = radS*blipSize/100;
+
+num[] action NormalisedPosition(obj pp,obj tPos) {
+    return num[((num)tPos.x-(num)pp.x)/radDist,0,((num)tPos.z-(num)pp.z)/radDist]; 
+}
+
+num[] action BlipPosition(num[] p,num rx) {
+    num a = -Math.toRad(Math.toDeg(Math.atan2(p[0],p[2]))-rx-90);
+    num d = Math.sqrt(p[0]*p[0]+p[1]*p[1]+p[2]*p[2]);
+    return num[d*Math.cos(a)*radS*0.5,d*Math.sin(a)*radS*0.5];
+}
+
+public action render(num delta) {
+    obj p = GAME.PLAYERS.getSelf();
+    if(!!p && !!p.rotation) {
+        obj pp = (obj)p.position;
+        num prx = Math.toDeg((num)p.rotation.x);
+        obj s = GAME.OVERLAY.getSize();
+        num x = (num)s.width-radX;
+        num y = radY;# num s.height-radY;
+        GAME.OVERLAY.drawCircle(x,y,radS2,radS2,0,"#000000",0.8,false);
+        GAME.OVERLAY.drawLine(x-radS2,y,x+radS2,y,2,'#696969',1);
+        GAME.OVERLAY.drawLine(x,y-radS2,x,y+radS2,2,'#696969',1);
+        obj[] pl = GAME.PLAYERS.list();
+        for(num i=0; i < lengthOf pl; i++) {
+            if((bool)pl[i].isYou || !!pl[i].isDead){continue;}
+            obj tPos = (obj)pl[i].position;
+             if (GAME.UTILS.getDist3D((num)tPos.x,(num)tPos.y,(num)tPos.z,(num)pp.x,(num)pp.y,(num)pp.z) <= radDist) {
+                num[] bPos = BlipPosition(NormalisedPosition(pp,tPos),prx);
+                GAME.OVERLAY.drawCircle(bPos[0]+x,bPos[1]+y,blipS,blipS,0,'#ff0000',1,false);
+             }
+        }
+    }
+}
+
+public action onPlayerSpawn(str id) {
+    obj p=GAME.PLAYERS.findByID(id);
+    if(!!p){p.isDead = false;}
+}
+
+public action onPlayerDeath(str id, str killerID) {
+    obj p=GAME.PLAYERS.findByID(id);
+    if(!!p){p.isDead = true;}
+}

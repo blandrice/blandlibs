@@ -1,0 +1,223 @@
+# ===================================================================
+# Library: libs\fiveNightsCamera\fnitecam.krnk
+# Author: CreepyCats
+# ===================================================================
+
+str keypress = "u";
+
+obj cameraControl = {
+	# == Camera ==
+	currentCamera: 0, # What camera am I on?
+	cameraOn: false, # Is the camera up?
+	canChange: true, # Can this player change the cameras now?
+	# == Static ==
+	drawStatic: true,
+	staticFrameIndex: 0,
+	staticTimer: 50
+};
+
+# Change this to add or remove cameras
+obj[] cameraList = obj[
+	
+	{	# Camera 1
+		position: {
+			x: 47.5,
+			y: 30,
+			z: 47.5
+		},
+		lookAt: {
+			x: 0,
+			y: 0,
+			z: 0
+		}
+	},
+	
+	{	# Camera 2
+		position: {
+			x: -47.5,
+			y: 30,
+			z: 47.5
+		},
+		lookAt: {
+			x: 0,
+			y: 0,
+			z: 0
+		}
+	},
+	
+	{	# Camera 3
+		position: {
+			x: -47.5,
+			y: 30,
+			z: -47.5
+		},
+		lookAt: {
+			x: 0,
+			y: 0,
+			z: 0
+		}
+	},
+	
+	{	# Camera 4
+		position: {
+			x: 47.5,
+			y: 30,
+			z: -47.5
+		},
+		lookAt: {
+			x: 0,
+			y: 0,
+			z: 0
+		}
+	}
+	
+];
+# Change this to add or remove cameras
+
+# Do not mess with this
+obj[] cameraButtons = obj[];
+num[] staticAnimationFrames = num[
+	35854, # Frame 1
+	35855, # Frame 2
+	35856, # Frame 3
+	35857 # Frame 4
+];
+action createCameraButton(str name, num buttonX, num buttonY, num cameraIndex, str text){
+	str buttonStyle = "color:white; font-size:16px; word-spacing:30px; font-variant: small-caps;z-index:9999;background-color:rgba(82, 82, 82,0.9); position: absolute; width: 75px; height: 56px; border: 4px solid white;";
+	str buttonCurrent = GAME.UI.addDIV(name, "visible", buttonStyle, "cameraMap"); # Init Button
+	GAME.UI.updateDIV(name, "top", toStr buttonY + "px");GAME.UI.updateDIV(name, "left", toStr buttonX + "px"); # Position Button
+	addTo cameraButtons {element: name,camIndex: cameraIndex}; # Add Button To List
+	GAME.UI.updateDIVText(name, "cam " + text); # Add Text
+}
+action destroyCameraUI(){
+	# Loop through list, destroy all camera ui divs.
+	GAME.UI.removeDIV("cameraMap");
+	GAME.UI.removeDIV("blockerCams");
+	GAME.UI.removeDIV("camFlipdown");
+	for (num i = lengthOf cameraButtons - 1; i < 0; i--) {
+		GAME.UI.removeDIV((str)cameraButtons[i].element);
+		remove cameraButtons[i];
+	}
+}
+# Do not mess with this
+
+# Change this to make the UI different
+action createCameraUI(){
+	# Setup
+	str blockerStyle = "position:absolute; width: 9999999px; height: 9999999px; top: 0%; left: 0%; background-color:rgba(0,0,0,0);";
+	GAME.UI.addDIV("blockerCams", "visible", blockerStyle);
+	str mapStyle = "/* Position and Size */ position:absolute; width: 600px; height: 600px; top: 100%; left: 100%; transform:translate(-125%, -125%); /* Image */ background-size: 100% 100%; background-color: rgba(0,0,0,0);";
+	GAME.UI.addDIV("cameraMap", "visible", mapStyle);
+	
+	# Put Down Cameras Button
+	str flipdownStyle = "font-size:30px; padding-top:0.5%; padding-bottom:0%; text-align: center; color:white;z-index:9999;background-color:rgba(82, 82, 82,0.9); position: absolute; bottom: 5%; left: 50%; width: 25%; height: 5%; border: 4px solid white; transform:translate(-50%, -50%)";
+	GAME.UI.addDIV("camFlipdown", "visible", flipdownStyle);
+	GAME.UI.updateDIVText("camFlipdown", "VVV Exit Cameras VVV");
+
+	# Here is where you add any camera buttons with their corresponding index
+	createCameraButton("camButton1", 100, 100, 0, "01"); # Cam 1
+	createCameraButton("camButton2", 400, 100, 1, "02"); # Cam 2
+	createCameraButton("camButton3", 400, 400, 2, "03"); # Cam 3
+	createCameraButton("camButton4", 100, 400, 3, "04"); # Cam 4
+}
+# Change this to make the UI different
+
+# Runs every game tick
+public action update(num delta) {
+	# ==CAMERA START==
+	
+	if ((bool)cameraControl.cameraOn) {	# Move camera to position if camera is up
+		GAME.CAMERA.position.x = (num)cameraList[(num)cameraControl.currentCamera].position.x;
+		GAME.CAMERA.position.y = (num)cameraList[(num)cameraControl.currentCamera].position.y;
+		GAME.CAMERA.position.z = (num)cameraList[(num)cameraControl.currentCamera].position.z;
+		
+		# Then, look at the coordinates given
+		GAME.CAMERA.lookAt((num)cameraList[(num)cameraControl.currentCamera].lookAt.x, (num)cameraList[(num)cameraControl.currentCamera].lookAt.y, (num)cameraList[(num)cameraControl.currentCamera].lookAt.z);
+	
+		# - Yellow Camera Button -
+		for (num i = 0; i < lengthOf cameraButtons; i++) {
+			if((num)cameraButtons[i].camIndex == (num)cameraControl.currentCamera){ # Check if the DIV clicked is this camera button
+				GAME.UI.updateDIV((str)cameraButtons[i].element, "background-color", "rgba(244, 255, 97,0.9)");
+			} else {
+				GAME.UI.updateDIV((str)cameraButtons[i].element, "background-color", "rgba(82, 82, 82,0.9)");
+			}
+		}
+	}
+
+	# - Static -
+	(num)cameraControl.staticTimer -= delta; # Move frame Timer for Static
+	if ((num)cameraControl.staticTimer <= 0) {
+		
+		cameraControl.staticTimer = 50; # Reset frame timer
+		
+		(num)cameraControl.staticFrameIndex++; # Move forward one animation frame
+		
+		if ((num)cameraControl.staticFrameIndex > lengthOf staticAnimationFrames - 1) {
+			cameraControl.staticFrameIndex = 0;
+		}
+		
+	}
+
+	# ==CAMERA END==
+}
+
+# Add rendering logic in here
+public action render(num delta) {
+	# ==CAMERA START==
+	obj dimensions = GAME.OVERLAY.getSize();
+
+	# Draw Static
+	if ((bool)cameraControl.drawStatic && (bool)cameraControl.cameraOn) {
+		GAME.OVERLAY.drawImage(staticAnimationFrames[(num)cameraControl.staticFrameIndex], (num)dimensions.width, (num)dimensions.height, (num)dimensions.width, (num)dimensions.height, 0, 0.1);
+		GAME.OVERLAY.drawImage(staticAnimationFrames[(num)cameraControl.staticFrameIndex], 0, 0, (num)dimensions.width, (num)dimensions.height, 180, 0.1);
+		GAME.OVERLAY.drawImage(staticAnimationFrames[(num)cameraControl.staticFrameIndex], 0, (num)dimensions.height, (num)dimensions.width, (num)dimensions.height, 0, 0.1);
+		GAME.OVERLAY.drawImage(staticAnimationFrames[(num)cameraControl.staticFrameIndex], (num)dimensions.width, 0, (num)dimensions.width, (num)dimensions.height, 180, 0.1);
+	}
+
+	# Draw UI (Map)
+	if ((bool)cameraControl.cameraOn) {
+		num assetID = 35861; # Replace this with your map texture
+		GAME.OVERLAY.drawImage(assetID, (num)dimensions.width - 450, (num)dimensions.height - 450, 600, 600, 0, 1);
+		
+		# DO NOT REMOVE THIS OR YOU RISK BEING REPORTED FOR STEALING SCRIPTS
+		# ALWAYS GIVE THE CREATOR CREDIT OR YOU ARE WORTHLESS AS A MAKER
+		GAME.OVERLAY.drawText("Camera Script and GUI Created by creepycats | creepycats#6942", (num)dimensions.width / 2, (num)dimensions.height - 24, 0, 24, "center", "#666", 1);
+		# DO NOT REMOVE THIS OR YOU RISK BEING REPORTED FOR STEALING SCRIPTS
+		# ALWAYS GIVE THE CREATOR CREDIT OR YOU ARE WORTHLESS AS A MAKER
+	}
+	else {
+		GAME.OVERLAY.drawText("Press " + keypress + " to look at camera", (num)dimensions.width / 2, (num)dimensions.height - 24, 0, 24, "center", "#666", 1);
+	}
+	# ==CAMERA END==
+}
+
+# User pressed a key
+public action onKeyPress(str key, num code) {
+	# ==CAMERA START==
+	
+	if(key == keypress && !(bool)cameraControl.cameraOn) { # On KeyPress
+		cameraControl.cameraOn = true;
+		GAME.CAMERA.detach();
+		GAME.INPUTS.unlockMouse();
+		createCameraUI(); # Create the camera buttons
+	}
+
+	# ==CAMERA END==
+}
+
+# User clicked a DIV (ID)
+public action onDIVClicked(str id) {
+	# ==CAMERA START==
+	for (num i = 0; i < lengthOf cameraButtons; i++) {
+		if((str)cameraButtons[i].element == id){ # Check if the DIV clicked is this camera button
+			cameraControl.currentCamera = (num)cameraButtons[i].camIndex;
+		}
+	}
+	if (id == "camFlipdown") {
+		cameraControl.cameraOn = false;
+			GAME.CAMERA.attach();
+			GAME.INPUTS.lockMouse();
+			destroyCameraUI(); # Remove camera buttons
+	}
+	# ==CAMERA END==
+}

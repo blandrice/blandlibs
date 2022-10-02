@@ -1,0 +1,5 @@
+#include <fnitecam.krnk>
+
+public action start(){
+    fnitecam_keypress = "t";
+}

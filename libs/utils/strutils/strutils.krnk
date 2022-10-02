@@ -1,6 +1,6 @@
 # ===================================================================
 # Header: \strutils\strutils.krnk
-# Author: blandrice
+# Author: blandrice, ProfNoob (replaceall), ManiaMapper (Splice)
 # Description: Additional String utilities
 # ===================================================================
 str action truncate(str text, num ln) {
@@ -9,6 +9,21 @@ str action truncate(str text, num ln) {
         ret += text[i];
     }
     return ret;
+}
+
+str action splice(str input, num start, num end) {
+    num charsLen = lengthOf input;
+    if(charsLen == 0 || start >= charsLen || start >= end) {
+        return '';
+    }
+    if(end > charsLen) {
+        end = charsLen;
+    }
+    str output = '';
+    for(num i = start; i < end; i++) {
+        output += input[i];
+    }
+    return output;
 }
 
 bool action starts(str text,str value) {
