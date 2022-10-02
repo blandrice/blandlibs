@@ -1,0 +1,34 @@
+#include <wi.krnk>
+
+# ===================================================================
+# Library: weaponinfo\wpninfo_c.krnk (client)
+# Author: blandrice
+#   Description: adds additional CLASS's PRIMARY weapon info to player object.
+#   Note: Weapon info will ONLY update if player class changes. 
+#       trigger "change Primary Weaopn"  will NOT update
+#       Weapon Pickup Zone will NOT update 
+# ===================================================================
+
+num prev_cIdx = 0;
+obj plr = {};
+
+action addWeaponInfo(obj plrobject) {
+    num idx = (num) plrobject.classIndex;
+    obj weapon = wi_info[idx];
+    plrobject.weapon = weapon;
+}
+
+public action onPlayerSpawn(str id) {
+    obj tplr = GAME.PLAYERS.findByID(id);
+    if ((bool)tplr.isYou) {
+        addWeaponInfo(tplr);
+    }
+}
+
+public action update(num delta) {
+    plr = GAME.PLAYERS.getSelf();
+    if ((num)plr.classIndex != prev_cIdx) {
+        prev_cIdx = (num)plr.classIndex;
+        addWeaponInfo(plr);
+    }
+}

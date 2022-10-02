@@ -1,5 +1,5 @@
 # ===================================================================
-# Header: weaponinfo\wpninfo.krnk
+# Header: weaponinfo\wi.krnk
 # Author: blandrice
 # ===================================================================
 
@@ -8,23 +8,23 @@ obj[] info = obj[
         name: "Assault Rifle",
         ammo: 28,
         range: 700,
-        fireRate: 110,
+        fireRate: 120,
         reload: 1500,
         swap: 300,
-        aim: 120,
+        aim: 130,
         auto: true,
-        damage: 30
+        damage: 23
     },
     {
         name: "Sniper Rifle",
         ammo: 3,
         range: 1000,
-        fireRate: 920,
+        fireRate: 1000,
         reload: 1700,
         swap: 300,
         aim: 120,
         auto: false,
-        damage: 30
+        damage: 109
     },
     {
         name: "Submachine Gun",
@@ -35,7 +35,7 @@ obj[] info = obj[
         swap: 300,
         aim: 110,
         auto: true,
-        damage: 30
+        damage: 18
     },
     {
         name: "Machine Gun",
@@ -46,7 +46,7 @@ obj[] info = obj[
         swap: 600,
         aim: 200,
         auto: true,
-        damage: 30
+        damage: 19
     },
     {
         name: "Shotgun",
@@ -57,30 +57,29 @@ obj[] info = obj[
         swap: 300,
         aim: 120,
         auto: false,
-        damage: 30
+        damage: 50
     },
     {
         name: "Revolver",
-        # ammo: 6,
-        ammo: 100,
+        ammo: 6,
         range: 700,
         fireRate: 450,
         reload: 900,
         swap: 200,
         aim: 110,
         auto: false,
-        damage: 100
+        damage: 65
     },
     {
         name: "Semi Auto",
         ammo: 8,
         range: 1000,
-        fireRate: 120,
+        fireRate: 150,
         reload: 1500,
         swap: 300,
         aim: 120,
         auto: false,
-        damage: 60
+        damage: 35
     },
     {
         name: "Rocket Launcher",
@@ -90,18 +89,18 @@ obj[] info = obj[
         swap: 350,
         aim: 200,
         auto: false,
-        damage: 30
+        damage: 50,
+        splashdamage: 35
     },
     {
         name: "Akimbo Uzi",
-        ammo: 24,
+        ammo: 24, #12 each
         range: 700,
-        fireRate: 70,
+        fireRate: 70, #140ms each
         reload: 1300,
         swap: 300,
-        aim: 120,
         auto: true,
-        damage: 30
+        damage: 14
     },
     {
         name: "Combat Knife", # Does not handle throwing
@@ -111,18 +110,19 @@ obj[] info = obj[
         swap: 250,
         aim: 100,
         auto: false,
-        damage: 30
+        damage: 50,
+        throwdamage: 180 # full charge
     },
     {
         name: "Desert Eagle",
         ammo: 6,
         range: 700,
-        fireRate: 400,
+        fireRate: 450,
         reload: 1000,
         swap: 200,
         aim: 110,
         auto: false,
-        damage: 30
+        damage: 45
     },
     {
         name: "Crossbow", # Not Supported
@@ -135,31 +135,31 @@ obj[] info = obj[
         auto: false,
         charge: true,
         projectile: true,
-        damage: 30
+        damage: 200
     },
     {
         name: "Famas",
         ammo: 30,
         range: 900,
-        fireRate: 280,
+        fireRate: 280, 
+        burst: true,
+        burstRate: 90,
         reload: 1200,
         swap: 300,
         aim: 130,
         auto: false,
-        burst: true,
-        burstRate: 90,
         burstCount: 3,
-        damage: 30
+        damage: 28
     },
     {
         name: "Blaster",
         ammo: 16,
         range: 700,
         fireRate: 160,
-        reload: 1500,
+        reload: 1450,
         swap: 300,
         aim: 130,
         auto: true,
-        damage: 30
+        damage: 35
     }
 ];

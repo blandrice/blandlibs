@@ -1,6 +1,7 @@
 # ===================================================================
 # Header: libs\collisions\raybox.krnk
 # Author: blandrice
+# Description: Ray-box intersections in Krunker.
 # ===================================================================
 
 # Convert Krunker player rotation to a unit vector

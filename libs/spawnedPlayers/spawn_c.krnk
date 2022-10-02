@@ -1,0 +1,12 @@
+# ===================================================================
+# Library: \libs\spawnedPlayers\spawn_c.krnk (client)
+# Author: blandrice
+#   Description: workaround to check how many players are spawned in
+# ===================================================================
+
+public action onPlayerSpawn(str id) {
+    obj tplr = GAME.PLAYERS.findByID(id);
+    if ((bool)tplr.isYou) {
+        GAME.NETWORK.send("spawn", {});
+    }
+}

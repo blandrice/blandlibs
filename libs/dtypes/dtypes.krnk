@@ -1,0 +1,188 @@
+# ===================================================================
+# Header: \libs\float\dtypes.krnk
+# Author: blandrice
+#   Description: custom float data types--> binary representation calculations.
+#   Goal was to pack float data into 16-bits and send over NetworkMessage 
+#   (much smaller than ASCII string representation)
+# ===================================================================
+
+# range = 2^BITS_EXP 
+# precision = 1/(2^BITS_MANT)
+num MAX_BITS = 16; num BITS_EXP = 3; # (16)MAX_BITS = (1)signbit + (3)bits_exp (=8, enough for 2pi radians) + (12)BITS_MANT # range: 0-8 precision: 0.0002
+
+num BIAS = 2**(BITS_EXP-1)-1;
+num BITS_MANT = MAX_BITS - 1 - BITS_EXP;
+num SIGN_LOC = MAX_BITS-1;
+
+
+num action findMSBLoc(num v){
+	# v better be an integer u dumbo
+	num r = 0;
+	v = v >> 1;
+	while (v > 0) {
+		r++;
+		v = v >> 1;
+	}
+	return r;
+}
+num action fmod(num x, num r){
+	return x - (r*Math.floor(x / r));	
+}
+str action printBinary(num f){
+	str retstr = "";
+	for (num i = 32-1; i >= 0; i--) {
+		retstr += toStr (f >> i & 0x1);
+	}
+	return retstr;
+}
+num action ones(num f){
+	num retnum = 0;
+	for (num i = 0; i < f; i++){
+		retnum = (retnum << 1) | 1;
+	}
+	return retnum;	
+}
+
+num action numToFloat16(num data) {
+	# normalize to [0, 2pi]
+	# sign bit
+	num signbit = 0;
+	if (data < 0) {signbit = 1; data = -data;}
+    if (data == 0) {return 0;}
+	# Convert  whole / decimal bits to pure binary
+	num whole = Math.floor(data); # # whole number 0,2PI is already between 0 - 8
+	num wholebit = whole; # max is the 2 ^ bits of the exponent
+	num decimal = (data - whole > 0) ? data - whole : 0;
+	num decbit = 0x000; 
+	# convert decimals into binary
+	 # 2 ^-7 
+	for (num i = 0; i < BITS_MANT; i++){
+		decimal *= 2;
+		num tdecbit = (decimal >= 1 ? 1 : 0);
+		decbit |=  tdecbit << (BITS_MANT-1-i); # 12 - i 
+		if (decimal >= 1) {decimal -=1;}
+	}
+	num purbinary = (wholebit << BITS_MANT) | decbit;
+	# normalize to determine mantissa and unbiased exponent
+	num unbiasedexp = findMSBLoc(purbinary) - BITS_MANT;
+	num biasedexp = unbiasedexp + BIAS;
+	
+	num mantissa = purbinary ^ (1 << (findMSBLoc(purbinary))); # remove leading 1 (MSB)
+	# num mantissa = 0;
+	if (findMSBLoc(purbinary)-1 > BITS_MANT-1)	{ # truncate to # of bits? #easier to understand if you put -1 in front of everything
+		mantissa = mantissa >> findMSBLoc(purbinary)-1 - (BITS_MANT-1);
+		# at this point rounding would be done for the last bit but I'm lazy
+	} else { # else, right pad with zeros
+		mantissa = (mantissa << (BITS_MANT - findMSBLoc(purbinary)-1));
+	}
+
+	
+	num float16 = (signbit << SIGN_LOC) | (biasedexp << BITS_MANT) | ( mantissa );
+	return float16;
+}
+
+num action float16ToNum(num f) {
+	if (f == 0) {return 0;}
+    # Determine sign
+	num sign = (((f >> SIGN_LOC) & 0x1) > 0) ? -1 : 1;
+	# Determine exponent 2*e 
+	num exp = (f >> BITS_MANT) & ones(BITS_EXP); 
+	exp -= BIAS;
+	# Convert mantissa to denary
+	num mantissa = f & ones(BITS_MANT);
+	# GAME.log("mantissa: ", printBinary(mantissa));
+	num mantden = 0;
+	for (num i = findMSBLoc(mantissa); i >=0 ; i--) {
+		num tman = 1/(2**(BITS_MANT-i)) * ((mantissa >> i) & 0x1);
+		mantden += tman;
+		
+	}
+	mantden += 1; # add 1 back 
+	num Rad = sign * mantden * (2 ** exp);
+	return Rad;
+}
+
+num action numToUint16(num x){
+	return (x & 0xFFFF); # cap 65536 
+}
+
+num action numToInt16(num x){
+	# return (x & 0xFF); # cap 65536 
+	num retnum = 0;
+	x = Math.round(x);
+	x = (x > 32767) ? 32767 : x;
+	x = (x < -32767) ? -32767 : x;
+	# cap to largest / smallest int size
+
+	num sign = x < 0 ? 1 : 0;
+
+	if (sign == 1) {
+		x = -x;
+	}
+	retnum |= sign << 15;
+
+	num i = 14; # 15 - 1
+	while (x > 0) {
+		if (x / (2**i) >= 1) {
+			retnum |=  (1 << i);
+			x-= (2**i);
+		}
+		i--;
+	}
+	return retnum;
+}
+
+num[] action numTo_uint16ByteArray(num data) {
+	data = Math.round(data);
+	num[] retArray = num[];
+	addTo retArray (data >> 8) & 0xff;
+	addTo retArray (data >> 0) & 0xff;
+	
+	return retArray;
+
+}
+
+num action merge2Bytes(num a,num b) {
+	return (b << 8) | a;
+}
+
+num action Int16ToNum(num bin) {
+	# num bin = (b << 0xff) | a;
+	num sign = ((bin & 0x8000) > 0) ? -1 : 1;
+	num denary = bin & 0x7FFF;
+
+	return sign * denary;
+}
+
+# int Numbers to byte array
+num[] action int16toByteArray(num data){
+	return num[((data >> 0) & 0xff),(data >> 8) & 0xff];
+}
+
+num[] action ColorToByteArray(num color) {
+	num[] retArray = num[];
+	addTo retArray (color >> 32) & 0xff;
+	addTo retArray (color >> 16) & 0xff;
+	addTo retArray (color >> 0) & 0xff;
+	
+	return retArray;
+}
+
+str action num2hexstring(num n){
+	str hexstr = "";
+	str[] lookup = str["0","1","2","3","4","5","6","7","8","9","A","B","C","D","E","F"];
+	while (n > 0){
+		hexstr = lookup[n & 0xF] + hexstr;
+		n = n >> 4;
+	}
+	return hexstr;
+}
+
+num action constrainRadians(num x){
+	x = fmod(x,Math.PI2);
+	if (x < 0){
+		x += 360;
+	}
+    return x;
+}
+

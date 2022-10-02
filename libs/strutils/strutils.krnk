@@ -1,0 +1,45 @@
+# ===================================================================
+# Header: \strutils\strutils.krnk
+# Author: blandrice
+# Description: Additional String utilities
+# ===================================================================
+
+str[] action split(str s, str delim) {
+	str[] output = str[];
+	num idx_matchstart = 0;
+
+    # iterate over string
+    for(num i = 0; i < lengthOf s; i++) {
+        bool match = false;
+        
+        # match delimiter
+        for (num j = 0; j < lengthOf delim; j++) {
+			match = true;
+            if (s[i+j] != delim[j]) {
+				match = false; break;
+			}
+		}
+
+        # matches, parse out the string previous
+        if (match) { 
+            str word = "";
+            for (num j = idx_matchstart; j < i; j++) {
+                word += s[j];
+            }
+            addTo output word;
+
+            # skip delimiter
+            i += lengthOf delim - 1;
+            idx_matchstart = i+1;
+        }
+    } 
+    
+    # also parse last string
+    str word = "";
+    for (num i = idx_matchstart; i < lengthOf s; i++) {
+        word += s[i];
+    }
+    addTo output word;
+
+	return output;
+}

@@ -1,0 +1,48 @@
+# ===================================================================
+# Library: \libs\spawnedPlayers\spawn_s.krnk
+# Author: blandrice
+#   Description: workaround to check how many players are spawned in
+# ===================================================================
+
+str[] spawnedPlayers = str[];
+bool sologame = true;
+num tFirstSpawnedPlayer = 0;
+
+
+public action start() {
+    spawnedPlayers = str[];
+    tFirstSpawnedPlayer = 0;
+    sologame = true;
+}
+
+
+# Player died
+public action onPlayerDeath(str id, str killerID) {
+    for (num i = lengthOf spawnedPlayers-1; i >=0; i--) {
+        if (id == spawnedPlayers[i]) {
+            remove spawnedPlayers[i];
+            break;
+        }
+    }
+}
+# When a player leaves the server
+public action onPlayerLeave(str playerID) {
+    for (num i = lengthOf spawnedPlayers-1; i >=0; i--) {
+        if (playerID == spawnedPlayers[i]) {
+            remove spawnedPlayers[i];
+            break;
+        }
+    }
+}
+# Spawn Notification must come from Client
+public action onNetworkMessage(str id, obj data, str playerID) {
+    if (id == "spawn") {
+        bool hasSpawned = false;
+        for (num i = 0; i < lengthOf spawnedPlayers; i++) {
+            hasSpawned = (spawnedPlayers[i] == id) ? true : hasSpawned;
+        }
+        if (!hasSpawned) {addTo spawnedPlayers playerID;}
+        if (lengthOf spawnedPlayers >= 2) {sologame = false;}
+        if (tFirstSpawnedPlayer == 0) {tFirstSpawnedPlayer = GAME.TIME.now();}
+    }
+}
