@@ -81,7 +81,7 @@ def reformatlibfile(libpath, klibname):
                 # find variables
                 for vartype in ['num', 'str', 'bool', 'obj']:
                     m = re.search(
-                        r"(^\s*\b{}\b)\s*(\[\])*\s*(.+?)\s?=\s*(.*)\s*;".format(vartype), line.strip())
+                        r"(^\s*\b{}\b)\s*(\[\])*\s*(.+?)\s?=\s*(.*)\s*".format(vartype), line.strip().replace(";",""))
                     if m:
                         # print(m.group(1), m.group(3), m.group(4))
                         globalvars.append(m.group(3))
@@ -279,8 +279,8 @@ def main():
                                     trailingstr = line[idx:]
                     # test
                     if state == "save":
-                        outscript.write("public action {} ({})".format(
-                            actionname, strargs) + " {\n")
+                        outscript.write("public action {}({})".format(
+                            actionname, strargs) + " \n")
                         libactions = []
                         for x in gbl_pubactions:
                             if x.endswith(actionname):
@@ -293,7 +293,7 @@ def main():
                                 r"(?<![a-zA-Z0-9_])(\bobj\b|\bstr\b|\bnum\b|\bbool\b|\[\s*\])(?![a-zA-Z0-9_])").sub("", strargs)
                             outscript.write(
                                 "{}{}({});".format(indentstr, x, invokelibstr.strip()))
-                        outscript.write(pubactioncontents + "}")
+                        outscript.write(pubactioncontents + "")
 
                         outscript.write(trailingstr)
                         state = "finish"
@@ -324,7 +324,7 @@ def main():
                         break
                 # write out top level public action definition
                 outscript.write(
-                    "public action {} ({}) ".format(x, currentargs) + "{\n")
+                    "public action {} ({})".format(x, currentargs) + "{\n")
                 # invoke separate lib public actions
                 for gblpubact in gbl_pubactions:
                     if gblpubact.endswith(x):
