@@ -2,8 +2,9 @@
 # Header: libs\collisions\raybox.krnk
 # Author: blandrice
 # ===================================================================
-# FUNCTIONS
-obj action RotToVecAdjusted(obj  rot, obj options) {
+
+# Convert Krunker player rotation to a unit vector
+obj action rotation2Vec(obj  rot, obj options) {
     num a = 0;
     num b = 0;
     num y = 0;

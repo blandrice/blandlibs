@@ -1,0 +1,26 @@
+# ===================================================================
+# Header: \libs\collisions\rotbox.krnk
+# Author: blandrice
+# Description: rotated bounding box collision
+# ===================================================================
+
+obj action rotation2Vec(obj  rot, obj options) {
+    num a = 0;
+    num b = 0;
+    num y = 0;
+    if (!!options.toRad) {
+        a = Math.toRad((num) rot.x); # x roll
+        b = Math.toRad((num) rot.y); # y pitch (krunker is yaw)
+        y = Math.toRad((num) rot.z); # z yaw (krunker is pitch)
+    }
+    else {
+        a = (num) rot.x; # x roll
+        b = (num) rot.y; # y pitch (krunker is yaw)
+        y = (num) rot.z; # z yaw (krunker is pitch)
+    }
+    
+    obj ux = {x: Math.cos(b)*Math.cos(y), y: Math.cos(a)*Math.sin(y)+Math.sin(a)*Math.sin(b)*Math.cos(y), z: Math.sin(a)*Math.sin(y)-Math.cos(a)*Math.sin(b)*Math.cos(y)};
+    obj uy = {x: -Math.cos(b)*Math.sin(y), y:Math.cos(a)*Math.cos(y)-Math.sin(a)*Math.sin(b)*Math.sin(y), z:Math.sin(a)*Math.cos(y)+Math.cos(a)*Math.sin(b)*Math.sin(y)};
+    obj uz = {x: Math.sin(b), y: -Math.sin(a)*Math.cos(b), z: Math.cos(a)*Math.cos(b)};
+    return {ux: ux, uy: uy, uz: uz};
+}

@@ -76,7 +76,7 @@ public action onPlayerUpdate(str id, num delta, obj inputs) {
     ray.rotation.y = (num) plr.rotation.x + Math.PI/2;
 	ray.rotation.z = plr.rotation.y;
     # ray direction
-    ray.dir = raybox_RotToVecAdjusted((obj)ray.rotation, {toRad:false});
+    ray.dir = raybox_rotation2Vec((obj)ray.rotation, {toRad:false});
 
     # detect ray-box AABB hit
     obj bounds = raybox_cubeBounds(cube_tohit);
