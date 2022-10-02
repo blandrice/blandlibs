@@ -1,0 +1,1 @@
+https://krunker.io/?play=test_kscommap
