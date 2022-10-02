@@ -15,7 +15,6 @@ bool action starts(str text,str value) {
     if (UTILS.textContains(truncate(text, lengthOf value), value)) {return true;} 
 	return false;}
 
-
 str[] action split(str s, str delim) {
 	str[] output = str[];
 	num idx_matchstart = 0;
@@ -54,4 +53,11 @@ str[] action split(str s, str delim) {
     addTo output word;
 
 	return output;
+}
+
+str action replace_all(str string, str to_replace, str replace_with){
+    while(UTILS.replaceText(string, to_replace, replace_with) != string){
+        string = UTILS.replaceText(string, to_replace, replace_with);
+    }
+    return string;
 }
