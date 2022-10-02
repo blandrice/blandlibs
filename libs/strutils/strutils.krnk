@@ -3,6 +3,18 @@
 # Author: blandrice
 # Description: Additional String utilities
 # ===================================================================
+str action truncate(str text, num ln) {
+    str ret = "";
+    for (num i = 0; i < ln; i++) {
+        ret += text[i];
+    }
+    return ret;
+}
+
+bool action starts(str text,str value) {
+    if (UTILS.textContains(truncate(text, lengthOf value), value)) {return true;} 
+	return false;}
+
 
 str[] action split(str s, str delim) {
 	str[] output = str[];
