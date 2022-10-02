@@ -4,7 +4,40 @@
 # Description: rotated bounding box collision
 # ===================================================================
 
-obj action rotation2Vec(obj  rot, obj options) {
+# ========================================================================================
+# obj collision
+# ========================================================================================
+#  https://jkh.me/files/tutorials/Separating%20Axis%20Theorem%20for%20Oriented%20Bounding%20Boxes.pdf
+
+obj action Subtract3D(obj Pa, obj Pb) {
+    return {x: (num)Pa.x - (num)Pb.x, y: (num)Pa.y - (num)Pb.y, z: (num)Pa.z - (num)Pb.z};
+}
+obj action ScalMult3D(num scal, obj P) {
+    return {x: scal * (num) P.x, y: scal * (num) P.y, z: scal * (num) P.z};
+}
+num action DotProd3D(obj Pa, obj Pb) {
+    return ((num) Pa.x * (num) Pb.x) + ((num) Pa.y * (num) Pb.y) + ((num) Pa.z * (num) Pb.z);
+}
+# num action Mag3D(obj P) {
+#     return Math.sqrt(Math.pow((num) P.x,2) + Math.pow((num) P.y,2) + Math.pow((num) P.z,2));
+# }
+
+# obj action Proj3D(obj Pa, obj Pb) { # Projects Pa onto Pb
+#     num M = DotProd3D(Pa, Pb) / Mag3D(Pb); # magnitude of projection Vect A onto Vect B
+#     obj L = (obj) ScalMult3D(1/Mag3D(P  b),Pb); # Pb unit vector 
+#     return ScalMult3D(M,L);
+# }
+
+obj action CrossProd3D(obj Pa, obj Pb) {
+    obj crossP = {};
+    crossP.x = ((num)Pa.y * (num)Pb.z) - ((num)Pa.z * (num)Pb.y);
+    crossP.y = ((num)Pa.z * (num)Pb.x) - ((num)Pa.x * (num)Pb.z);
+    crossP.z = ((num)Pa.x * (num)Pb.y) - ((num)Pa.y * (num)Pb.x);
+
+    return crossP;
+}
+
+obj action RotToVecAdjusted(obj  rot, obj options) {
     num a = 0;
     num b = 0;
     num y = 0;
@@ -19,8 +52,55 @@ obj action rotation2Vec(obj  rot, obj options) {
         y = (num) rot.z; # z yaw (krunker is pitch)
     }
     
-    obj ux = {x: Math.cos(b)*Math.cos(y), y: Math.cos(a)*Math.sin(y)+Math.sin(a)*Math.sin(b)*Math.cos(y), z: Math.sin(a)*Math.sin(y)-Math.cos(a)*Math.sin(b)*Math.cos(y)};
-    obj uy = {x: -Math.cos(b)*Math.sin(y), y:Math.cos(a)*Math.cos(y)-Math.sin(a)*Math.sin(b)*Math.sin(y), z:Math.sin(a)*Math.cos(y)+Math.cos(a)*Math.sin(b)*Math.sin(y)};
-    obj uz = {x: Math.sin(b), y: -Math.sin(a)*Math.cos(b), z: Math.cos(a)*Math.cos(b)};
-    return {ux: ux, uy: uy, uz: uz};
+    # https://www.mecademic.com/en/how-is-orientation-in-space-represented-with-euler-angles
+    obj Rx = {x: Math.cos(b)*Math.cos(y), y: Math.cos(a)*Math.sin(y)+Math.sin(a)*Math.sin(b)*Math.cos(y), z: Math.sin(a)*Math.sin(y)-Math.cos(a)*Math.sin(b)*Math.cos(y)};
+    obj Ry = {x: -Math.cos(b)*Math.sin(y), y:Math.cos(a)*Math.cos(y)-Math.sin(a)*Math.sin(b)*Math.sin(y), z:Math.sin(a)*Math.cos(y)+Math.cos(a)*Math.sin(b)*Math.sin(y)};
+    obj Rz = {x: Math.sin(b), y: -Math.sin(a)*Math.cos(b), z: Math.cos(a)*Math.cos(b)};
+    return {ux: Rx, uy: Ry, uz: Rz};
+}
+
+bool action detectCollision(obj cube1, obj cube2) {
+    obj BoxA = {P: {x:(num)cube1.position.x,y:(num)cube1.position.y,z:cube1.position.z}, R:RotToVecAdjusted((obj)cube1.rotation,{toRad:false}),S:cube1.scale};
+    obj BoxB = {P: {x:(num)cube2.position.x,y:(num)cube2.position.y,z:cube2.position.z}, R:RotToVecAdjusted((obj)cube2.rotation,{toRad:false}),S:cube2.scale};
+
+    # Gotta offset the position which should be the center of the cube, by cube y height/2
+    BoxA.P = {x:(num)BoxA.P.x + (num)BoxA.R.uy.x*(num)BoxA.S.y/2,y:(num)BoxA.P.y + (num)BoxA.R.uy.y*(num)BoxA.S.y/2,z:(num)BoxA.P.z + (num)BoxA.R.uy.z*(num)BoxA.S.y/2};
+    BoxB.P = {x:(num)BoxB.P.x + (num)BoxB.R.uy.x*(num)BoxB.S.y/2,y:(num)BoxB.P.y + (num)BoxB.R.uy.y*(num)BoxB.S.y/2,z:(num)BoxB.P.z + (num)BoxB.R.uy.z*(num)BoxB.S.y/2};
+
+
+    obj T = Subtract3D((obj) BoxA.P, (obj) BoxB.P);
+	obj L = {x: 0, y:0, z:0};
+    
+    obj[] Llist = obj[(obj)BoxA.R.ux,(obj)BoxA.R.uy,(obj)BoxA.R.uz,
+        (obj)BoxB.R.ux,(obj)BoxB.R.uy,(obj)BoxB.R.uz,
+        CrossProd3D((obj)BoxA.R.ux,(obj)BoxB.R.ux),
+        CrossProd3D((obj)BoxA.R.ux,(obj)BoxB.R.uy),
+        CrossProd3D((obj)BoxA.R.ux,(obj)BoxB.R.uz),
+        
+        CrossProd3D((obj)BoxA.R.uy,(obj)BoxB.R.ux),
+        CrossProd3D((obj)BoxA.R.uy,(obj)BoxB.R.uy),
+        CrossProd3D((obj)BoxA.R.uy,(obj)BoxB.R.uz),
+        
+        CrossProd3D((obj)BoxA.R.uz,(obj)BoxB.R.ux),
+        CrossProd3D((obj)BoxA.R.uz,(obj)BoxB.R.uy),
+        CrossProd3D((obj)BoxA.R.uz,(obj)BoxB.R.uz)];
+
+    for (num i = 0; i < lengthOf Llist; i++) {
+        L = Llist[i];
+        num ProjT = Math.abs(DotProd3D(T,L));
+        num Mag = (
+            Math.abs(DotProd3D(ScalMult3D((num)BoxA.S.x/2,(obj)BoxA.R.ux),L)) +
+            Math.abs(DotProd3D(ScalMult3D((num)BoxA.S.y/2,(obj)BoxA.R.uy),L)) +
+            Math.abs(DotProd3D(ScalMult3D((num)BoxA.S.z/2,(obj)BoxA.R.uz),L)) +
+            Math.abs(DotProd3D(ScalMult3D((num)BoxB.S.x/2,(obj)BoxB.R.ux),L)) +
+            Math.abs(DotProd3D(ScalMult3D((num)BoxB.S.y/2,(obj)BoxB.R.uy),L)) +
+            Math.abs(DotProd3D(ScalMult3D((num)BoxB.S.z/2,(obj)BoxB.R.uz),L))
+            );
+
+        if (ProjT >  Mag) {
+            return false;
+        }
+    }
+    
+	return true;
 }

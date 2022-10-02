@@ -1,0 +1,204 @@
+
+num tnow = 0;
+num tlastStand = 0;
+num tlastCrouch = 0;
+num MS_DURATION_UNCROUCH = 166;
+
+obj bullet = {};
+obj cube = {};
+
+# logging
+obj BoxA_log = {};
+obj BoxB_log = {};
+
+#include <rotbox.krnk>
+
+num action cubelineofsight(obj plr, obj cube) {
+    num w = (num) cube.scale.x / 2;
+    num h = (num) cube.scale.y / 2;
+    
+    num offset = 10; # how far cube should be in front of player
+
+    # Positioning cube in case of crouching
+    num HEIGHT_STAND = 10+h;
+    num HEIGHT_CROUCH = 7+h;
+    num shootheight = 0;
+    if ((bool) plr.crouch) {
+        tlastCrouch = tnow;
+        shootheight = Math.max(Math.lerp(HEIGHT_STAND,HEIGHT_CROUCH,(tnow - tlastStand)/MS_DURATION_UNCROUCH),HEIGHT_CROUCH);
+    } else {
+        tlastStand = tnow;
+        shootheight = Math.min(Math.lerp(HEIGHT_CROUCH,HEIGHT_STAND,(tnow - tlastCrouch)/MS_DURATION_UNCROUCH),HEIGHT_STAND);
+    }
+
+	cube.position.x = (num) plr.position.x-(h/Math.sqrt(2))*Math.sin((num)plr.rotation.x)*(Math.sin((num)plr.rotation.y));
+	cube.position.y = (num) plr.position.y + shootheight - h*2-0.5;
+	cube.position.z = (num) plr.position.z-(h/Math.sqrt(2))*Math.cos((num)plr.rotation.x)*(Math.sin((num)plr.rotation.y));
+	cube.rotation.y = (num) plr.rotation.x + Math.PI/2;
+	cube.rotation.z = plr.rotation.y;
+
+	(num) cube.position.x += -1*(w + offset)*Math.sin((num)plr.rotation.x)*(Math.cos((num)plr.rotation.y));
+	(num) cube.position.y += (w+offset)*Math.sin((num)plr.rotation.y);
+	(num) cube.position.z += -1*(w + offset)*Math.cos((num)plr.rotation.x)*(Math.cos((num)plr.rotation.y));
+
+    return shootheight;
+}
+
+public action start() {
+    
+    # example rotated cube
+    cube = GAME.SCENE.addCube("34379", "#F00", 20, 20, 20, 10, 10, 10, {});
+    cube.rotation.x = 1;
+    cube.rotation.y = 2;
+    cube.rotation.z = 3;
+
+    # change bullet dimensions here
+
+    # bullet =  GAME.SCENE.addCube("34379", "#00ff00", 0,0,0, 200,5,5,{opacity:0.5});
+    bullet =  GAME.SCENE.addCube("34379", "#00ff00", 0,0,0, 700,1,1,{opacity:0.5});
+    # bullet =  GAME.SCENE.addCube("34379", "#00ff00", 0,0,0, 50,10,10,{opacity:0.5});
+}
+
+
+public action onPlayerUpdate(str id, num delta,  obj inputs) {
+    tnow = GAME.TIME.now();
+    obj plr = GAME.PLAYERS.getSelf();
+    if ((bool)inputs.crouch){
+        plr.crouch = true;
+    } else{
+        plr.crouch = false;
+    }
+    if ((bool)inputs.lMouse) {
+        cubelineofsight(plr,bullet);   
+        if (rotbox_detectCollision(cube,bullet)) {
+            
+            # logging
+            obj cube1 = cube;
+            obj cube2 = bullet;
+            obj BoxA = {P: {x:(num)cube1.position.x,y:(num)cube1.position.y,z:cube1.position.z}, R:rotbox_RotToVecAdjusted((obj)cube1.rotation,{toRad:false}),S:cube1.scale};
+            obj BoxB = {P: {x:(num)cube2.position.x,y:(num)cube2.position.y,z:cube2.position.z}, R:rotbox_RotToVecAdjusted((obj)cube2.rotation,{toRad:false}),S:cube2.scale};
+            BoxA.P = {x:(num)BoxA.P.x + (num)BoxA.R.uy.x*(num)BoxA.S.y/2,y:(num)BoxA.P.y + (num)BoxA.R.uy.y*(num)BoxA.S.y/2,z:(num)BoxA.P.z + (num)BoxA.R.uy.z*(num)BoxA.S.y/2};
+            BoxB.P = {x:(num)BoxB.P.x + (num)BoxB.R.uy.x*(num)BoxB.S.y/2,y:(num)BoxB.P.y + (num)BoxB.R.uy.y*(num)BoxB.S.y/2,z:(num)BoxB.P.z + (num)BoxB.R.uy.z*(num)BoxB.S.y/2};
+            BoxA_log = BoxA;
+            BoxB_log = BoxB;
+
+            # end logging
+            cube.opacity = 1;
+            
+        } else {
+            cube.opacity = 0.5;
+        }
+    }
+}
+
+# Debug stuff - shows the 8 corners of the cube/bullet
+public action render(num delta) {
+    obj pos = GAME.SCENE.posToScreen((num) BoxA_log.P.x, (num) BoxA_log.P.y, (num)BoxA_log.P.z);
+    if ((bool)pos.onScreen) {
+        GAME.OVERLAY.drawRect((num) pos.x, (num)pos.y, 10, 10, 0, "#F00", 1, true);
+    }
+    
+    obj[] Plist = obj[
+        {
+            x:(num) BoxA_log.P.x + (num)BoxA_log.R.ux.x*(num)BoxA_log.S.x/2 + (num)BoxA_log.R.uy.x*(num)BoxA_log.S.y/2 + (num)BoxA_log.R.uz.x*(num)BoxA_log.S.z/2,
+            y:(num) BoxA_log.P.y + (num)BoxA_log.R.ux.y*(num)BoxA_log.S.x/2 + (num)BoxA_log.R.uy.y*(num)BoxA_log.S.y/2 + (num)BoxA_log.R.uz.y*(num)BoxA_log.S.z/2,
+            z:(num) BoxA_log.P.z + (num)BoxA_log.R.ux.z*(num)BoxA_log.S.x/2 + (num)BoxA_log.R.uy.z*(num)BoxA_log.S.y/2 + (num)BoxA_log.R.uz.z*(num)BoxA_log.S.z/2
+        },
+        {
+            x:(num) BoxA_log.P.x + (num)BoxA_log.R.ux.x*(num)BoxA_log.S.x/2 - (num)BoxA_log.R.uy.x*(num)BoxA_log.S.y/2 + (num)BoxA_log.R.uz.x*(num)BoxA_log.S.z/2,
+            y:(num) BoxA_log.P.y + (num)BoxA_log.R.ux.y*(num)BoxA_log.S.x/2 - (num)BoxA_log.R.uy.y*(num)BoxA_log.S.y/2 + (num)BoxA_log.R.uz.y*(num)BoxA_log.S.z/2,
+            z:(num) BoxA_log.P.z + (num)BoxA_log.R.ux.z*(num)BoxA_log.S.x/2 - (num)BoxA_log.R.uy.z*(num)BoxA_log.S.y/2 + (num)BoxA_log.R.uz.z*(num)BoxA_log.S.z/2
+        },
+        {
+            x:(num) BoxA_log.P.x - (num)BoxA_log.R.ux.x*(num)BoxA_log.S.x/2 + (num)BoxA_log.R.uy.x*(num)BoxA_log.S.y/2 + (num)BoxA_log.R.uz.x*(num)BoxA_log.S.z/2,
+            y:(num) BoxA_log.P.y - (num)BoxA_log.R.ux.y*(num)BoxA_log.S.x/2 + (num)BoxA_log.R.uy.y*(num)BoxA_log.S.y/2 + (num)BoxA_log.R.uz.y*(num)BoxA_log.S.z/2,
+            z:(num) BoxA_log.P.z - (num)BoxA_log.R.ux.z*(num)BoxA_log.S.x/2 + (num)BoxA_log.R.uy.z*(num)BoxA_log.S.y/2 + (num)BoxA_log.R.uz.z*(num)BoxA_log.S.z/2
+        },
+        {
+            x:(num) BoxA_log.P.x - (num)BoxA_log.R.ux.x*(num)BoxA_log.S.x/2 - (num)BoxA_log.R.uy.x*(num)BoxA_log.S.y/2 + (num)BoxA_log.R.uz.x*(num)BoxA_log.S.z/2,
+            y:(num) BoxA_log.P.y - (num)BoxA_log.R.ux.y*(num)BoxA_log.S.x/2 - (num)BoxA_log.R.uy.y*(num)BoxA_log.S.y/2 + (num)BoxA_log.R.uz.y*(num)BoxA_log.S.z/2,
+            z:(num) BoxA_log.P.z - (num)BoxA_log.R.ux.z*(num)BoxA_log.S.x/2 - (num)BoxA_log.R.uy.z*(num)BoxA_log.S.y/2 + (num)BoxA_log.R.uz.z*(num)BoxA_log.S.z/2
+        },
+        {
+            x:(num) BoxA_log.P.x + (num)BoxA_log.R.ux.x*(num)BoxA_log.S.x/2 + (num)BoxA_log.R.uy.x*(num)BoxA_log.S.y/2 - (num)BoxA_log.R.uz.x*(num)BoxA_log.S.z/2,
+            y:(num) BoxA_log.P.y + (num)BoxA_log.R.ux.y*(num)BoxA_log.S.x/2 + (num)BoxA_log.R.uy.y*(num)BoxA_log.S.y/2 - (num)BoxA_log.R.uz.y*(num)BoxA_log.S.z/2,
+            z:(num) BoxA_log.P.z + (num)BoxA_log.R.ux.z*(num)BoxA_log.S.x/2 + (num)BoxA_log.R.uy.z*(num)BoxA_log.S.y/2 - (num)BoxA_log.R.uz.z*(num)BoxA_log.S.z/2
+        },
+        {
+            x:(num) BoxA_log.P.x + (num)BoxA_log.R.ux.x*(num)BoxA_log.S.x/2 - (num)BoxA_log.R.uy.x*(num)BoxA_log.S.y/2 - (num)BoxA_log.R.uz.x*(num)BoxA_log.S.z/2,
+            y:(num) BoxA_log.P.y + (num)BoxA_log.R.ux.y*(num)BoxA_log.S.x/2 - (num)BoxA_log.R.uy.y*(num)BoxA_log.S.y/2 - (num)BoxA_log.R.uz.y*(num)BoxA_log.S.z/2,
+            z:(num) BoxA_log.P.z + (num)BoxA_log.R.ux.z*(num)BoxA_log.S.x/2 - (num)BoxA_log.R.uy.z*(num)BoxA_log.S.y/2 - (num)BoxA_log.R.uz.z*(num)BoxA_log.S.z/2
+        },
+        {
+            x:(num) BoxA_log.P.x - (num)BoxA_log.R.ux.x*(num)BoxA_log.S.x/2 + (num)BoxA_log.R.uy.x*(num)BoxA_log.S.y/2 - (num)BoxA_log.R.uz.x*(num)BoxA_log.S.z/2,
+            y:(num) BoxA_log.P.y - (num)BoxA_log.R.ux.y*(num)BoxA_log.S.x/2 + (num)BoxA_log.R.uy.y*(num)BoxA_log.S.y/2 - (num)BoxA_log.R.uz.y*(num)BoxA_log.S.z/2,
+            z:(num) BoxA_log.P.z - (num)BoxA_log.R.ux.z*(num)BoxA_log.S.x/2 + (num)BoxA_log.R.uy.z*(num)BoxA_log.S.y/2 - (num)BoxA_log.R.uz.z*(num)BoxA_log.S.z/2
+        },
+        {
+            x:(num) BoxA_log.P.x - (num)BoxA_log.R.ux.x*(num)BoxA_log.S.x/2 - (num)BoxA_log.R.uy.x*(num)BoxA_log.S.y/2 - (num)BoxA_log.R.uz.x*(num)BoxA_log.S.z/2,
+            y:(num) BoxA_log.P.y - (num)BoxA_log.R.ux.y*(num)BoxA_log.S.x/2 - (num)BoxA_log.R.uy.y*(num)BoxA_log.S.y/2 - (num)BoxA_log.R.uz.y*(num)BoxA_log.S.z/2,
+            z:(num) BoxA_log.P.z - (num)BoxA_log.R.ux.z*(num)BoxA_log.S.x/2 - (num)BoxA_log.R.uy.z*(num)BoxA_log.S.y/2 - (num)BoxA_log.R.uz.z*(num)BoxA_log.S.z/2
+        }
+    ];
+
+    for (num i = 0; i < lengthOf Plist; i++) {
+        obj P = Plist[i];
+
+        pos = GAME.SCENE.posToScreen((num)P.x,(num)P.y,(num)P.z);
+        if ((bool)pos.onScreen) {
+            GAME.OVERLAY.drawRect((num) pos.x, (num)pos.y, 10, 10, 0, "#F00", 1, true);
+        }
+    }
+
+    Plist = obj[
+        {
+            x:(num) BoxB_log.P.x + (num)BoxB_log.R.ux.x*(num)BoxB_log.S.x/2 + (num)BoxB_log.R.uy.x*(num)BoxB_log.S.y/2 + (num)BoxB_log.R.uz.x*(num)BoxB_log.S.z/2,
+            y:(num) BoxB_log.P.y + (num)BoxB_log.R.ux.y*(num)BoxB_log.S.x/2 + (num)BoxB_log.R.uy.y*(num)BoxB_log.S.y/2 + (num)BoxB_log.R.uz.y*(num)BoxB_log.S.z/2,
+            z:(num) BoxB_log.P.z + (num)BoxB_log.R.ux.z*(num)BoxB_log.S.x/2 + (num)BoxB_log.R.uy.z*(num)BoxB_log.S.y/2 + (num)BoxB_log.R.uz.z*(num)BoxB_log.S.z/2
+        },
+        {
+            x:(num) BoxB_log.P.x + (num)BoxB_log.R.ux.x*(num)BoxB_log.S.x/2 - (num)BoxB_log.R.uy.x*(num)BoxB_log.S.y/2 + (num)BoxB_log.R.uz.x*(num)BoxB_log.S.z/2,
+            y:(num) BoxB_log.P.y + (num)BoxB_log.R.ux.y*(num)BoxB_log.S.x/2 - (num)BoxB_log.R.uy.y*(num)BoxB_log.S.y/2 + (num)BoxB_log.R.uz.y*(num)BoxB_log.S.z/2,
+            z:(num) BoxB_log.P.z + (num)BoxB_log.R.ux.z*(num)BoxB_log.S.x/2 - (num)BoxB_log.R.uy.z*(num)BoxB_log.S.y/2 + (num)BoxB_log.R.uz.z*(num)BoxB_log.S.z/2
+        },
+        {
+            x:(num) BoxB_log.P.x - (num)BoxB_log.R.ux.x*(num)BoxB_log.S.x/2 + (num)BoxB_log.R.uy.x*(num)BoxB_log.S.y/2 + (num)BoxB_log.R.uz.x*(num)BoxB_log.S.z/2,
+            y:(num) BoxB_log.P.y - (num)BoxB_log.R.ux.y*(num)BoxB_log.S.x/2 + (num)BoxB_log.R.uy.y*(num)BoxB_log.S.y/2 + (num)BoxB_log.R.uz.y*(num)BoxB_log.S.z/2,
+            z:(num) BoxB_log.P.z - (num)BoxB_log.R.ux.z*(num)BoxB_log.S.x/2 + (num)BoxB_log.R.uy.z*(num)BoxB_log.S.y/2 + (num)BoxB_log.R.uz.z*(num)BoxB_log.S.z/2
+        },
+        {
+            x:(num) BoxB_log.P.x - (num)BoxB_log.R.ux.x*(num)BoxB_log.S.x/2 - (num)BoxB_log.R.uy.x*(num)BoxB_log.S.y/2 + (num)BoxB_log.R.uz.x*(num)BoxB_log.S.z/2,
+            y:(num) BoxB_log.P.y - (num)BoxB_log.R.ux.y*(num)BoxB_log.S.x/2 - (num)BoxB_log.R.uy.y*(num)BoxB_log.S.y/2 + (num)BoxB_log.R.uz.y*(num)BoxB_log.S.z/2,
+            z:(num) BoxB_log.P.z - (num)BoxB_log.R.ux.z*(num)BoxB_log.S.x/2 - (num)BoxB_log.R.uy.z*(num)BoxB_log.S.y/2 + (num)BoxB_log.R.uz.z*(num)BoxB_log.S.z/2
+        },
+        {
+            x:(num) BoxB_log.P.x + (num)BoxB_log.R.ux.x*(num)BoxB_log.S.x/2 + (num)BoxB_log.R.uy.x*(num)BoxB_log.S.y/2 - (num)BoxB_log.R.uz.x*(num)BoxB_log.S.z/2,
+            y:(num) BoxB_log.P.y + (num)BoxB_log.R.ux.y*(num)BoxB_log.S.x/2 + (num)BoxB_log.R.uy.y*(num)BoxB_log.S.y/2 - (num)BoxB_log.R.uz.y*(num)BoxB_log.S.z/2,
+            z:(num) BoxB_log.P.z + (num)BoxB_log.R.ux.z*(num)BoxB_log.S.x/2 + (num)BoxB_log.R.uy.z*(num)BoxB_log.S.y/2 - (num)BoxB_log.R.uz.z*(num)BoxB_log.S.z/2
+        },
+        {
+            x:(num) BoxB_log.P.x + (num)BoxB_log.R.ux.x*(num)BoxB_log.S.x/2 - (num)BoxB_log.R.uy.x*(num)BoxB_log.S.y/2 - (num)BoxB_log.R.uz.x*(num)BoxB_log.S.z/2,
+            y:(num) BoxB_log.P.y + (num)BoxB_log.R.ux.y*(num)BoxB_log.S.x/2 - (num)BoxB_log.R.uy.y*(num)BoxB_log.S.y/2 - (num)BoxB_log.R.uz.y*(num)BoxB_log.S.z/2,
+            z:(num) BoxB_log.P.z + (num)BoxB_log.R.ux.z*(num)BoxB_log.S.x/2 - (num)BoxB_log.R.uy.z*(num)BoxB_log.S.y/2 - (num)BoxB_log.R.uz.z*(num)BoxB_log.S.z/2
+        },
+        {
+            x:(num) BoxB_log.P.x - (num)BoxB_log.R.ux.x*(num)BoxB_log.S.x/2 + (num)BoxB_log.R.uy.x*(num)BoxB_log.S.y/2 - (num)BoxB_log.R.uz.x*(num)BoxB_log.S.z/2,
+            y:(num) BoxB_log.P.y - (num)BoxB_log.R.ux.y*(num)BoxB_log.S.x/2 + (num)BoxB_log.R.uy.y*(num)BoxB_log.S.y/2 - (num)BoxB_log.R.uz.y*(num)BoxB_log.S.z/2,
+            z:(num) BoxB_log.P.z - (num)BoxB_log.R.ux.z*(num)BoxB_log.S.x/2 + (num)BoxB_log.R.uy.z*(num)BoxB_log.S.y/2 - (num)BoxB_log.R.uz.z*(num)BoxB_log.S.z/2
+        },
+        {
+            x:(num) BoxB_log.P.x - (num)BoxB_log.R.ux.x*(num)BoxB_log.S.x/2 - (num)BoxB_log.R.uy.x*(num)BoxB_log.S.y/2 - (num)BoxB_log.R.uz.x*(num)BoxB_log.S.z/2,
+            y:(num) BoxB_log.P.y - (num)BoxB_log.R.ux.y*(num)BoxB_log.S.x/2 - (num)BoxB_log.R.uy.y*(num)BoxB_log.S.y/2 - (num)BoxB_log.R.uz.y*(num)BoxB_log.S.z/2,
+            z:(num) BoxB_log.P.z - (num)BoxB_log.R.ux.z*(num)BoxB_log.S.x/2 - (num)BoxB_log.R.uy.z*(num)BoxB_log.S.y/2 - (num)BoxB_log.R.uz.z*(num)BoxB_log.S.z/2
+        }
+    ];
+    
+    for (num i = 0; i < lengthOf Plist; i++) {
+        obj P = Plist[i];
+
+        pos = GAME.SCENE.posToScreen((num)P.x,(num)P.y,(num)P.z);
+        if ((bool)pos.onScreen) {
+            GAME.OVERLAY.drawRect((num) pos.x, (num)pos.y, 10, 10, 0, "#0F0", 1, true);
+        }
+    }
+}
