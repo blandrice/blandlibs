@@ -2,7 +2,9 @@
 
 📖☕ Hi Friends, welcome to my library ☕📖
 
-I made a quick script to do Krunkscript Library. I'm hoping it makes scripting easier for now
+I made a quick script to do Krunkscript Library. I'm hoping it makes scripting easier and more portable for now.
+
+This is just a quick job to get some sort of library feature before Krunker actually implements the official version, and so I can start packaging my own libraries. But hopefully it is uesful to other KrunkScripters 😊
 
 <p align="center">
   <img src="docs/blandlib.png" />
@@ -55,23 +57,22 @@ I made a quick script to do Krunkscript Library. I'm hoping it makes scripting e
 Example Structure:
 
     \BLANDLIBS
-    ├───blandlibs
-    │   ├───libs
-    │   │   └───doublejump
-    │   │           djump_client.krnk
-    │   │           djump_server.krnk
-    │   │           DJ_head.krnk
-    │   │
-    │   ├───maps
-    │   │   └───test_djump
-    │   │           testdjump_client.krnk
-    │   │           testdjump_server.krnk
-    │   │
-    │   ├───out
-    │   │       o_testdjump_client.krnk
-    │   │
-    │   ├───py
-    │   │       compile.py
+    ├───libs
+    │   └───doublejump
+    │           djump_client.krnk
+    │           djump_server.krnk
+    │           DJ_head.krnk
+    │
+    ├───maps
+    │   └───test_djump
+    │           testdjump_client.krnk
+    │           testdjump_server.krnk
+    │
+    ├───out
+    │       o_testdjump_client.krnk
+    │
+    ├───py
+    │       compile.py
 
 # Example Library Import
 
