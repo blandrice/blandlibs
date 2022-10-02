@@ -8,6 +8,12 @@ I made a quick script to do Krunkscript Library. I'm hoping it makes scripting e
   <img src="docs/blandlib.png" />
 </p>
 
+
+# Library Example!
+
+[Example HEADER](/libs/doublejump/DJ_head.krnk) --> [Example LIBRARY](/libs/doublejump/djump_client.krnk) --> [Example MAP SCRIPT](/maps/test_djump/testdjump_client.krnk) --> [Example FINAL SCRIPT](/out/o_testdjump_client.krnk)
+
+
 # How it Works
 1. Including: 
     - C-style syntax is used : `#include <lib.krnk>`
@@ -18,7 +24,7 @@ I made a quick script to do Krunkscript Library. I'm hoping it makes scripting e
         - e.g. in `lib.krnk`, 
             - global var `num time` --> `num lib_time`
             - global action `num action myaction()` --> `num action lib_myaction()`
-    - Recursion: Libraries can include other Libraries (again, cannot include more than once)
+    - Recursion: Libraries can include other Libraries (AKA headers) (again, cannot include more than once)
         - e.g. `lib.krnk` can have `#include <other_lib.krnk>`
             - be careful - the global variables will keep prepending (in above example: `num lib_other_lib_time`)
 
@@ -36,150 +42,8 @@ I made a quick script to do Krunkscript Library. I'm hoping it makes scripting e
 
     output will be printed in the `/out` folder
 
-# Library Example!!
-
-Example HEADER:
-
-https://github.com/blandrice/blandlibs/blob/master/libs/doublejump/DJ_head.krnk
-
-```cs
-# ===================================================================
-# Header: doublejump\DJ_head.krnk
-# Author: blandrice
-# ===================================================================
-
-# ===================================================================
-# SETTINGS:
-num MAX_JUMPCOUNT = 2; # 2 is "doublejump", 3 is "triplejump"
-bool WALLJUMP_REFRESHS = true;
-bool ENABLE_CROUCHJUMP = true; # lower height for crouch jump, also
-                                # applies "moonjump" mid-air physics
-num SOUND = 31960; # sound ID. set to 0 if no sound desired
-
-# HARD-CODED NUMBERS - DON'T TOUCH
-num MS_DURATION_UNCROUCH = 166;
-num HEIGHT_JUMP = 0.0793; # 60FPS, max clearance 17.9 units
-num HEIGHT_CROUCHJUMP = 0.0595; # 60FPS, max clearance 10.2 units
-# ===================================================================
-```
-
-Example LIBRARY: (calls header)
-
-https://github.com/blandrice/blandlibs/blob/master/libs/doublejump/djump_client.krnk
-
-```cs
-#include <DJ_head.krnk>
-
-# ===================================================================
-# Library: doublejump\djump_client.krnk
-# Author: blandrice
-# ===================================================================
-
-obj updateState = { updateId: 0, playerUpdateId: 0, lastUpdate: 0 };
-obj currentPlayerState = {};
-obj[] playerStateHistory = obj[];
-
-obj action findHistoryState() {
-    # Current state that was synced up was the last state
-    obj currentState = playerStateHistory[lengthOf playerStateHistory - 1];
-    obj[] possibleStates = obj[];
-    num highestMatches = 0;
 
 
-# .........more code...
-```
-
-Example MAP SCRIPT (calls library):
-
-https://github.com/blandrice/blandlibs/blob/master/maps/test_djump/testdjump_client.krnk
-
-```cs
-#include <djump_client.krnk>
-
-# ===================================================================
-# File: maps/test_djump/testdjump_client.krnk
-# Author: blandrice
-# ===================================================================
-
-num map_var = 0;
-
-public action start()
-{
-    # nothing to see here
-}
-```
-
-Example OUTPUT SCRIPT:
-
-https://github.com/blandrice/blandlibs/blob/master/out/o_testdjump_client.krnk
-
-```cs
-# ===================================================================
-# Header: doublejump\DJ_head.krnk
-# Author: blandrice
-# ===================================================================
-
-# ===================================================================
-# SETTINGS:
-num djump_client_DJ_head_MAX_JUMPCOUNT = 2; # 2 is "doublejump", 3 is "triplejump"
-bool djump_client_DJ_head_WALLJUMP_REFRESHS = true;
-bool djump_client_DJ_head_ENABLE_CROUCHJUMP = true; # lower height for crouch jump, also
-                                # applies "moonjump" mid-air physics
-num djump_client_DJ_head_SOUND = 31960; # sound ID. set to 0 if no sound desired
-
-# HARD-CODED NUMBERS - DON'T TOUCH
-num djump_client_DJ_head_MS_DURATION_UNCROUCH = 166;
-num djump_client_DJ_head_HEIGHT_JUMP = 0.0793; # 60FPS, max clearance 17.9 units
-num djump_client_DJ_head_HEIGHT_CROUCHJUMP = 0.0595; # 60FPS, max clearance 10.2 units
-# ===================================================================
-# ===================================================================
-# Library: doublejump\djump_client.krnk
-# Author: blandrice
-# ===================================================================
-
-obj djump_client_updateState = { updateId: 0, playerUpdateId: 0, lastUpdate: 0 };
-obj djump_client_currentPlayerState = {};
-obj[] djump_client_playerStateHistory = obj[];
-
-obj action djump_client_findHistoryState() {
-    # Current state that was synced up was the last state
-    obj currentState = djump_client_playerStateHistory[lengthOf djump_client_playerStateHistory - 1];
-    obj[] possibleStates = obj[];
-    num highestMatches = 0;
-
-    # check all 6 position/velocity number
-
-# .... more code ...
-
-# ===================================================================
-# File: maps/test_djump/testdjump_client.krnk
-# Author: blandrice
-# ===================================================================
-
-num map_var = 0;
-
-public action start () {
-{
-    # nothing to see here
-}}
-
-# ================================================================
-# auto-detected public actions from libraries
-# ================================================================
-public action onPlayerSpawn (str id) {
-    djump_client_onPlayerSpawn(id);
-}
-
-public action update (num delta) {
-    djump_client_update(delta);
-}
-
-public action onPlayerUpdate (str id, num delta, obj inputs) {
-    djump_client_onPlayerUpdate(id,  delta,  inputs);
-}
-
-
-```
 
 # Directory Structure
 `/libs`: use/put your libraries here
