@@ -1,9 +1,11 @@
+#include <djump_client.krnk>
+
 # ===================================================================
 # File: maps/test_djump/testdjump_client.krnk
 # Author: blandrice
 # ===================================================================
 
-#include <djump_client.krnk>
+num map_var = 0;
 
 public action start()
 {

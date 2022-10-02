@@ -1,5 +1,11 @@
 #include <DJ_head.krnk>
 
+# ===================================================================
+# Library: doublejump\djump_server.krnk
+# Author: blandrice
+# ===================================================================
+
+
 num timeNow = 0;
 
 # Runs every game tick

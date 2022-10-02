@@ -277,7 +277,6 @@ def main():
                                     endbrack += 1
                                     state = "save"
                                     trailingstr = line[idx:]
-                                    continue
                     # test
                     if state == "save":
                         outscript.write("public action {} ({})".format(

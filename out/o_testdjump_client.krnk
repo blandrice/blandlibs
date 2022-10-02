@@ -1,0 +1,166 @@
+# ===================================================================
+# Header: doublejump\DJ_head.krnk
+# Author: blandrice
+# ===================================================================
+
+# ===================================================================
+# SETTINGS:
+num djump_client_DJ_head_MAX_JUMPCOUNT = 2; # 2 is "doublejump", 3 is "triplejump"
+bool djump_client_DJ_head_WALLJUMP_REFRESHS = true;
+bool djump_client_DJ_head_ENABLE_CROUCHJUMP = true; # lower height for crouch jump, also
+                                # applies "moonjump" mid-air physics
+num djump_client_DJ_head_SOUND = 31960; # sound ID. set to 0 if no sound desired
+
+# HARD-CODED NUMBERS - DON'T TOUCH
+num djump_client_DJ_head_MS_DURATION_UNCROUCH = 166;
+num djump_client_DJ_head_HEIGHT_JUMP = 0.0793; # 60FPS, max clearance 17.9 units
+num djump_client_DJ_head_HEIGHT_CROUCHJUMP = 0.0595; # 60FPS, max clearance 10.2 units
+# ===================================================================
+# ===================================================================
+# Library: doublejump\djump_client.krnk
+# Author: blandrice
+# ===================================================================
+
+obj djump_client_updateState = { updateId: 0, playerUpdateId: 0, lastUpdate: 0 };
+obj djump_client_currentPlayerState = {};
+obj[] djump_client_playerStateHistory = obj[];
+
+obj action djump_client_findHistoryState() {
+    # Current state that was synced up was the last state
+    obj currentState = djump_client_playerStateHistory[lengthOf djump_client_playerStateHistory - 1];
+    obj[] possibleStates = obj[];
+    num highestMatches = 0;
+
+    # check all 6 position/velocity numbers will match a state
+    for(num i = lengthOf djump_client_playerStateHistory - 2; i >= 0; i--) {
+        obj historyState = djump_client_playerStateHistory[i];
+        num totalMatches = 0;
+        num tolerance = 0.01;
+
+        if(Math.abs((num)historyState.position.x - (num)currentState.position.x) < tolerance) { totalMatches++; } 
+        if(Math.abs((num)historyState.position.y - (num)currentState.position.y) < tolerance) { totalMatches++; } 
+        if(Math.abs((num)historyState.position.z - (num)currentState.position.z) < tolerance) { totalMatches++; } 
+        if(Math.abs((num)historyState.velocity.x - (num)currentState.velocity.x) < tolerance) { totalMatches++; } 
+        if(Math.abs((num)historyState.velocity.y - (num)currentState.velocity.y) < tolerance) { totalMatches++; } 
+        if(Math.abs((num)historyState.velocity.z - (num)currentState.velocity.z) < tolerance) { totalMatches++; } 
+
+        if(totalMatches == 6) {
+			# GAME.log(lengthOf djump_client_playerStateHistory - i);
+            return djump_client_playerStateHistory[i];
+        }
+        if(totalMatches > highestMatches) {
+            highestMatches = totalMatches;
+        }
+        addTo possibleStates {state: djump_client_playerStateHistory[i], totalMatches: totalMatches, id: lengthOf djump_client_playerStateHistory - i };
+    }
+    # Rest is error logging
+    GAME.log("Failed to find state history", GAME.TIME.now());
+	GAME.log("Highest matches: ", highestMatches);
+    for(num i = 0; i < lengthOf possibleStates; i++) {
+        if((num)possibleStates[i].totalMatches == highestMatches) {
+            GAME.log("Index: ", possibleStates[i].id);
+            return (obj)possibleStates[i].state;
+        }
+    }
+    return djump_client_currentPlayerState;
+}
+
+bool djump_client_syncStarted = false;
+# Runs every game tick
+action djump_client_update(num delta) {
+    djump_client_syncStarted = false;
+}
+
+num djump_client_jumpCount = 0;
+bool djump_client_hasJumped = false;
+num djump_client_timeLastCrouched = GAME.TIME.now();
+
+# Player update
+action djump_client_onPlayerUpdate(str id, num delta, obj inputs) {
+    obj player = GAME.PLAYERS.getSelf();
+    num timeNow = GAME.TIME.now();
+    (num) djump_client_updateState.playerUpdateId++;
+
+    # Syncing: We got a sync, so reset the current player state to the correct history
+    if(!djump_client_syncStarted && timeNow == (num)djump_client_updateState.lastUpdate)
+    {
+        djump_client_syncStarted = true;
+        djump_client_currentPlayerState = djump_client_findHistoryState();
+        # sync done, throw out old values
+        djump_client_playerStateHistory = obj[];
+    }
+
+    # Double-Jump stuff
+    if ((bool) inputs.crouch) {
+        player.timeLastCrouched = timeNow;
+    }
+    if((bool) player.onGround) {
+        djump_client_currentPlayerState.jumpCount = djump_client_DJ_head_MAX_JUMPCOUNT-1;
+    } else if (djump_client_DJ_head_WALLJUMP_REFRESHS && (bool) player.onWall && (bool) inputs.jump) {
+        djump_client_currentPlayerState.jumpCount = djump_client_DJ_head_MAX_JUMPCOUNT-1;
+    } 
+    if((bool) inputs.jump) {
+        if(!(bool)djump_client_currentPlayerState.hasJumped  && (num)djump_client_currentPlayerState.jumpCount > 0 && !(bool)player.onGround) {
+            if (!(bool) player.onWall && djump_client_DJ_head_WALLJUMP_REFRESHS) {
+                if (djump_client_DJ_head_ENABLE_CROUCHJUMP && ((timeNow - (num) player.timeLastCrouched) < djump_client_DJ_head_MS_DURATION_UNCROUCH)) {
+                    player.velocity.y = Math.lerp(djump_client_DJ_head_HEIGHT_CROUCHJUMP,djump_client_DJ_head_HEIGHT_JUMP,(timeNow - (num)player.timeLastCrouched)/djump_client_DJ_head_MS_DURATION_UNCROUCH);	# "moonjumping" calculation
+                } else {
+                    player.velocity.y = djump_client_DJ_head_HEIGHT_JUMP;	
+                }
+                if (djump_client_DJ_head_SOUND > 0) {
+                    GAME.SOUND.play2D(32576, 1, 0.5, false); # jump djump_client_DJ_head_SOUND
+                }
+                (num)djump_client_currentPlayerState.jumpCount--;
+            }
+        }
+        djump_client_currentPlayerState.hasJumped = true;
+    }
+    else {
+        djump_client_currentPlayerState.hasJumped = false;
+    }
+
+    # Sync saving old player states
+    addTo djump_client_playerStateHistory {
+        # Data to use in an attempt to find the correct state in history
+        position: {x: player.position.x, y: player.position.y, z: player.position.z },
+        velocity: {x: player.velocity.x, y: player.velocity.y, z: player.velocity.z },
+        # Actual data we want to save
+        djump_client_jumpCount: djump_client_currentPlayerState.jumpCount,
+        djump_client_hasJumped: djump_client_currentPlayerState.hasJumped,
+        time: GAME.TIME.now(),
+        djump_client_timeLastCrouched: player.timeLastCrouched
+    };
+    djump_client_updateState.lastUpdate = GAME.TIME.now();    
+}
+
+action djump_client_onPlayerSpawn(str id) {
+    djump_client_updateState.updateId = 0;
+    djump_client_updateState.playerUpdateId = 0;
+}
+# ===================================================================
+# File: maps/test_djump/testdjump_client.krnk
+# Author: blandrice
+# ===================================================================
+
+num map_var = 0;
+
+public action start () {
+{
+    # nothing to see here
+}}
+
+# ================================================================
+# auto-detected public actions from libraries
+# ================================================================
+public action onPlayerSpawn (str id) {
+    djump_client_onPlayerSpawn(id);
+}
+
+public action update (num delta) {
+    djump_client_update(delta);
+}
+
+public action onPlayerUpdate (str id, num delta, obj inputs) {
+    djump_client_onPlayerUpdate(id,  delta,  inputs);
+}
+

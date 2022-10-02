@@ -1,18 +1,9 @@
 #include <DJ_head.krnk>
 
-# # ===================================================================
-# # SETTINGS:
-# num DJ_head_MAX_JUMPCOUNT = 2; # 2 is "doublejump", 3 is "triplejump"
-# bool DJ_head_WALLJUMP_REFRESHS = true;
-# bool DJ_head_ENABLE_CROUCHJUMP = true; # lower height for crouch jump, also
-#                                 # applies "moonjump" mid-air physics
-# num DJ_head_SOUND = 31960; # DJ_head_SOUND ID. set to 0 if no DJ_head_SOUND desired
-
-# # HARD-CODED NUMBERS - DON'T TOUCH
-# num DJ_head_MS_DURATION_UNCROUCH = 166;
-# num DJ_head_HEIGHT_JUMP = 0.0793; # 60FPS, max clearance 17.9 units
-# num DJ_head_HEIGHT_CROUCHJUMP = 0.0595; # 60FPS, max clearance 10.2 units
-# # ===================================================================
+# ===================================================================
+# Library: doublejump\djump_client.krnk
+# Author: blandrice
+# ===================================================================
 
 obj updateState = { updateId: 0, playerUpdateId: 0, lastUpdate: 0 };
 obj currentPlayerState = {};
