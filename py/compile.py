@@ -81,7 +81,7 @@ def reformatlibfile(libpath, klibname):
                 # find variables
                 for vartype in ['num', 'str', 'bool', 'obj']:
                     m = re.search(
-                        r"(^\s*\b{}\b)\s*(\[\])*\s*(.+?)\s?=\s*(.*)\s*".format(vartype), line.strip().replace(";",""))
+                        r"(^\s*\b{}\b)\s*(\[\])*\s*(.+?)\s?=\s*(.*)\s*".format(vartype), line.strip().replace(";", ""))
                     if m:
                         # print(m.group(1), m.group(3), m.group(4))
                         globalvars.append(m.group(3))
@@ -263,12 +263,6 @@ def main():
                         elif startbrack > endbrack:
                             pubactionargs += char
                     if state == "parseactcontents":
-                        if char in openbracks:
-                            bracketstack += char
-                            if startbrack == endbrack:
-                                startbrack += 1
-                        if startbrack > endbrack:
-                            pubactioncontents += char
                         if bracketstack and char in closebracks:
                             if openbracks.index(bracketstack[-1]) == closebracks.index(char):
                                 # pop the bracket
@@ -277,10 +271,17 @@ def main():
                                     endbrack += 1
                                     state = "save"
                                     trailingstr = line[idx:]
+                        if startbrack > endbrack:
+                            pubactioncontents += char
+                        if char in openbracks:
+                            bracketstack += char
+                            if startbrack == endbrack:
+                                startbrack += 1
+                        
                     # test
                     if state == "save":
                         outscript.write("public action {}({})".format(
-                            actionname, strargs) + " \n")
+                            actionname, strargs) + "{\n")
                         libactions = []
                         for x in gbl_pubactions:
                             if x.endswith(actionname):
@@ -293,7 +294,7 @@ def main():
                                 r"(?<![a-zA-Z0-9_])(\bobj\b|\bstr\b|\bnum\b|\bbool\b|\[\s*\])(?![a-zA-Z0-9_])").sub("", strargs)
                             outscript.write(
                                 "{}{}({});".format(indentstr, x, invokelibstr.strip()))
-                        outscript.write(pubactioncontents + "")
+                        outscript.write(pubactioncontents + "\n}\n")
 
                         outscript.write(trailingstr)
                         state = "finish"
@@ -305,16 +306,19 @@ def main():
                         trailingstr = ""
                         state = "none"
                         break
-            outscript.write("\n\n")
-            outscript.write(
-                "# ================================================================\n")
-            outscript.write("# auto-detected public actions from libraries\n")
-            outscript.write(
-                "# ================================================================\n")
+
             # if public action does not exist in main file - need to create it and prepend libraries' public actions
 
             otherlibpubactions = set([x.split("_")[-1]
                                      for x in gbl_pubactions])
+            if otherlibpubactions:
+                outscript.write("\n\n")
+                outscript.write(
+                    "# ================================================================\n")
+                outscript.write(
+                    "# auto-detected public actions from libraries\n")
+                outscript.write(
+                    "# ================================================================\n")
             for x in otherlibpubactions:
                 # lookup the arguments
                 currentargs = ""
