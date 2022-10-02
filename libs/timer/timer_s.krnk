@@ -1,0 +1,28 @@
+#include <strutils.krnk>
+# ===================================================================
+# Library: libs\timer\timer_s.krnk
+# Author: blandrice
+# Description: Timer utility (syncs Client to Server)
+#   Use the "prefab_trigger.txt" to quickly update the timer for a certain player.
+# ===================================================================
+
+num clocktime=0; # in ms
+
+public action update(num delta) {
+# Timer countdown
+    if (clocktime > 0) {
+        clocktime -= delta;
+        if (clocktime < 0) {
+            clocktime = 0; 
+        }
+    }
+}
+
+public action onCustomTrigger(str playerID, str customParam, num value) {
+    if (strutils_starts(customParam,"clocktime")){
+        str[] params = strutils_split(customParam,"_");
+        clocktime = toNum params[1];
+        bool success = GAME.NETWORK.send("sync", {t:clocktime}, playerID);    
+        if (!success) {GAME.log("ERROR: clocktime sync not sent");}
+    }
+}

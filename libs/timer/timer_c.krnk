@@ -1,0 +1,60 @@
+# ===================================================================
+# Library: libs\timer\timer_c.krnk
+# Author: blandrice
+#   Description: Timer utility (syncs to Server)
+# ===================================================================
+
+num warnstarts = 10; # when warning beep starts
+
+num clocktime = 0;
+num ticksound = 0;
+num lastTick = 0;
+
+str action timetoStr(num mstime) {
+    num min = Math.floor(mstime / 1000 / 60);
+    num sec = Math.floor((mstime / 1000) - (min * 60));
+    num ms_remain = Math.round((mstime % 1000)/100);
+
+    min = min >= 0 ? min : 0;
+    sec = sec >= 0 ? sec : 0;
+    ms_remain = ms_remain >= 0 ? ms_remain : 0;
+
+    str minstr = (min >= 10 ? toStr min : "0" + toStr min);
+    str secstr = (sec >= 10 ? toStr sec : "0" + toStr sec);
+    
+
+    return minstr + ":" + secstr + "." + toStr ms_remain;
+}
+
+
+public action render(num delta) {
+    obj size = GAME.OVERLAY.getSize();
+    if (clocktime > 0.1) {
+        GAME.OVERLAY.drawRect((num)size.width*7/16, (num) size.height*1/32, (num)size.width/8,(num)size.height/16, 0, "#000000", 0.3, false);
+        GAME.OVERLAY.drawText(timetoStr(clocktime), (num) size.width/2, (num) size.height*9/128, 0, 32*(num)size.height / 1080, "center", "#FFFFFF", 1);
+    }
+}
+
+public action onNetworkMessage(str id, obj data) {
+    GAME.log(id);
+    GAME.log(data);
+    if (id == "sync") {
+        clocktime = (num)data.t;
+    }
+}
+
+public action update(num delta) {
+    if (clocktime > 0) {
+        clocktime -= delta;
+        ticksound = Math.ceil(clocktime/1000);
+        if (lastTick != ticksound) {
+            lastTick = ticksound;
+            if (lastTick >= warnstarts) {
+                GAME.SOUND.play2D(31960,1,1,false); # clock tick
+            } else {
+                GAME.SOUND.play2D(34639,1,1,false); # warning beep
+            }
+        }
+        
+    }
+}
