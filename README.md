@@ -1,8 +1,8 @@
 # Blandrice's Library
 
-<center>📖☕ Hi Friends, welcome to my library ☕📖</center>
+📖☕ Hi Friends, welcome to my library ☕📖
 
-<center>I made a quick script to do Krunkscript Library. I'm hoping it makes scripting easier for now!</center>
+I made a quick script to do Krunkscript Library. I'm hoping it makes scripting easier for now
 
 <p align="center">
   <img src="docs/blandlib.png" />
