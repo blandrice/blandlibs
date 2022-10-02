@@ -1,20 +1,21 @@
 # ===================================================================
 # Header: b91encoding\b91.krnk
 # Author: SlxTnT
+# Description: Base91 decoding converted from https://github.com/KvanTTT/BaseNcoding
 # ===================================================================
 
-# Base91 decoding converted from https://github.com/KvanTTT/BaseNcoding
-obj b91_base91 = {
+
+obj base91 = {
     alphabet: "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!#$%&()*+,./:;<=>?@[]^_`{|}~-"
 };
 
 # Recursion due to loop limits
 num action getValue(str c, num index) {
-	if(index >= lengthOf b91_base91.alphabet) {
+	if(index >= lengthOf base91.alphabet) {
 		return -1;
 	}
 	
-	if((str)b91_base91.alphabet[index] == c) {
+	if((str)base91.alphabet[index] == c) {
 		return index;
 	}
 	
@@ -28,7 +29,7 @@ num[] action decode(str data) {
     num[] result = num[];
 
     for(num i = 0; i < lengthOf data; i++) {
-        num iv = b91_getValue(data[i], 0);
+        num iv = getValue(data[i], 0);
 
         if(iv == -1) { continue; }
 
@@ -94,8 +95,8 @@ str action encode(num[] data) {
 			num quotient = Math.floor(ev / 91);
 			num remainder = ev % 91;
 		
-			result += (str)b91_base91.alphabet[remainder];
-			result += (str)b91_base91.alphabet[quotient];
+			result += (str)base91.alphabet[remainder];
+			result += (str)base91.alphabet[quotient];
 		}
 	}
 
@@ -103,10 +104,10 @@ str action encode(num[] data) {
 			num quotient = Math.floor(ebq / 91);
 			num remainder = ebq % 91;
 
-			result += (str)b91_base91.alphabet[remainder];
+			result += (str)base91.alphabet[remainder];
 
 			if(en > 7 || ebq > 90) {
-				result += (str)b91_base91.alphabet[quotient];
+				result += (str)base91.alphabet[quotient];
 			}
 	}
 
