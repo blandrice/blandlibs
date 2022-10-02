@@ -110,6 +110,9 @@ public action start()
 ```
 
 Example OUTPUT SCRIPT:
+
+https://github.com/blandrice/blandlibs/blob/master/out/o_testdjump_client.krnk
+
 ```cs
 # ===================================================================
 # Header: doublejump\DJ_head.krnk
