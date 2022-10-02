@@ -1,3 +1,3 @@
 /temp
-maps/aim_building/aim_building_client.krnk
-.gitignore
+/out
+/maps
