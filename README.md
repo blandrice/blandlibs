@@ -90,7 +90,7 @@ My parsing is not the best because this is just a quick job to get libs before K
 
 Watch out for these bad practices that may break my code:
 - do NOT include brackets () in `# comments`
-- do NOT MANUALLY include calls to update functions in other libraries in any script
+- do NOT MANUALLY include calls to public actions in other libraries in any script
     - My python script should handle that for you
 - do NOT mess with the syntax of public action line too much
     - e.g. `public action update(num delta) {`
