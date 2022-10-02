@@ -1,0 +1,99 @@
+#include <raybox.krnk>
+
+# ===================================================================
+# Map: libs\collisions\raybox.krnk
+# Author: blandrice
+# ===================================================================
+# CONSTANT DEFINES 
+num MS_DURATION_UNCROUCH = 166;
+num HEIGHT_STAND = 9.5;
+num HEIGHT_CROUCH = 6.2;
+
+
+# ================================================================
+# INITIALIZE VARIABLES
+# ================================================================
+obj ray = {};
+obj cube_tohit = {};
+
+num tnow = 0;
+num tlastStand = 0;
+num tlastCrouch = 0;
+num shootheight = 0;
+
+
+# ================================================================
+# KRUNKSCRIPT GAME ACTIONS
+# ================================================================
+# Runs when the game starts
+public action start() {
+    str aid = "34379"; # temp fix for now
+    cube_tohit = GAME.SCENE.addCube(aid, "#FF0000", 0,0,0, 3,3,3, {opacity:0.5});
+}
+
+
+# Add rendering logic in here
+public action render(num delta) {
+
+}
+
+# Player spawns in
+public action onPlayerSpawn(str id) {
+    obj plr = GAME.PLAYERS.getSelf();
+    ray = {origin:{x:plr.position.x,y:plr.position.y,z:plr.position.z},rotation:{x:0,y:0,z:0},dir:{x:0,y:0,z:0}};
+}
+
+# Player died
+public action onPlayerDeath(str id, str killerID) {
+
+}
+
+# Player update
+public action onPlayerUpdate(str id, num delta, obj inputs) {
+    obj plr = GAME.PLAYERS.getSelf();
+    tnow = GAME.TIME.now();
+    # GAME.log(plr);
+    # GAME.log(inputs);
+
+    
+    # shootheight
+    if (!!inputs.crouch) {
+        tlastCrouch = tnow;
+        if ((tnow - tlastStand) < MS_DURATION_UNCROUCH) {
+            shootheight = Math.max(Math.lerp(HEIGHT_STAND,HEIGHT_CROUCH,(tnow - tlastStand)/MS_DURATION_UNCROUCH),HEIGHT_CROUCH);
+        }
+    } else {
+        tlastStand = tnow;
+        shootheight = Math.min(Math.lerp(HEIGHT_CROUCH,HEIGHT_STAND,(tnow - tlastCrouch)/MS_DURATION_UNCROUCH),HEIGHT_STAND);
+    } # shootheight
+
+
+    # ray origin
+    ray.origin.x = (num) plr.position.x;
+    ray.origin.y = (num) plr.position.y + shootheight;
+    ray.origin.z = (num) plr.position.z;
+    # ray rotation
+    ray.rotation.y = (num) plr.rotation.x + Math.PI/2;
+	ray.rotation.z = plr.rotation.y;
+    # ray direction
+    ray.dir = raybox_RotToVecAdjusted((obj)ray.rotation, {toRad:false});
+
+    # detect ray-box AABB hit
+    obj bounds = raybox_cubeBounds(cube_tohit);
+    
+    num[] origin = num[(num)ray.origin.x, (num)ray.origin.y, (num)ray.origin.z];
+    num[] dir = num[(num)ray.dir.ux.x, (num)ray.dir.ux.y, (num)ray.dir.ux.z];
+    num[] coord = num[0,0,0];
+    bool didHit = raybox_HitBoundingBox((num[])bounds.minB, (num[])bounds.maxB, origin, dir, coord);
+    if (didHit){
+        cube_tohit.opacity = 1;
+        GAME.log(coord);
+    } else {
+        cube_tohit.opacity = 0.5;
+    }
+
+    
+
+
+
+}

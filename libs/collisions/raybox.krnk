@@ -1,0 +1,117 @@
+# ===================================================================
+# Header: libs\collisions\raybox.krnk
+# Author: blandrice
+# ===================================================================
+# FUNCTIONS
+obj action RotToVecAdjusted(obj  rot, obj options) {
+    num a = 0;
+    num b = 0;
+    num y = 0;
+    if (!!options.toRad) {
+        a = Math.toRad((num) rot.x); # x roll
+        b = Math.toRad((num) rot.y); # y pitch (krunker is yaw)
+        y = Math.toRad((num) rot.z); # z yaw (krunker is pitch)
+    }
+    else {
+        a = (num) rot.x; # x roll
+        b = (num) rot.y; # y pitch (krunker is yaw)
+        y = (num) rot.z; # z yaw (krunker is pitch)
+    }
+    
+    obj ux = {x: Math.cos(b)*Math.cos(y), y: Math.cos(a)*Math.sin(y)+Math.sin(a)*Math.sin(b)*Math.cos(y), z: Math.sin(a)*Math.sin(y)-Math.cos(a)*Math.sin(b)*Math.cos(y)};
+    obj uy = {x: -Math.cos(b)*Math.sin(y), y:Math.cos(a)*Math.cos(y)-Math.sin(a)*Math.sin(b)*Math.sin(y), z:Math.sin(a)*Math.cos(y)+Math.cos(a)*Math.sin(b)*Math.sin(y)};
+    obj uz = {x: Math.sin(b), y: -Math.sin(a)*Math.cos(b), z: Math.cos(a)*Math.cos(b)};
+    return {ux: ux, uy: uy, uz: uz};
+}
+
+obj action cubeBounds(obj cube){
+    num[] minB = num[];
+    num[] maxB = num[];
+    
+    addTo minB (num) cube.position.x - (num) cube.scale.x/2; # x
+    addTo minB (num) cube.position.y + 0;                    # y
+    addTo minB (num) cube.position.z - (num) cube.scale.z/2; # z
+    
+    addTo maxB (num) cube.position.x + (num) cube.scale.x/2; # x
+    addTo maxB (num) cube.position.y + (num) cube.scale.y;   # y
+    addTo maxB (num) cube.position.z + (num) cube.scale.z/2; # z
+
+    return {minB:minB,maxB:maxB};
+}
+
+# Fast Ray-Box numersection
+# by Andrew Woo
+# from "Graphics Gems", Academic Press, 1990
+bool FALSE = false;
+bool TRUE = true;
+num NUMDIM = 3;
+num RIGHT = 0;
+num LEFT = 1;
+num MIDDLE = 2;
+
+# minB[NUMDIM]  , maxB[NUMDIM];	/* box
+# origin[NUMDIM], dir[NUMDIM];	/* ray
+# coord[NUMDIM] 				/* hit point
+bool action HitBoundingBox(
+    num[] minB,num[] maxB,
+    num[] origin, num[] dir,
+    num[] coord) 
+{
+	bool inside = true;
+	num[] quadrant = num[1,2,3];
+	num i = 0;
+	num whichPlane = 0;
+	num[] maxT = num[0,0,0];
+	num[] candidatePlane = num[0,0,0];
+
+	# Find candidate planes; this loop can be avoided if
+   	# rays cast all from the eye(assume perpsective view)
+	for (i=0; i<NUMDIM; i++) {
+        if(origin[i] < minB[i]) {
+			quadrant[i] = LEFT;
+			candidatePlane[i] = minB[i];
+			inside = FALSE;
+		}else if (origin[i] > maxB[i]) {
+			quadrant[i] = RIGHT;
+			candidatePlane[i] = maxB[i];
+			inside = FALSE;
+		}else	{
+			quadrant[i] = MIDDLE;
+		}
+    }
+	# Ray origin inside bounding box 
+	if(inside)	{
+		coord = origin;
+		return (TRUE);
+	}
+    # Calculate T distances to candidate planes
+	for (i = 0; i < NUMDIM; i++) {
+        if (quadrant[i] != MIDDLE && dir[i] !=0) {
+            maxT[i] = (candidatePlane[i]-origin[i]) / dir[i];
+        } else {
+            maxT[i] = -1;
+        }
+    }
+	# Get largest of the maxT's for final choice of numersection 
+	whichPlane = 0;
+	for (i = 1; i < NUMDIM; i++) {
+        if (maxT[whichPlane] < maxT[i]) {
+            whichPlane = i;
+        }
+    }
+	# Check final candidate actually inside box 
+	if (maxT[whichPlane] < 0) {return (FALSE);}
+	for (i = 0; i < NUMDIM; i++){
+        if (whichPlane != i) {
+			coord[i] = origin[i] + maxT[whichPlane] *dir[i];
+			if (coord[i] < minB[i] || coord[i] > maxB[i]){
+                return (FALSE);
+            }
+		} else {
+			coord[i] = candidatePlane[i];
+		}
+    }
+		
+	return TRUE; # Ray hits box
+}
+
