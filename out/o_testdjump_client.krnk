@@ -144,23 +144,23 @@ action djump_client_onPlayerSpawn(str id) {
 
 num map_var = 0;
 
-public action start () {
+public action start() 
 {
     # nothing to see here
-}}
+}
 
 # ================================================================
 # auto-detected public actions from libraries
 # ================================================================
-public action onPlayerSpawn (str id) {
-    djump_client_onPlayerSpawn(id);
+public action onPlayerUpdate (str id, num delta, obj inputs){
+    djump_client_onPlayerUpdate(id,  delta,  inputs);
 }
 
-public action update (num delta) {
+public action update (num delta){
     djump_client_update(delta);
 }
 
-public action onPlayerUpdate (str id, num delta, obj inputs) {
-    djump_client_onPlayerUpdate(id,  delta,  inputs);
+public action onPlayerSpawn (str id){
+    djump_client_onPlayerSpawn(id);
 }
 

@@ -1,0 +1,165 @@
+# ===================================================================
+# Header: weaponinfo\wpninfo.krnk
+# Author: blandrice
+# ===================================================================
+
+obj[] info = obj[
+    {
+        name: "Assault Rifle",
+        ammo: 28,
+        range: 700,
+        fireRate: 110,
+        reload: 1500,
+        swap: 300,
+        aim: 120,
+        auto: true,
+        damage: 30
+    },
+    {
+        name: "Sniper Rifle",
+        ammo: 3,
+        range: 1000,
+        fireRate: 920,
+        reload: 1700,
+        swap: 300,
+        aim: 120,
+        auto: false,
+        damage: 30
+    },
+    {
+        name: "Submachine Gun",
+        ammo: 34,
+        range: 700,
+        fireRate: 90,
+        reload: 1000,
+        swap: 300,
+        aim: 110,
+        auto: true,
+        damage: 30
+    },
+    {
+        name: "Machine Gun",
+        ammo: 60,
+        range: 700,
+        fireRate: 130,
+        reload: 3300,
+        swap: 600,
+        aim: 200,
+        auto: true,
+        damage: 30
+    },
+    {
+        name: "Shotgun",
+        ammo: 2,
+        range: 160,
+        fireRate: 450,
+        reload: 1100,
+        swap: 300,
+        aim: 120,
+        auto: false,
+        damage: 30
+    },
+    {
+        name: "Revolver",
+        # ammo: 6,
+        ammo: 100,
+        range: 700,
+        fireRate: 450,
+        reload: 900,
+        swap: 200,
+        aim: 110,
+        auto: false,
+        damage: 100
+    },
+    {
+        name: "Semi Auto",
+        ammo: 8,
+        range: 1000,
+        fireRate: 120,
+        reload: 1500,
+        swap: 300,
+        aim: 120,
+        auto: false,
+        damage: 60
+    },
+    {
+        name: "Rocket Launcher",
+        ammo: 3,
+        fireRate: 350,
+        reload: 1500,
+        swap: 350,
+        aim: 200,
+        auto: false,
+        damage: 30
+    },
+    {
+        name: "Akimbo Uzi",
+        ammo: 24,
+        range: 700,
+        fireRate: 70,
+        reload: 1300,
+        swap: 300,
+        aim: 120,
+        auto: true,
+        damage: 30
+    },
+    {
+        name: "Combat Knife", # Does not handle throwing
+        ammo: 0,
+        fireRate: 250,
+        reload: 0,
+        swap: 250,
+        aim: 100,
+        auto: false,
+        damage: 30
+    },
+    {
+        name: "Desert Eagle",
+        ammo: 6,
+        range: 700,
+        fireRate: 400,
+        reload: 1000,
+        swap: 200,
+        aim: 110,
+        auto: false,
+        damage: 30
+    },
+    {
+        name: "Crossbow", # Not Supported
+        ammo: 1,
+        range: 700,
+        fireRate: 150,
+        reload: 900,
+        swap: 200,
+        aim: 120,
+        auto: false,
+        charge: true,
+        projectile: true,
+        damage: 30
+    },
+    {
+        name: "Famas",
+        ammo: 30,
+        range: 900,
+        fireRate: 280,
+        reload: 1200,
+        swap: 300,
+        aim: 130,
+        auto: false,
+        burst: true,
+        burstRate: 90,
+        burstCount: 3,
+        damage: 30
+    },
+    {
+        name: "Blaster",
+        ammo: 16,
+        range: 700,
+        fireRate: 160,
+        reload: 1500,
+        swap: 300,
+        aim: 130,
+        auto: true,
+        damage: 30
+    }
+];
