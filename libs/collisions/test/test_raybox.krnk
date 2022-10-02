@@ -3,6 +3,7 @@
 # ===================================================================
 # Map: libs\collisions\raybox.krnk
 # Author: blandrice
+#   Description: host this on a Quick-Start map.
 # ===================================================================
 # CONSTANT DEFINES 
 num MS_DURATION_UNCROUCH = 166;
