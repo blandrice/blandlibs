@@ -57,21 +57,21 @@ This is just a quick job to get some sort of library feature before Krunker actu
 Example Structure:
 
     \BLANDLIBS
-    ├───libs
-    │   └───doublejump
+    ├───libs # 1. add libraries here
+    │   └───doublejump 
     │           djump_client.krnk
     │           djump_server.krnk
     │           DJ_head.krnk
     │
-    ├───maps
+    ├───maps # 2. create map scripts (call libraries) here
     │   └───test_djump
     │           testdjump_client.krnk
     │           testdjump_server.krnk
     │
-    ├───out
+    ├───out # 4. final output script here goes into krunker editor
     │       o_testdjump_client.krnk
     │
-    ├───py
+    ├───py # 3. run compile script on maps/script.krnk
     │       compile.py
 
 # Example Library Import
