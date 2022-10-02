@@ -55,22 +55,23 @@ I made a quick script to do Krunkscript Library. I'm hoping it makes scripting e
 Example Structure:
 
     \BLANDLIBS
-    ├───libs # 1. all libraries referenced will be here
-    │   │   raybox.krnk
+    ├───blandlibs
+    │   ├───libs
+    │   │   └───doublejump
+    │   │           djump_client.krnk
+    │   │           djump_server.krnk
+    │   │           DJ_head.krnk
     │   │
-    │   └───float16
-    │           float16.krnk
-    │
-    ├───maps # 2. create your mapfile here (including libraries above)
-    │       testmap_client.krnk # calls raybox.krnk, float16.krnk
-    │
-    ├───out # 4. compiled map file (put this into KrunkScript editor)
-    │       testmap_client.krnk
-    │
-    ├───py # 3. python file to be called
-    │       compile.py
-    │
-    └───temp # scratch space for compile.py
+    │   ├───maps
+    │   │   └───test_djump
+    │   │           testdjump_client.krnk
+    │   │           testdjump_server.krnk
+    │   │
+    │   ├───out
+    │   │       o_testdjump_client.krnk
+    │   │
+    │   ├───py
+    │   │       compile.py
 
 # Example Library Import
 
