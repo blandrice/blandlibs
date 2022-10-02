@@ -6,23 +6,23 @@
 #   Use the "prefab_trigger.txt" to quickly update the timer for a certain player.
 # ===================================================================
 
-num clocktime=0; # in ms
+num t=0; # in ms
 
 public action update(num delta) {
 # Timer countdown
-    if (clocktime > 0) {
-        clocktime -= delta;
-        if (clocktime < 0) {
-            clocktime = 0; 
+    if (t > 0) {
+        t -= delta;
+        if (t < 0) {
+            t = 0; 
         }
     }
 }
 
 public action onCustomTrigger(str playerID, str customParam, num value) {
-    if (strutils_starts(customParam,"clocktime")){
+    if (strutils_starts(customParam,"t")){
         str[] params = strutils_split(customParam,"_");
-        clocktime = toNum params[1];
-        bool success = GAME.NETWORK.send("sync", {t:clocktime}, playerID);    
-        if (!success) {GAME.log("ERROR: clocktime sync not sent");}
+        t = toNum params[1];
+        bool success = GAME.NETWORK.send("sync", {t:t}, playerID);    
+        if (!success) {GAME.log("ERROR: t sync not sent");}
     }
 }

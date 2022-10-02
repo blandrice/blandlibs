@@ -36,8 +36,6 @@ public action render(num delta) {
 }
 
 public action onNetworkMessage(str id, obj data) {
-    GAME.log(id);
-    GAME.log(data);
     if (id == "sync") {
         clocktime = (num)data.t;
     }
