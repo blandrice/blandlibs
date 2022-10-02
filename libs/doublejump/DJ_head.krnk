@@ -1,0 +1,18 @@
+# ===================================================================
+# Library: doublejump\DJ_head.krnk
+# Author: blandrice
+# ===================================================================
+
+# ===================================================================
+# SETTINGS:
+num MAX_JUMPCOUNT = 2; # 2 is "doublejump", 3 is "triplejump"
+bool WALLJUMP_REFRESHS = true;
+bool ENABLE_CROUCHJUMP = true; # lower height for crouch jump, also
+                                # applies "moonjump" mid-air physics
+num SOUND = 31960; # sound ID. set to 0 if no sound desired
+
+# HARD-CODED NUMBERS - DON'T TOUCH
+num MS_DURATION_UNCROUCH = 166;
+num HEIGHT_JUMP = 0.0793; # 60FPS, max clearance 17.9 units
+num HEIGHT_CROUCHJUMP = 0.0595; # 60FPS, max clearance 10.2 units
+# ===================================================================

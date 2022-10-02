@@ -125,7 +125,7 @@ def reformatlibfile(libpath, klibname):
                         print(bracketstack)
                         exit()
 
-    text_file = open(libpath, "r")
+    text_file = open(templibpath, "r")
     # read whole file to a string
     newText = text_file.read()
     # close file
@@ -133,11 +133,10 @@ def reformatlibfile(libpath, klibname):
     # print(newText)
     # print(globalvars)
     # print(klibname)
-    newText.replace("dummytest", "")
     for var in globalvars:
         # newText = newText.replace(var, klibname+"_"+var)
         newText = re.sub(
-            r'(?<![a-zA-Z0-9_]){}(?![a-zA-Z0-9_])'.format(var), klibname+"_"+var, newText)
+            r'(?<![a-zA-Z0-9_.]){}(?![a-zA-Z0-9_])'.format(var), klibname+"_"+var, newText)
     # print(globalactions)
     for act in globalactions:
         newText = re.sub(
@@ -268,7 +267,9 @@ def main():
                             bracketstack += char
                             if startbrack == endbrack:
                                 startbrack += 1
-                        elif bracketstack and char in closebracks:
+                        if startbrack > endbrack:
+                            pubactioncontents += char
+                        if bracketstack and char in closebracks:
                             if openbracks.index(bracketstack[-1]) == closebracks.index(char):
                                 # pop the bracket
                                 bracketstack = bracketstack[:-1]
@@ -277,8 +278,6 @@ def main():
                                     state = "save"
                                     trailingstr = line[idx:]
                                     continue
-                        elif startbrack > endbrack:
-                            pubactioncontents += char
                     # test
                     if state == "save":
                         outscript.write("public action {} ({})".format(
@@ -292,7 +291,7 @@ def main():
 
                         for x in libactions:
                             invokelibstr = re.compile(
-                                r"(?<![a-zA-Z0-9_])(\bstr\b|\bnum\b|\bbool\b|\[\s*\])(?![a-zA-Z0-9_])").sub("", strargs)
+                                r"(?<![a-zA-Z0-9_])(\bobj\b|\bstr\b|\bnum\b|\bbool\b|\[\s*\])(?![a-zA-Z0-9_])").sub("", strargs)
                             outscript.write(
                                 "{}{}({});".format(indentstr, x, invokelibstr.strip()))
                         outscript.write(pubactioncontents + "}")
@@ -334,7 +333,7 @@ def main():
                         currentargs = gbl_pubargs[gbl_pubactions.index(
                             gblpubact)]
                         invokelibstr = re.compile(
-                            r"(?<![a-zA-Z0-9_])(\bstr\b|\bnum\b|\bbool\b|\[\s*\])(?![a-zA-Z0-9_])").sub("", currentargs)
+                            r"(?<![a-zA-Z0-9_])(\bobj\b|\bstr\b|\bnum\b|\bbool\b|\[\s*\])(?![a-zA-Z0-9_])").sub("", currentargs)
                         outscript.write(
                             "{}{}({});\n".format(indentstr, gblpubact, invokelibstr.strip()))
                 # end curly bracket

@@ -1,0 +1,11 @@
+# ===================================================================
+# File: maps/test_djump/testdjump_client.krnk
+# Author: blandrice
+# ===================================================================
+
+#include <djump_client.krnk>
+
+public action start()
+{
+    # nothing to see here
+}

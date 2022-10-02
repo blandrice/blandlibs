@@ -1,0 +1,38 @@
+#include <DJ_head.krnk>
+
+num timeNow = 0;
+
+# Runs every game tick
+public action update(num delta) {
+    timeNow = GAME.TIME.now();
+}
+
+public action onPlayerUpdate(str id, num delta, obj inputs) {
+    timeNow = GAME.TIME.now();
+    obj player = GAME.PLAYERS.findByID(id);
+    
+    if ((bool) inputs.crouch) {
+        player.tLastCrouch = timeNow;
+    }
+    if ((bool) player.onGround) {
+        player.jumpCnt = DJ_head_MAX_JUMPCOUNT-1;
+    } else if (DJ_head_WALLJUMP_REFRESHS && (bool) player.onWall && (bool) inputs.jump) {
+        player.jumpCnt = DJ_head_MAX_JUMPCOUNT-1;
+
+    }
+    if((bool) inputs.jump) {
+        if((bool)player.jumpPressed == false && (num) player.jumpCnt > 0 && !(bool) player.onGround) {
+            if (!(bool) player.onWall && DJ_head_WALLJUMP_REFRESHS) {
+                if (DJ_head_ENABLE_CROUCHJUMP && (timeNow - ((num) player.tLastCrouch)) < DJ_head_MS_DURATION_UNCROUCH) {
+                    player.velocity.y = Math.lerp(DJ_head_HEIGHT_CROUCHJUMP,DJ_head_HEIGHT_JUMP,(timeNow - ((num) player.tLastCrouch))/DJ_head_MS_DURATION_UNCROUCH);	
+                } else {
+                    player.velocity.y = DJ_head_HEIGHT_JUMP;	    
+                }
+                (num) player.jumpCnt--;
+            }
+        }
+        player.jumpPressed = true;
+	} else {
+        player.jumpPressed = false;
+    }
+}
