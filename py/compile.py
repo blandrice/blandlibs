@@ -135,7 +135,7 @@ def reformatlibfile(libpath, klibname):
     # print(globalactions)
     for act in globalactions:
         newText = re.sub(
-            r'(?<![a-zA-Z0-9_]){}(?![a-zA-Z0-9_])'.format(act), klibname+"_"+act, newText)
+            r'(?<![a-zA-Z0-9_.]){}(?![a-zA-Z0-9_])'.format(act), klibname+"_"+act, newText)
     # print(pubactions)
     for act in pubactions:
         newText = re.sub('public\s*action\s*(?<![a-zA-Z0-9_]){}(?![a-zA-Z0-9_])'.format(
