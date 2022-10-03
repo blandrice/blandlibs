@@ -48,18 +48,11 @@ def reformatlibfile(libpath, klibname):
         "pubactions": [],
         "pubaction_args": []
     }
-    templibpath = os.path.join(temppath, "temp_" + klibname+".krnk")
-    # check includes first and replace all
-    with open(libpath, 'r') as flib:
-        with open(templibpath, 'w') as ftemp:
-            for idx, line in enumerate(flib):
-                includelines = checkinclude(line, libpath)
-                if includelines:
-                    ftemp.write(includelines)
-                else:
-                    ftemp.write(line)
+    # templibpath = os.path.join(temppath, "temp_" + klibname+".krnk")
+    templibpath = libpath
     # once intermediate file (with all includes replaced) is created, do reformat
-    with open(templibpath, 'r') as flib:
+    # find all global vars and actions
+    with open(libpath, 'r') as flib:
         bracketstack = ""
         openbracks = ['[', '(', '{']
         closebracks = [']', ')', '}']
@@ -119,13 +112,13 @@ def reformatlibfile(libpath, klibname):
                     if bracketstack and (openbracks.index(bracketstack[-1]) == closebracks.index(brack)):
                         bracketstack = bracketstack[:-1]  # pop the bracket
                     else:
-                        print("ERROR: {}".format(templibpath))
+                        print("ERROR: {}".format(libpath))
                         print("\tunmatched bracket {} in line {}: {}".format(
                             brack, idx+1, line))
                         print(bracketstack)
                         exit()
 
-    text_file = open(templibpath, "r")
+    text_file = open(libpath, "r")
     # read whole file to a string
     newText = text_file.read()
     # close file
@@ -146,10 +139,32 @@ def reformatlibfile(libpath, klibname):
         newText = re.sub('public\s*action\s*(?<![a-zA-Z0-9_]){}(?![a-zA-Z0-9_])'.format(
             act), "action " + klibname+"_"+act, newText)
 
-    libobj["libfile"] = newText
+    lines = newText.split("\n")
+    lines_with_include_replaced = []
+    for idx, line in enumerate(lines):
+        includelines = checkinclude(line, libpath)
+        if includelines:
+            lines_with_include_replaced += includelines.split("\n")
+        else:
+            lines_with_include_replaced.append(line)
+    
+    libobj["libfile"] = '\n'.join(lines_with_include_replaced)
+    # libobj["libfile"] = newText
     # print(newText)
     libobj["pubactions"] = [klibname+"_"+act for act in pubactions]
     libobj["pubaction_args"] = pubaction_args
+
+    # templibpath = os.path.join(temppath, "temp_" + klibname+".krnk")
+
+    # # check includes and replace all
+    # with open(libpath, 'r') as flib:
+    #     with open(templibpath, 'w') as ftemp:
+    #         for idx, line in enumerate(flib):
+    #             includelines = checkinclude(line, libpath)
+    #             if includelines:
+    #                 ftemp.write(includelines)
+    #             else:
+    #                 ftemp.write(line)
     return libobj
 
 

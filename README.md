@@ -28,7 +28,6 @@ This is just a quick job to get some sort of library feature before Krunker actu
             - global action `num action myaction()` --> `num action lib_myaction()`
     - Recursion: Libraries can include other Libraries (AKA headers) (again, cannot include more than once)
         - e.g. `lib.krnk` can have `#include <other_lib.krnk>`
-            - be careful - the global variables will keep prepending (in above example: `num lib_other_lib_time`)
 
     - A library's **public actions** are automatically inserted/prepended, e.g.:
         
