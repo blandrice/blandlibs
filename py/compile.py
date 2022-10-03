@@ -6,6 +6,8 @@ pypath = os.path.dirname(os.path.abspath(__file__))
 libspath = os.path.abspath(os.path.join(pypath, '..', 'libs'))
 outpath = os.path.abspath(os.path.join(pypath, '..', 'out'))
 temppath = os.path.abspath(os.path.join(pypath, '..', 'temp'))
+if not os.path.exists(temppath):
+    os.mkdir(temppath)
 
 global libslist
 libslist = []
