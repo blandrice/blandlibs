@@ -1,0 +1,8 @@
+#include <kbo_bub.krnk>
+
+public action start()  {
+    kbo_bub_keyLogger.colors.keyUp.background = '#4f4'; # Green
+    kbo_bub_keyLogger.colors.keyDown.background = '#080'; # Green
+    kbo_bub_keyLogger.absolutePosition.top.pct = 70;
+    kbo_bub_keyLogger.absolutePosition.left.pct = 10;
+}

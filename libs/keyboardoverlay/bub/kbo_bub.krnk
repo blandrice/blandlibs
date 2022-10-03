@@ -1,0 +1,164 @@
+# ===================================================================
+# Library: libs\keyboardoverlay\kboverlay_bub.krnk
+# Author: Bub Lap
+# Description: keyboard stuff much like L-U-C-A’s but parameterizable
+# ===================================================================
+obj keyLogger = {
+	keySizeUnit: 75,
+    spaceBetweenKeys: 10,
+	rowLeftOffset: 30,
+	absolutePosition: {
+        top: {
+			px: 0,
+            pct: 75
+        },
+		left: {
+            px: 0,
+			pct: 15
+        },
+		centered: true
+    },
+	colors: {
+        keyUp: {
+            background: '#f44',
+			font: '#444',
+			backgroundOpacity: 0.5
+        },
+		keyDown: {
+            background: '#800',
+			font: '#fff',
+			backgroundOpacity: 1
+        }
+    },
+    keyRows: obj[][
+        obj[
+			{
+                text: 'W',
+		        code: 87,
+		        leftOffset: 3,
+		        width: 1
+            }
+		],
+		obj[
+            {
+                text: 'SHIFT',
+		        code: 16,
+		        width: 2
+            },
+		    {
+                text: 'A',
+		        code: 65,
+		        width: 1
+            },
+		    {
+                text: 'S',
+		        code: 83,
+		        width: 1
+            },
+	     	{
+                text: 'D',
+		        code: 68,
+                width: 1
+            }
+        ],
+		obj[
+            {
+                text: 'SPACE',
+		        code: 32,
+		        leftOffset: 2,
+		        width: 3
+            } 
+        ]
+    ]
+};
+
+num action getPositionOffset(num nbUnits) {
+    return (
+		(num) keyLogger.keySizeUnit +
+	    (num) keyLogger.spaceBetweenKeys
+	) * nbUnits;
+}
+
+num action getSize(num nbUnits) {
+    return getPositionOffset(nbUnits) - (num) keyLogger.spaceBetweenKeys;
+}
+
+action centerKeyLogger() {
+    num loggerWidth = getSize(5) +
+       2 * (num) keyLogger.rowLeftOffset;
+    num loggerHeight = getSize(3);
+    num newLoggerTopInPixels = (num) keyLogger.absolutePosition.top.px -
+        Math.floor(loggerHeight / 2);
+    num newLoggerLeftInPixels = (num) keyLogger.absolutePosition.left.px -
+        Math.floor(loggerWidth / 2);
+    
+    keyLogger.absolutePosition.top.px = newLoggerTopInPixels;
+    keyLogger.absolutePosition.left.px = newLoggerLeftInPixels;
+}
+
+# Runs when the game starts
+public action start() {
+	if((bool) keyLogger.absolutePosition.centered) {
+        centerKeyLogger();
+    }
+}
+
+# Add rendering logic in here
+public action render(num delta) {
+	obj uiSize = GAME.OVERLAY.getSize();
+    num uiWidth = (num) uiSize.width;
+    num uiHeight = (num) uiSize.height;
+    num loggerTop = (num) keyLogger.absolutePosition.top.px +
+        Math.floor(
+            (num) keyLogger.absolutePosition.top.pct *
+            uiHeight /
+            100
+        );
+    num loggerLeft = (num) keyLogger.absolutePosition.left.px +
+        Math.floor(
+            (num) keyLogger.absolutePosition.left.pct *
+            uiWidth /
+            100
+        );
+	obj[][] keyRows = (obj[][]) keyLogger.keyRows;
+	
+    for(num i = 0; i < lengthOf keyRows; i++) {
+        obj[] currentKeyRow = keyRows[i];
+		num leftOffset = i * (num) keyLogger.rowLeftOffset;
+		
+		for(num j = 0; j < lengthOf currentKeyRow; j++) {
+            obj currentKey = currentKeyRow[j];
+			num keyRelativeLeftOffset = 
+                getPositionOffset((num) currentKey.leftOffset);
+			
+            num xRec = loggerLeft + leftOffset + keyRelativeLeftOffset;
+		    num yRec = loggerTop + getPositionOffset(i);
+            num w = getSize((num) currentKey.width);
+            num h = (num) keyLogger.keySizeUnit;
+            num r = 0;
+            bool keyDown = GAME.INPUTS.keyDown((num) currentKey.code);
+            obj colorScheme = keyDown ? 
+                (obj) keyLogger.colors.keyDown :
+                (obj) keyLogger.colors.keyUp;
+            str colorRec = (str) colorScheme.background;
+            num opacRec = (num) colorScheme.backgroundOpacity;
+            bool center = false;
+
+            str text = (str) currentKey.text;
+            num xText = xRec + w / 2;
+            num yText = yRec + h / 2;
+            num size = h / 1.6;
+            str align = 'center';
+            str colorText = (str) colorScheme.font;
+            str font = 'Arial';
+
+			GAME.OVERLAY.drawRect(xRec, yRec, w, h, r, colorRec, opacRec, center);
+            GAME.OVERLAY.drawText(
+                text, xText, yText, r, size, align, colorText, 1, font
+            );
+            
+            leftOffset += keyRelativeLeftOffset + w + 
+                (num) keyLogger.spaceBetweenKeys;
+        }
+    }
+}

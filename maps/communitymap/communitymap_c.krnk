@@ -1,7 +1,7 @@
 #include <fnitecam.krnk>
 #include <radar_c.krnk>
 #include <djump_client.krnk>
-#include <kboverlay_luca.krnk>
+#include <kbo_luca.krnk>
 
 public action start(){
     fnitecam_keypress = "t";
