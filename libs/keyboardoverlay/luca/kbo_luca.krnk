@@ -1,6 +1,7 @@
 # ===================================================================
 # Library: libs\keyboardoverlay\kboverlay_luca.krnk
 # Author: L-U-C-A
+# Description: Basic HTML Div-based keyboard
 # ===================================================================
 public action start() {
     # space DIV
