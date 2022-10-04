@@ -1,5 +1,10 @@
 #include <kbo_bub.krnk>
 
+# ===================================================================
+# Library: libs\keyboardoverlay\bub\kbobub_green.krnk
+# Author: Bub Lap, theme by Blandrice
+# ===================================================================
+
 public action start()  {
     kbo_bub_keyLogger.colors.keyUp.background = '#4f4'; # Green
     kbo_bub_keyLogger.colors.keyDown.background = '#080'; # Green
