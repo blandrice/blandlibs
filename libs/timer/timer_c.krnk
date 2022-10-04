@@ -4,6 +4,7 @@
 #   Description: Timer utility (syncs to Server)
 # ===================================================================
 
+str networkmsg = "sync";
 num warnstarts = 10; # when warning beep starts
 
 num clocktime = 0;
@@ -36,7 +37,7 @@ public action render(num delta) {
 }
 
 public action onNetworkMessage(str id, obj data) {
-    if (id == "sync") {
+    if (id == networkmsg) {
         clocktime = (num)data.t;
     }
 }

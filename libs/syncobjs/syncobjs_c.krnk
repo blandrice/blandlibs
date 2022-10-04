@@ -71,9 +71,6 @@ obj[] action byteArrayToObjs(num[] byteArray) {
 	return objlist;
 }
 
-
-obj player = {};
-
 obj[] objlist = obj[];
 str[] delList = str[];
 
