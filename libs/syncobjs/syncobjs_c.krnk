@@ -1,5 +1,237 @@
+#include <dtypes.krnk>
+#include <b91.krnk>
+
 # ===================================================================
 # Library: \libs\syncobjs\syncobjs_c.krnk
 # Author: blandrice
 #   Description: not ready!
 # ===================================================================
+
+# Binary decoding of an array of bytes to Objects
+obj[] action byteArrayToObjs(num[] byteArray) {
+	obj[] objlist = obj[];
+	num i = 0;
+	while (i < lengthOf byteArray-1){
+		obj tobj = {};
+		# contents byte
+		num contents = byteArray[i];
+		tobj.hit = ((contents & 0x80) > 0) ? 1:0; ## contents parsing
+		i++;
+		# object id 2 bytes
+		tobj.objid = dtypes_merge2Bytes(byteArray[i],byteArray[i+1]);
+		i+=2;
+		# 4 bytes health / fullhealth
+		if ((contents & 0x40) > 0) {
+			tobj.health = dtypes_merge2Bytes(byteArray[i],byteArray[i+1]);
+			tobj.fhealth = dtypes_merge2Bytes(byteArray[i+2],byteArray[i+3]);
+			i+= 4;
+		}
+		# 6 bytes position
+		if ((contents & 0x20) > 0){
+			tobj.position = {
+				x : dtypes_Int16ToNum(dtypes_merge2Bytes(byteArray[i],byteArray[i+1])),
+				y : dtypes_Int16ToNum(dtypes_merge2Bytes(byteArray[i+2],byteArray[i+3])),
+				z : dtypes_Int16ToNum(dtypes_merge2Bytes(byteArray[i+4],byteArray[i+5]))
+			};
+			i+= 6;
+		}
+		# 6 bytes rotation
+		if ((contents & 0x10) > 0) {
+			tobj.rotation ={
+				x: dtypes_float16ToNum(dtypes_merge2Bytes(byteArray[i],byteArray[i+1])),
+				y: dtypes_float16ToNum(dtypes_merge2Bytes(byteArray[i+2],byteArray[i+3])),
+				z: dtypes_float16ToNum(dtypes_merge2Bytes(byteArray[i+4],byteArray[i+5]))
+			};
+			i+= 6;
+		}
+		# 6 bytes scale
+		if ((contents & 0x08) > 0) {
+			tobj.scale = {
+				x: dtypes_Int16ToNum(dtypes_merge2Bytes(byteArray[i],byteArray[i+1])),
+				y: dtypes_Int16ToNum(dtypes_merge2Bytes(byteArray[i+2],byteArray[i+3])),
+				z: dtypes_Int16ToNum(dtypes_merge2Bytes(byteArray[i+4],byteArray[i+5]))
+			};
+			i+= 6;
+		}
+		# 7 bytes details (2 type, 2 texture, 3 color)
+		if ((contents & 0x04) > 0) {
+			tobj.type = dtypes_merge2Bytes(byteArray[i],byteArray[i+1]);
+            i+=2;
+		}
+        if ((contents & 0x02) > 0) {
+			tobj.aid = dtypes_merge2Bytes(byteArray[i],byteArray[i+1]);
+            i+=2;
+		}
+        if ((contents & 0x01) > 0) {
+			tobj.color = byteArray[i] | (byteArray[i+1] << 8) | (byteArray[i+2] << 16);
+            i+=3;
+		}
+		addTo objlist tobj;
+	}
+	return objlist;
+}
+
+
+obj player = {};
+
+obj[] objlist = obj[];
+str[] delList = str[];
+
+# interpolation
+num newTime = 0;
+num oldTime = 0;
+num dataBuffer = 0;
+num interpM = 0;
+
+# update with new object data
+bool action updateobjproperties(obj currentObj, obj newObjData) {
+    currentObj.oldpos.x = (num) currentObj.newpos.x;
+    currentObj.oldpos.y = (num) currentObj.newpos.y;
+    currentObj.oldpos.z = (num) currentObj.newpos.z;
+
+    if (notEmpty (obj) newObjData.position){
+        currentObj.newpos.x = (num) newObjData.position.x;
+        currentObj.newpos.y = (num) newObjData.position.y;
+        currentObj.newpos.z = (num) newObjData.position.z;
+    }
+    if (notEmpty (obj) newObjData.scale){
+        currentObj.scale.x = (num) newObjData.scale.x;
+        currentObj.scale.y = (num) newObjData.scale.y;
+        currentObj.scale.z = (num) newObjData.scale.z;
+    }
+    if (!!(num)newObjData.health) {
+        currentObj.health = (num)newObjData.health;
+    }
+    if (!!(num)newObjData.fhealth) {
+        currentObj.fhealth = (num)newObjData.fhealth;
+    }
+    if (notEmpty (obj)newObjData.rotation) {
+        currentObj.rotation.x = (num) newObjData.rotation.x;
+        currentObj.rotation.y = (num) newObjData.rotation.y;
+        currentObj.rotation.z = (num) newObjData.rotation.z;
+    }
+    return true;
+}
+
+# First creation of object
+obj action createObj(obj newObjData) {
+    if ((num) newObjData.type == 0) {
+        # str aid = (str) newObjData.aid;
+        # str aid = "34379"; # temp fix for now
+        str colr = "#" + dtypes_num2hexstring((num) newObjData.color);
+        
+        obj cube = GAME.SCENE.addCube(toStr (num)newObjData.aid, colr, (num)newObjData.position.x,(num)newObjData.position.y,(num)newObjData.position.z, 0,0,0);
+        cube.objid = (num) newObjData.objid;
+        cube.oldpos = {x:(num)newObjData.position.x,y:(num)newObjData.position.y,z:(num)newObjData.position.z};
+        cube.newpos = {x:(num)newObjData.position.x,y:(num)newObjData.position.y,z:(num)newObjData.position.z};
+        cube.health = (num)newObjData.health;
+        cube.fhealth = (num)newObjData.fhealth;
+        cube.hit = (num)newObjData.hit;
+      
+        updateobjproperties(cube, newObjData);
+        return cube;
+    }
+    return {};
+}
+
+
+action lerpObj(num delta) {
+    interpM = Math.min(1.5, (GAME.TIME.now() - newTime) / dataBuffer);
+    for (num i = 0; i < lengthOf objlist; i++){
+        obj curObj = objlist[i];
+        (num) curObj.position.x += (Math.lerp((num)curObj.oldpos.x, (num)curObj.newpos.x, interpM)-(num)curObj.position.x)*delta/1000*60/4;
+        (num) curObj.position.y += (Math.lerp((num)curObj.oldpos.y, (num)curObj.newpos.y, interpM)-(num)curObj.position.y)*delta/1000*60/4;
+        (num) curObj.position.z += (Math.lerp((num)curObj.oldpos.z, (num)curObj.newpos.z, interpM)-(num)curObj.position.z)*delta/1000*60/4;
+    }
+     
+}
+
+obj action findObjbyID(num id) {
+    for (num i = 0; i < lengthOf objlist; i++) {
+        if ((num) objlist[i].objid == id) {
+            return objlist[i];
+        }
+    }
+    return {};
+}
+
+action deleteobj(num id) {
+    for (num i = 0; i < lengthOf objlist; i++) {
+        if ((num) objlist[i].objid == id) {
+            obj cube = objlist[i];
+            addTo delList (str) cube.objid;
+            remove objlist[i];
+            cube.delete();
+        }
+    }
+}
+
+bool action objIDWasDeleted(str id) {
+    for (num i = 0; i < lengthOf delList; i++) {
+        if (id == delList[i]) {
+            return true;
+        }
+        
+    }
+    return false;
+}
+
+bool action updateobjs(obj[] netobjs) {
+    for (num i = 0; i < lengthOf netobjs; i++){
+        obj newObjData = netobjs[i];
+        # add new Object
+        if ((lengthOf objlist == 0) || ((num)newObjData.objid > (num) objlist[lengthOf objlist - 1].objid)) {
+            if (!objIDWasDeleted((str)newObjData.objid)) {
+                obj newObj = createObj(newObjData);
+                addTo objlist newObj;
+            } else {
+                GAME.log("object already deleted! " + (str)newObjData.objid);
+            }
+        } 
+        # Update current object properties
+        else {
+            obj curObj = findObjbyID((num)newObjData.objid);
+            bool success = updateobjproperties(curObj, newObjData);
+            if (!success) {
+                GAME.log("ERROR: properties not updated for objid: ", toStr newObjData.objid);
+                GAME.log(newObjData);
+                GAME.log(objlist);
+            }
+        }
+    }
+    return true;
+}
+
+# reset object lists, time vars, attempted to preload sounds into game engine to avoid the first sound's lag.
+public action start() {
+    objlist = obj[];
+    delList = str[];
+    
+    oldTime = GAME.TIME.now();
+    newTime = GAME.TIME.now();
+}
+
+public action onNetworkMessage(str id, obj data) {
+    if (id == "sync") {
+        
+        obj[] netobjs = byteArrayToObjs(b91_decode((str)data.d));
+        oldTime = newTime;
+        newTime = GAME.TIME.now();
+        dataBuffer = newTime - oldTime;
+        
+        updateobjs(netobjs);
+        num[] newdellist = (num[]) data.dellist;
+        for (num i = 0; i < lengthOf newdellist; i++) {
+            deleteobj(newdellist[i]);
+        }
+    } else if (id == "clear") {
+        for (num i = lengthOf objlist - 1; i >= 0; i--) {
+            deleteobj((num)objlist[i].objid);
+        }
+    }
+}
+
+public action update(num delta){
+    # object position lerping
+    lerpObj(delta);
+}

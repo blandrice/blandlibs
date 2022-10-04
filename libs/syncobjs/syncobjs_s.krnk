@@ -1,8 +1,13 @@
+#include <dtypes.krnk>
+#include <b91.krnk>
+
 # ===================================================================
 # Library: \libs\syncobjs\syncobjs_s.krnk
 # Author: blandrice
 #   Description: not ready!
 # ===================================================================
+
+num SYNC_INTERVAL = 50;
 
 # object contents
 num[] action objsToByteArray(obj[] objlist) {
@@ -61,7 +66,7 @@ num[] action objsToByteArray(obj[] objlist) {
 			tObj.aid_old = tObj.aid;
             contents |=  0x02;
         }
-		if (!!tObj.color && (str)tObj.color != (str)tObj.color_old){
+		if ((str) tObj.color !="undefined" && (str)tObj.color != (str)tObj.color_old){
             # type (cube, sphere, modelID)
 			tObj.color_old = tObj.color;
             tArray = dtypes_ColorToByteArray((num)tObj.color); addTo retArray tArray[0]; addTo retArray tArray[1]; addTo retArray tArray[2];
@@ -81,3 +86,84 @@ num tlastbroadcast = 0;
 obj[] objlist = obj[];
 num[] newdellist = num[];
 num objid = 0;
+num tnow = 0;
+
+
+
+# takes data from 
+action createObject(obj d) {
+    
+    # object template!
+    obj tobj = {
+        type: 0, #0 = cube, 1 = sphere, 2 = cylinder, all else = modelID
+        aid: 34379,
+        scale: {x:20,y:80,z:20}, # models only need x:scale which is all 3 dimensions
+        position: {x:1,y:1,z:1},
+        rotation: {x:0,y:0,z:0},
+        color: 0x00A8F9
+    };
+    if ((str) d.type != "undefined") {tobj.type = d.type;}
+    if ((str) d.aid != "undefined") {tobj.aid = d.aid;}
+    if (notEmpty (obj) d.scale) {tobj.scale = d.scale;}
+    if (notEmpty (obj) d.position) {tobj.position = d.position;}
+    if (notEmpty (obj) d.rotation) {tobj.rotation = d.rotation;}
+    if ((str) d.color != "undefined") {tobj.color = d.color;}
+
+	tobj.objid = toNum toStr objid;
+    objid++;
+    addTo objlist tobj;
+}
+
+bool action deleteObject(str id) {
+    for (num i = lengthOf objlist - 1; i >= 0; i--) {
+        if ((str) objlist[i].objid == id) {
+            addTo newdellist toNum objlist[i].objid;
+            remove objlist[i];
+            return true;
+        }
+    }
+    return false;
+}
+
+obj action findObjbyID(str id){
+    for (num i = lengthOf objlist - 1; i >= 0; i--) {
+        if ((str) objlist[i].objid == id) {
+            return objlist[i];
+        }
+    }
+    return {};
+}
+
+public action start() {
+    objlist = obj[];
+    objid=0;
+}
+
+public action update(num delta) {
+	tnow = GAME.TIME.now();
+
+    # Broadcast Synced Objects data
+    if ((tnow - tlastbroadcast) > SYNC_INTERVAL) {
+        tlastbroadcast = tnow;
+        # str encodedobjdata = objencoding();
+        str encodedobjdata = b91_encode(objsToByteArray(objlist));
+
+        # bool success = GAME.NETWORK.broadcast("sync", {data:objdata});
+        obj[] plrs = GAME.PLAYERS.list();
+        bool success=true;
+        for (num i = 0; i < lengthOf plrs; i++) {
+            success = GAME.NETWORK.send("sync", {d:encodedobjdata, dellist:newdellist}, (str)plrs[i].id);    
+        }
+        if (!success) {
+            GAME.log("ERROR: sync not sent!!!");
+        } else {
+            newdellist = num[];
+        }
+    }
+}
+
+# Runs when the round ends
+public action onGameEnd() {
+    # delete all objects client side
+    GAME.NETWORK.broadcast("clear", {});
+}
