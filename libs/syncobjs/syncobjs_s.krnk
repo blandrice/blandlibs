@@ -1,0 +1,83 @@
+# ===================================================================
+# Library: \libs\syncobjs\syncobjs_s.krnk
+# Author: blandrice
+#   Description: 
+# ===================================================================
+
+# object contents
+num[] action objsToByteArray(obj[] objlist) {
+	num[] retArray = num[];
+	for (num i = 0; i < lengthOf objlist; i++) {
+		obj tObj = objlist[i];
+		num[] tArray = num[];
+
+		# 1 byte (8bits) object contents
+		num contents = 0x00;
+		num contentsidx = lengthOf retArray;
+		addTo retArray contents;
+		if ((num) tObj.hit>0) {contents |=  0x80;}
+		
+		# 2 bytes objid
+		tArray = dtypes_int16toByteArray(dtypes_numToUint16((num)tObj.objid)); addTo retArray tArray[0]; addTo retArray tArray[1];
+
+		# 4 bytes health/fhealth
+		if (notEmpty (obj) tObj.health) {
+			contents |=  0x40;
+			tArray = dtypes_int16toByteArray(dtypes_numToUint16((num)tObj.health.h)); addTo retArray tArray[0]; addTo retArray tArray[1];
+			tArray = dtypes_int16toByteArray(dtypes_numToUint16((num)tObj.health.fh)); addTo retArray tArray[0]; addTo retArray tArray[1];
+		}
+		# 6 bytes position
+		if (notEmpty (obj) tObj.position) {
+			contents |=  0x20;
+			tArray = dtypes_int16toByteArray(dtypes_numToInt16((num)tObj.position.x)); addTo retArray tArray[0]; addTo retArray tArray[1];
+			tArray = dtypes_int16toByteArray(dtypes_numToInt16((num)tObj.position.y)); addTo retArray tArray[0]; addTo retArray tArray[1];
+			tArray = dtypes_int16toByteArray(dtypes_numToInt16((num)tObj.position.z)); addTo retArray tArray[0]; addTo retArray tArray[1];
+		}
+		# 6 bytes rotation
+		if (notEmpty (obj) tObj.rotation) {
+			contents |=  0x10;
+			tArray = dtypes_int16toByteArray(dtypes_numToFloat16((num)tObj.rotation.x)); addTo retArray tArray[0]; addTo retArray tArray[1];
+            # GAME.log("x: ",dtypes_numToFloat16((num)tObj.rotation.x), printBinary(dtypes_numToFloat16((num)tObj.rotation.x)));
+			tArray = dtypes_int16toByteArray(dtypes_numToFloat16((num)tObj.rotation.y)); addTo retArray tArray[0]; addTo retArray tArray[1];
+			tArray = dtypes_int16toByteArray(dtypes_numToFloat16((num)tObj.rotation.z)); addTo retArray tArray[0]; addTo retArray tArray[1];
+		}
+		# 6 bytes scale
+		if (notEmpty (obj) tObj.scale) {
+			contents |=  0x08;
+			tArray = dtypes_int16toByteArray(dtypes_numToInt16((num)tObj.scale.x)); addTo retArray tArray[0]; addTo retArray tArray[1];
+			tArray = dtypes_int16toByteArray(dtypes_numToInt16((num)tObj.scale.y)); addTo retArray tArray[0]; addTo retArray tArray[1];
+			tArray = dtypes_int16toByteArray(dtypes_numToInt16((num)tObj.scale.z)); addTo retArray tArray[0]; addTo retArray tArray[1];
+		}
+		# 7 bytes details (2 type, 2 texture, 3 color)
+        if (!!tObj.type && (num)tObj.type != (num)tObj.type_old){
+            # type (cube, sphere, modelID)
+			tObj.type_old = tObj.type;
+            tArray = dtypes_int16toByteArray((num)tObj.type); addTo retArray tArray[0]; addTo retArray tArray[1];    
+            contents |=  0x04;
+        }
+        if (!!tObj.aid && (num)tObj.aid != (num)tObj.aid_old){
+            # type (cube, sphere, modelID)
+            tArray = dtypes_int16toByteArray((num)tObj.aid); addTo retArray tArray[0]; addTo retArray tArray[1];    
+			tObj.aid_old = tObj.aid;
+            contents |=  0x02;
+        }
+		if (!!tObj.color && (str)tObj.color != (str)tObj.color_old){
+            # type (cube, sphere, modelID)
+			tObj.color_old = tObj.color;
+            tArray = dtypes_ColorToByteArray((num)tObj.color); addTo retArray tArray[0]; addTo retArray tArray[1]; addTo retArray tArray[2];
+            contents |=  0x01;
+        }
+		retArray[contentsidx] = contents;
+	}
+	return retArray;
+}
+
+num tlastbroadcast = 0;
+
+# ========================================================================================
+# cube movement
+# ========================================================================================
+
+obj[] objlist = obj[];
+num[] newdellist = num[];
+num objid = 0;
