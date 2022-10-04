@@ -1,0 +1,35 @@
+#include <dtypes.krnk>
+# ===================================================================
+# Test: \libs\float\dtypes.krnk
+# Notes: weird errors for floats rightnow for values < 2 (up to 1 radian of error)
+# even -20 radians of error on value 0.1 ...
+# ===================================================================
+
+num action test_float(num float){
+    num[] tArray = dtypes_int16toByteArray(dtypes_numToFloat16(float));
+    num t_float = dtypes_float16ToNum(dtypes_merge2Bytes(tArray[0],tArray[1]));
+    return t_float;
+}
+
+# Runs when the game starts
+public action start() {
+	num peak = 7;
+    num steps = 70;
+    # num[] floats = num[0, Math.PI, 2.0, 2.1];
+	num[] floats = num[0, Math.PI, 2.0, 2.1];
+    # for (num i = 0; i < lengthOf floats; i++){ }
+    for (num i = 0; i < steps; i++){ 
+        num float = peak * (i/steps) ;
+        
+    
+        num radfloat16 = dtypes_numToFloat16(float);
+        num back2rad = dtypes_float16ToNum(radfloat16);
+        # GAME.log("number: ",float);
+        # GAME.log("float16: ", dtypes_printBinary(radfloat16));
+        # GAME.log("back to number: ", back2rad);
+
+        GAME.log( float, back2rad);
+    }
+}
+
+	

@@ -161,9 +161,9 @@ num[] action int16toByteArray(num data){
 
 num[] action ColorToByteArray(num color) {
 	num[] retArray = num[];
-	addTo retArray (color >> 32) & 0xff;
-	addTo retArray (color >> 16) & 0xff;
 	addTo retArray (color >> 0) & 0xff;
+	addTo retArray (color >> 8) & 0xff;
+	addTo retArray (color >> 16) & 0xff;
 	
 	return retArray;
 }
@@ -171,7 +171,7 @@ num[] action ColorToByteArray(num color) {
 str action num2hexstring(num n){
 	str hexstr = "";
 	str[] lookup = str["0","1","2","3","4","5","6","7","8","9","A","B","C","D","E","F"];
-	while (n > 0){
+	for (num i =0; i < 6; i++){
 		hexstr = lookup[n & 0xF] + hexstr;
 		n = n >> 4;
 	}
