@@ -310,7 +310,7 @@ def main():
                             invokelibstr = re.compile(
                                 r"(?<![a-zA-Z0-9_])(\bobj\b|\bstr\b|\bnum\b|\bbool\b|\[\s*\])(?![a-zA-Z0-9_])").sub("", strargs)
                             outscript.write(
-                                "{}{}({});".format(indentstr, x, invokelibstr.strip()))
+                                "{}{}({});\n".format(indentstr, x, invokelibstr.strip()))
                         outscript.write(pubactioncontents + "\n}\n")
 
                         outscript.write(trailingstr)
