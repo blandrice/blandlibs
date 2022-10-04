@@ -1,0 +1,8 @@
+#include <syncobjs_c.krnk>
+
+# ===================================================================
+# Library: \libs\ECS\ecs_c.krnk
+# Author: blandrice
+#   Description: Entity! Component! System!!!
+# ===================================================================
+
