@@ -1,0 +1,86 @@
+#include <syncobjs_s.krnk>
+
+# ===================================================================
+# Library: \libs\ECS\ecs_s.krnk
+# Author: blandrice
+#   Description: Entity! Component! System!!!
+# ===================================================================
+
+#############################################
+# Entities: obj list
+#############################################
+# syncobjs_s_objlist
+
+#############################################
+# Components: 
+#############################################
+# phystics/movement
+num WORLDFLOOR = 0;
+obj bounce = {x:0,y:0.2,z:0,ygrav:-0.1};
+
+# health / death
+obj health = {health: 100, fullhealth:100};
+
+# collide with player
+obj collide = {plr:true,onplrcol:"inflict_5;hurt_50"};
+# obj collide = {plr:true,onplrcol:"inflict_5;hurt_50"};
+
+# team
+obj team = {team:"enemy"};
+# obj team = {team:"1"};
+
+#############################################
+# Systems: public actions + onNetworkMessage hooks
+#############################################
+action onPlayerCollision(){
+    obj[] plrs = GAME.PLAYERS.list();
+    for (num i = 0; i < lengthOf plrs; i++){
+
+    }
+}
+
+num test = 0;
+
+public action update(num delta){
+    GAME.log(syncobjs_s_objlist);
+    if (test == 0)
+    {
+        for (num i = 0; i < lengthOf syncobjs_s_objlist; i++)
+        {
+            obj tobj = syncobjs_s_objlist[i];
+
+            # physics/movement
+            GAME.log("notempty bounce: ", notEmpty (obj) tobj.bounce);
+            if (notEmpty (obj) tobj.bounce) 
+            {
+                (num) tobj.velocity.y += (num) tobj.bounce.ygrav*(delta/1000);
+                if ((num)tobj.position.y < WORLDFLOOR)
+                {
+                    tobj.position = WORLDFLOOR;
+                    tobj.velocity.y = (num) tobj.bounce.y;
+                }
+            }
+
+            # apply velocity
+            GAME.log("notempty vel and position:",notEmpty (obj) tobj.velocity && notEmpty (obj) tobj.position);
+            if (notEmpty (obj) tobj.velocity && notEmpty (obj) tobj.position)
+            {
+                (num) tobj.position.x += (num)tobj.velocity.x * (delta/1000);
+                (num) tobj.position.y += (num)tobj.velocity.y * (delta/1000);
+                (num) tobj.position.z += (num)tobj.velocity.z * (delta/1000);
+            }
+
+        }
+        test = 1;
+    }
+    
+
+}
+
+public action onNetworkMessage(str id, obj data, str playerID) {
+
+}
+
+public action start(){
+    syncobjs_s_createObject({scale:{x:10,y:10,z:10},position:{x:22,y:22,z:22},color:0xff0000,bounce:bounce});
+}
