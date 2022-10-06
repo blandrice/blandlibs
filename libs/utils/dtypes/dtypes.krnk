@@ -5,20 +5,10 @@
 #   Goal was to pack float data into 16-bits and send over NetworkMessage 
 #   (much smaller than ASCII string representation)
 # ===================================================================
-
-# range = 2^BITS_EXP 
-# precision = 1/(2^BITS_MANT)
-num MAX_BITS = 16; num BITS_EXP = 3; # (16)MAX_BITS = (1)signbit + (3)bits_exp (=8, enough for 2pi radians) + (12)BITS_MANT # range: 0-8 precision: 0.0002
-
-num BIAS = 2**(BITS_EXP-1)-1;
-num BITS_MANT = MAX_BITS - 1 - BITS_EXP;
-num SIGN_LOC = MAX_BITS-1;
-
-
 num action findMSBLoc(num v){
 	# v better be an integer u dumbo
-	num r = 0;
-	v = v >> 1;
+	num r = -1;
+	# v = v >> 1;
 	while (v > 0) {
 		r++;
 		v = v >> 1;
@@ -43,40 +33,63 @@ num action ones(num f){
 	return retnum;	
 }
 
+
+# adapted from IEEE 754 Standard for Single Precision 32 bit floating
+# but allows for you to select # of exponent / mantissa bits
+# half-precision (16 bit), single-precision (32 bit)
+# num MAX_BITS = 32; num BITS_EXP = 8;
+num MAX_BITS = 16; num BITS_EXP = 5; 
+#don't change to something like 16-3.. error up to 30 units observed
+
+# (e.g. 32-bit) from left to right:
+# 1 bit - Sign bit (2's complement) += (-1) * 2^place in exponent
+# 8 bits - Exponent (2^e)
+# 23 bits - Mantissa (part after decimal)
+# range = 2^BITS_EXP 
+# precision = 1/(2^BITS_MANT)
+
+num BIAS = 2**(BITS_EXP-1)-1;
+num BITS_MANT = MAX_BITS - 1 - BITS_EXP;
+num SIGN_LOC = MAX_BITS-1;
+
 num action numToFloat16(num data) {
-	# normalize to [0, 2pi]
-	# sign bit
+	# 1. determine the sign bit
 	num signbit = 0;
 	if (data < 0) {signbit = 1; data = -data;}
     if (data == 0) {return 0;}
-	# Convert  whole / decimal bits to pure binary
-	num whole = Math.floor(data); # # whole number 0,2PI is already between 0 - 8
-	num wholebit = whole; # max is the 2 ^ bits of the exponent
+	# 2. Convert  whole / decimal bits to pure binary
+	num whole = Math.floor(data); # floor it so it's just an integer (will be between 0 and 2^bitsexp). max is the 2 ^ bits of the exponent
 	num decimal = (data - whole > 0) ? data - whole : 0;
 	num decbit = 0x000; 
-	# convert decimals into binary
-	 # 2 ^-7 
-	for (num i = 0; i < BITS_MANT; i++){
+	for (num i = 0; i < BITS_MANT; i++){ # convert decimals into binary
 		decimal *= 2;
 		num tdecbit = (decimal >= 1 ? 1 : 0);
 		decbit |=  tdecbit << (BITS_MANT-1-i); # 12 - i 
 		if (decimal >= 1) {decimal -=1;}
 	}
-	num purbinary = (wholebit << BITS_MANT) | decbit;
-	# normalize to determine mantissa and unbiased exponent
-	num unbiasedexp = findMSBLoc(purbinary) - BITS_MANT;
-	num biasedexp = unbiasedexp + BIAS;
-	
-	num mantissa = purbinary ^ (1 << (findMSBLoc(purbinary))); # remove leading 1 (MSB)
-	# num mantissa = 0;
-	if (findMSBLoc(purbinary)-1 > BITS_MANT-1)	{ # truncate to # of bits? #easier to understand if you put -1 in front of everything
-		mantissa = mantissa >> findMSBLoc(purbinary)-1 - (BITS_MANT-1);
-		# at this point rounding would be done for the last bit but I'm lazy
-	} else { # else, right pad with zeros
-		mantissa = (mantissa << (BITS_MANT - findMSBLoc(purbinary)-1));
-	}
+		# GAME.log("decbit",printBinary(decbit));
 
+	num purbinary = (whole << BITS_MANT) | decbit;
+		# GAME.log("purbinary",printBinary(purbinary));
+		# GAME.log("findMSBLoc(purbinary)",findMSBLoc(purbinary));
 	
+	# 3. normalize to determine mantissa and unbiased exponent
+	num unbiasedexp = findMSBLoc(purbinary) - BITS_MANT;
+		# GAME.log("unbiasedexp",unbiasedexp);
+	# 4. determine biased exponent
+	num biasedexp = unbiasedexp + BIAS;
+	# 5. remove leading 1 (MSB)
+		# align first
+	num mantissa = purbinary;
+	num alignmantissa = (BITS_MANT-1)-findMSBLoc(mantissa);
+	if (alignmantissa > 0) {
+		mantissa = mantissa << alignmantissa;
+	} else {
+		mantissa = mantissa >> (-1 * alignmantissa);
+	}
+	mantissa = (mantissa ^ (1 << (findMSBLoc(mantissa)))) << 1; # remove leading 1
+		# GAME.log("mantissa:",printBinary(mantissa));
+		# GAME.log("left-shift by:",alignmantissa);	
 	num float16 = (signbit << SIGN_LOC) | (biasedexp << BITS_MANT) | ( mantissa );
 	return float16;
 }

@@ -14,22 +14,37 @@ num action test_float(num float){
 # Runs when the game starts
 public action start() {
 	num peak = 7;
-    num steps = 70;
+    num steps = 700;
     # num[] floats = num[0, Math.PI, 2.0, 2.1];
-	num[] floats = num[0, Math.PI, 2.0, 2.1];
-    # for (num i = 0; i < lengthOf floats; i++){ }
+	# num[] floats = num[0, Math.PI, 2.0, 2.1];
+    num errors = 0;
     for (num i = 0; i < steps; i++){ 
         num float = peak * (i/steps) ;
+        num numasfloat16 = dtypes_numToFloat16(float);
+        num back2float = dtypes_float16ToNum(numasfloat16);
         
-    
-        num radfloat16 = dtypes_numToFloat16(float);
-        num back2rad = dtypes_float16ToNum(radfloat16);
-        # GAME.log("number: ",float);
-        # GAME.log("float16: ", dtypes_printBinary(radfloat16));
-        # GAME.log("back to number: ", back2rad);
-
-        GAME.log( float, back2rad);
+        if (Math.abs(float - back2float) > 0.0174533){
+            errors++;
+            GAME.log("ERROR");
+            GAME.log( float, back2float, float - back2float);
+            GAME.log(dtypes_printBinary(dtypes_numToFloat16(float)));
+        }
+        
     }
+    GAME.log("total errors:",errors);
 }
 
 	
+
+# public action start(){
+#     # num decnumber = 0.09375; # 00111101110000000000000000000000
+#     # num decnumber = -123.3;
+#     num[] decnumber = num[0.09375,-123.3,0.3];
+#     for (num i = 0; i < lengthOf decnumber; i++){
+#         GAME.log("decnumber:",decnumber[i]);
+#         num binrep = dtypes_numToFloat16(decnumber[i]); 
+#         GAME.log(dtypes_printBinary(binrep));
+
+#     }
+    
+# }
