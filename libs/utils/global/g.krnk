@@ -1,0 +1,12 @@
+# ===================================================================
+# Header: \libs\utils\global\g.krnk
+# Author: blandrice
+#   Description: some global vars that other libs can reference to reduce calls
+# ===================================================================
+
+
+num tnow = 0;
+
+public action update(num delta){
+    tnow = GAME.TIME.now();
+}
