@@ -1,0 +1,22 @@
+# ===================================================================
+# Library: libs\ECS\bounce\ecsgrav.krnk
+# Author: blandrice
+#   Description: gravity
+# ===================================================================
+
+num MAXYVEL = 100;
+
+num action sign(num d){
+    return d >= 0 ? 1 : -1;
+}
+
+private action onECSUpdate(num delta, obj tobj, obj[] objlist){
+if (notEmpty (obj) tobj.gravity && (num) tobj.onGround == 0 ) 
+    {
+        (num) tobj.velocity.y += (num) tobj.gravity.y*(delta/1000);
+        if (Math.abs((num) tobj.velocity.y) > MAXYVEL){
+            tobj.velocity.y = sign((num) tobj.velocity.y) * MAXYVEL;
+        }
+
+    }
+}

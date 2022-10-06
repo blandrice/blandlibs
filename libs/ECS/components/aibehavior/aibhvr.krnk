@@ -1,0 +1,25 @@
+#include <plrutil.krnk>
+#include <vec.krnk>
+# ===================================================================
+# Library: libs\ECS\components\movebehavior\aibhvr.krnk
+# Author: blandrice
+#   Description: basic movement - following player?
+# ===================================================================
+
+private action onECSUpdate(num delta, obj tobj, obj[] objlist){
+    if (notEmpty (obj)tobj.behavior){
+        if ((str)tobj.behavior.default == "followplr"){
+            # GAME.log("followplayer behavior found");
+            # GAME.log(tobj);
+                obj plr = GAME.PLAYERS.findByID(plrutil_closestPlayer((obj)tobj.position));
+                # GAME.log("closestplayer: ",plrutil_closestPlayer((obj)tobj.position));
+                # GAME.log("player:",plr);
+                
+                obj udir = vec_unitDir((obj)tobj.position,(obj)plr.position);
+                # GAME.log(udir);
+                tobj.velocity.x = (num)udir.x * (num)tobj.walkspeed.x;
+                tobj.velocity.z = (num)udir.z * (num)tobj.walkspeed.z;
+                # GAME.log(tobj.velocity.x, tobj.velocity.z);
+        }        
+    }
+}

@@ -1,6 +1,7 @@
 #include <syncobjs_c.krnk>
-#include <spawn_c.krnk>
+#include <plrutil_c.krnk>
 #include <AABB.krnk>
+#include <plrbhvr_c.krnk>
 
 # ===================================================================
 # Library: \libs\ECS\ecs_c.krnk
@@ -12,7 +13,7 @@ bool cr = false;
 
 public action update(num delta){
     obj plr = GAME.PLAYERS.getSelf();
-    if (spawn_c_imspawned) {
+    if (plrutil_c_imspawned) {
         obj[] res = AABB_resolveplr(plr,cr,syncobjs_c_objlist);
         for (num i = 0; i < lengthOf res; i++){
             obj cobj = res[i];

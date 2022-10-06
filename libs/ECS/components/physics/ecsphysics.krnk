@@ -1,0 +1,24 @@
+# ===================================================================
+# Library: libs\ECS\bounce\ecsgrav.krnk
+# Author: blandrice
+#   Description: classic position/velocity/(eventually acceleration)
+# ===================================================================
+
+# num MAXYVEL = 100;
+
+# num action sign(num d){
+#     return d >= 0 ? 1 : -1;
+# }
+
+private action onECSUpdate(num delta, obj tobj, obj[] objlist){
+    tobj.ogvel = 
+        {
+            x: (num) tobj.velocity.x,
+            y: (num) tobj.velocity.y,
+            z: (num) tobj.velocity.z
+        };
+    # actually change position
+    (num) tobj.position.x += (num)tobj.velocity.x * (delta/1000);
+    (num) tobj.position.y += (num)tobj.velocity.y * (delta/1000);
+    (num) tobj.position.z += (num)tobj.velocity.z * (delta/1000);
+}
