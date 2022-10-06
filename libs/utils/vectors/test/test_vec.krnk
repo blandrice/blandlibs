@@ -1,0 +1,11 @@
+#include <vec.krnk>
+public action start() {
+	obj P1 = {x:-1,y:-1,z:-1};
+	obj P2 = {x:1,y:1,z:1};
+	obj sub = vec_subtract3d(P1,P2);
+	GAME.log("Subtract:",sub);
+	GAME.log("Mag:",vec_mag3d(sub));
+	GAME.log("Norm:",vec_norm3d(sub));
+	GAME.log("unitDir:",vec_unitDir(P1,P2));
+
+}

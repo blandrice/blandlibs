@@ -1,0 +1,36 @@
+# ===================================================================
+# Header: libs\utils\vectors\vec.krnk
+# Author: blandrice
+# Description: vector math
+# ===================================================================
+
+obj action subtract3d(obj Pa, obj Pb) {
+    return {x: (num)Pa.x - (num)Pb.x, y: (num)Pa.y - (num)Pb.y, z: (num)Pa.z - (num)Pb.z};
+}
+obj action scalmult3d(num scal, obj P) {
+    return {x: scal * (num) P.x, y: scal * (num) P.y, z: scal * (num) P.z};
+}
+num action dotprod3d(obj Pa, obj Pb) {
+    return ((num) Pa.x * (num) Pb.x) + ((num) Pa.y * (num) Pb.y) + ((num) Pa.z * (num) Pb.z);
+}
+num action mag3d(obj P) {
+    return Math.sqrt(Math.pow((num) P.x,2) + Math.pow((num) P.y,2) + Math.pow((num) P.z,2));
+}
+obj action norm3d(obj P){
+    num mag = mag3d(P);
+    return {x:(num)P.x/mag,y:(num)P.y/mag,z:(num)P.z/mag};
+}
+
+obj action crossprod3d(obj Pa, obj Pb) {
+    obj crossP = {};
+    crossP.x = ((num)Pa.y * (num)Pb.z) - ((num)Pa.z * (num)Pb.y);
+    crossP.y = ((num)Pa.z * (num)Pb.x) - ((num)Pa.x * (num)Pb.z);
+    crossP.z = ((num)Pa.x * (num)Pb.y) - ((num)Pa.y * (num)Pb.x);
+
+    return crossP;
+}
+
+# unit vector from Pa --> Pb
+obj action unitDir(obj Pa, obj Pb) {
+    return norm3d(subtract3d(Pb,Pa));
+}
