@@ -9,3 +9,9 @@ public action start() {
 	GAME.log("unitDir:",vec_unitDir(P1,P2));
 
 }
+
+public action update(num delta) {
+	obj P1 = {x:-1,y:-1,z:-1};
+	obj plr = GAME.PLAYERS.getSelf();
+	GAME.log("normplayer:",vec_norm3d(vec_subtract3d((obj)plr.position,P1)));
+}

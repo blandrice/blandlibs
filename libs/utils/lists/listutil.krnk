@@ -1,0 +1,21 @@
+# ===================================================================
+# Header: libs\utils\lists\listutil.krnk
+# Author: blandrice
+# Description: Additional string utilities
+# ===================================================================
+
+num action minlist(num[] list){
+    if (lengthOf list > 2){
+        num min = list[0];
+        for (num i = 1; i < lengthOf list; i++){
+            min = (list[i] < min) ? list[i] : min;
+        }
+		return min;
+    } else if (lengthOf list == 1){
+        return list[0];
+    }
+    else if (lengthOf list == 2) {
+        return Math.min(list[0],list[1]);
+    }
+    return 0;
+}
