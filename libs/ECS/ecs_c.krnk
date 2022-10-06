@@ -1,4 +1,6 @@
 #include <syncobjs_c.krnk>
+#include <spawn_c.krnk>
+#include <AABB.krnk>
 
 # ===================================================================
 # Library: \libs\ECS\ecs_c.krnk
@@ -6,3 +8,25 @@
 #   Description: Entity! Component! System!!!
 # ===================================================================
 
+bool cr = false;
+
+public action update(num delta){
+    obj plr = GAME.PLAYERS.getSelf();
+    if (spawn_c_imspawned) {
+        obj[] res = AABB_resolveplr(plr,cr,syncobjs_c_objlist);
+        for (num i = 0; i < lengthOf res; i++){
+            obj cobj = res[i];
+            if ((num)cobj.colside == AABB_YNEG){
+                plr.velocity.x = (notEmpty (obj)cobj.colobj.velocity) ? (num)cobj.colobj.velocity.x : 0;
+                plr.velocity.z = (notEmpty (obj)cobj.colobj.velocity) ? (num)cobj.colobj.velocity.z : 0;
+            }
+        }
+        
+    }
+    
+}
+
+# Player update
+public action onPlayerUpdate(str id, num delta, obj inputs) {
+    cr = (bool)inputs.crouch;
+}

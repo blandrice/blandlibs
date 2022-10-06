@@ -1,0 +1,30 @@
+#include <spawn_s.krnk>
+#include <ecs_s.krnk>
+action createobjs(){
+    syncobjs_s_createObject({scale:{x:10,y:10,z:10},position:{x:22,y:22,z:22},velocity:{x:0,y:20,z:0},color:0x00FF00,onGround:false,bounce:{x:0,y:1,z:0}});
+    syncobjs_s_createObject({scale:{x:10,y:10,z:10},position:{x:-22,y:22,z:22},velocity:{x:100,y:0,z:50},color:0xFF00FF,onGround:false,bounce:{x:1,y:0.99,z:1},gravity:{x:0,y:-100,z:0}});
+    syncobjs_s_createObject({scale:{x:10,y:10,z:10},position:{x:-22,y:22,z:22},velocity:{x:0,y:0,z:10},color:0xFF00FF,onGround:false,bounce:{x:1,y:0,z:1},gravity:{x:0,y:-100,z:0}});
+    # syncobjs_s_createObject({scale:{x:10,y:10,z:10},position:{x:-22,y:22,z:-22},velocity:{x:0,y:20,z:0},color:0x0000FF,onGround:false,bounce:{x:0,y:0.99,z:0},gravity:{x:0,y:-100,z:0},behavior:{default:"followplr"},walkspeed:{x:20,z:20}});
+    syncobjs_s_createObject({scale:{x:10,y:10,z:10},position:{x:-22,y:22,z:-22},velocity:{x:0,y:0,z:0},color:0x0000FF,onGround:false,gravity:{x:0,y:-100,z:0},behavior:{default:"followplr"},walkspeed:{x:20,z:20}});
+    syncobjs_s_createObject({scale:{x:10,y:10,z:10},position:{x:22,y:22,z:-22},color:0xFF0000,onGround:false,gravity:{x:0,y:-100,z:0}});
+
+    # debug:"1"
+}
+num created = 0;
+public action update(num delta){
+    if (lengthOf spawn_s_spawnedPlayers > 0) {
+        if (created == 0){
+            createobjs();
+            created = 1;
+        }
+
+    }
+}
+
+public action onNetworkMessage(str id, obj data, str playerID) {
+    if (id == "reset"){
+        syncobjs_s_objlist = obj[];
+        GAME.NETWORK.broadcast("clear", {});
+        createobjs();
+    }
+}

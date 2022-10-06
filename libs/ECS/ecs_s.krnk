@@ -1,9 +1,54 @@
 #include <syncobjs_s.krnk>
+#include <AABB.krnk>
+#include <vec.krnk>
 
+str action closestPlayer(obj position){
+    
+	obj[] plrs = GAME.PLAYERS.list();
+    num mindist = 0;
+	str plrid = "";
+    for (num i = 0; i < lengthOf plrs; i++) {
+		
+            obj plr = plrs[i];
+            num dist = UTILS.getDist3D(
+                (num)plr.position.x,
+                (num)plr.position.y,
+                (num)plr.position.z,
+                (num)position.x,
+                (num)position.y,
+                (num)position.z
+            );
+            if (i == 0 || dist < mindist ) {
+				mindist = dist;
+				plrid = (str) plr.id;
+			}
+        }
+	return plrid;
+}
+
+num action sign(num d){
+    return d >= 0 ? 1 : -1;
+}
+
+num action minlist(num[] list){
+    if (lengthOf list > 2){
+        num min = list[0];
+        for (num i = 1; i < lengthOf list; i++){
+            min = (list[i] < min) ? list[i] : min;
+        }
+		return min;
+    } else if (lengthOf list == 1){
+        return list[0];
+    }
+    else if (lengthOf list == 2) {
+        return Math.min(list[0],list[1]);
+    }
+    return 0;
+}
 # ===================================================================
 # Library: \libs\ECS\ecs_s.krnk
 # Author: blandrice
-#   Description: Entity! Component! System!!!
+#   Description: Entity! Component!! System!!!
 # ===================================================================
 
 #############################################
@@ -14,9 +59,11 @@
 #############################################
 # Components: 
 #############################################
-# phystics/movement
-num WORLDFLOOR = 0;
-obj bounce = {x:0,y:0.2,z:0,ygrav:-0.1};
+# physics/movement
+num WORLDFLOOR = -100;
+# obj bounce = {x:0,y:0.2,z:0,};
+# obj gravity = {x:0,y:-0.01,z:0};
+num MAXYVEL = 100;
 
 # health / death
 obj health = {health: 100, fullhealth:100};
@@ -24,6 +71,13 @@ obj health = {health: 100, fullhealth:100};
 # collide with player
 obj collide = {plr:true,onplrcol:"inflict_5;hurt_50"};
 # obj collide = {plr:true,onplrcol:"inflict_5;hurt_50"};
+
+
+
+# follow player
+obj behavior = {idle:"none",plr:"followplr"};
+#walkspeed
+
 
 # team
 obj team = {team:"enemy"};
@@ -39,41 +93,105 @@ action onPlayerCollision(){
     }
 }
 
-num test = 0;
-
 public action update(num delta){
-    GAME.log(syncobjs_s_objlist);
-    if (test == 0)
-    {
-        for (num i = 0; i < lengthOf syncobjs_s_objlist; i++)
-        {
-            obj tobj = syncobjs_s_objlist[i];
+    obj[] world = GAME.OBJECTS.list();
+    obj[] worldedit = obj[]; # edits to make 
 
-            # physics/movement
-            GAME.log("notempty bounce: ", notEmpty (obj) tobj.bounce);
-            if (notEmpty (obj) tobj.bounce) 
-            {
-                (num) tobj.velocity.y += (num) tobj.bounce.ygrav*(delta/1000);
-                if ((num)tobj.position.y < WORLDFLOOR)
-                {
-                    tobj.position = WORLDFLOOR;
-                    tobj.velocity.y = (num) tobj.bounce.y;
+    # simpler world position and scale system
+    for (num i = 0; i < lengthOf world; i++){
+            obj wcube = {
+                position:{
+                    x:(num)world[i].position.x,
+                    y:(num)world[i].position.y - (num)world[i].scale.y,
+                    z:(num)world[i].position.z
+                },
+                scale: {
+                    x:(num)world[i].scale.x*2,
+                    y:(num)world[i].scale.y*2,
+                    z:(num)world[i].scale.z*2
                 }
-            }
+            };
+        addTo worldedit wcube;
+    }
 
-            # apply velocity
-            GAME.log("notempty vel and position:",notEmpty (obj) tobj.velocity && notEmpty (obj) tobj.position);
-            if (notEmpty (obj) tobj.velocity && notEmpty (obj) tobj.position)
-            {
-                (num) tobj.position.x += (num)tobj.velocity.x * (delta/1000);
-                (num) tobj.position.y += (num)tobj.velocity.y * (delta/1000);
-                (num) tobj.position.z += (num)tobj.velocity.z * (delta/1000);
+    # loop through object list
+    for (num i = 0; i < lengthOf syncobjs_s_objlist; i++)
+    {
+        obj tobj = syncobjs_s_objlist[i];
+        
+        # physics/movement
+        # behavior
+        if (notEmpty (obj)tobj.behavior){
+            
+            # if ((str)tobj.behavior.default == "followplr"){
+            #     GAME.log("followplayer behavior found");
+            #     GAME.log(tobj);
+            #         obj plr = GAME.PLAYERS.findByID(closestPlayer((obj)tobj.position));
+                    
+            #         obj udir = vec_unitDir((obj)tobj.position,(obj)plr.position);
+            #         GAME.log(udir);
+            #         tobj.velocity.x = (num)udir.x * (num)tobj.walkspeed.x;
+            #         tobj.velocity.z = (num)udir.z * (num)tobj.walkspeed.z;
+            #         GAME.log(tobj.velocity.x, tobj.velocity.z);
+            # }
+            
+        }
+
+        # gravity
+        if (notEmpty (obj) tobj.gravity && (num) tobj.onGround == 0 ) 
+        {
+            (num) tobj.velocity.y += (num) tobj.gravity.y*(delta/1000);
+            if (Math.abs((num) tobj.velocity.y) > MAXYVEL){
+                tobj.velocity.y = sign((num) tobj.velocity.y) * MAXYVEL;
             }
 
         }
-        test = 1;
-    }
-    
+
+        tobj.ogvel = 
+        {
+            x: (num) tobj.velocity.x,
+            y: (num) tobj.velocity.y,
+            z: (num) tobj.velocity.z
+        };
+
+        # resolve collision
+        obj[] res = AABB_resolve(tobj,worldedit);
+
+        # all collisions
+        for (num j = 0; j < lengthOf res; j++){
+            obj cobj = res[j];
+            
+            num side = (num) cobj.colside;
+            # add bounce velocity
+            if ((notEmpty (obj)tobj.bounce))
+            {
+                if ((side & (AABB_XNEG | AABB_XPOS)) > 0) # +-x
+                { 
+                    tobj.velocity.x = -1 * (num)tobj.ogvel.x * (num)tobj.bounce.x;
+                }
+                if ((side & (AABB_YNEG | AABB_YPOS)) > 0) # +-y
+                { 
+                    tobj.velocity.y = -1 * (num)tobj.ogvel.y * (num)tobj.bounce.y ;
+                }
+                if ((side & (AABB_ZNEG | AABB_ZPOS)) > 0) # +-z
+                { 
+                    tobj.velocity.z = -1 * (num)tobj.ogvel.z * (num)tobj.bounce.z;
+                }
+
+            }
+        }
+        
+
+        # actually change position
+        (num) tobj.position.x += (num)tobj.velocity.x * (delta/1000);
+        (num) tobj.position.y += (num)tobj.velocity.y * (delta/1000);
+        (num) tobj.position.z += (num)tobj.velocity.z * (delta/1000);
+        
+        if ((str) tobj.debug == "1"){
+            GAME.log(tobj);
+        }
+    } 
+
 
 }
 
@@ -82,5 +200,6 @@ public action onNetworkMessage(str id, obj data, str playerID) {
 }
 
 public action start(){
-    syncobjs_s_createObject({scale:{x:10,y:10,z:10},position:{x:22,y:22,z:22},color:0xff0000,bounce:bounce});
+    GAME.DEFAULT.disableServerSync();
+	GAME.DEFAULT.disablePlayerBehaviour();
 }

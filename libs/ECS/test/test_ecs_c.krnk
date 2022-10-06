@@ -1,0 +1,8 @@
+#include <ecs_c.krnk>
+
+public action onKeyPress(str key, num code) {
+    if (key == "t"){
+        GAME.NETWORK.send("reset", {});
+    }
+}
+
