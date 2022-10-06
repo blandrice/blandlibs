@@ -245,6 +245,7 @@ def main():
                 includelines = checkinclude(line,idx, tempfilename)
                 if includelines:
                     tempscript.write(includelines)
+                    tempscript.write('\n')
                 else:
                     tempscript.write(line)
 
