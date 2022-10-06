@@ -4,9 +4,16 @@
 #   Description: workaround to check how many players are spawned in
 # ===================================================================
 
+bool imspawned = false;
+
 public action onPlayerSpawn(str id) {
     obj tplr = GAME.PLAYERS.findByID(id);
     if ((bool)tplr.isYou) {
         GAME.NETWORK.send("spawn", {});
+        imspawned = true;
     }
+}
+
+public action onPlayerDeath(str id, str killerID) {
+    imspawned = false;
 }
