@@ -21,6 +21,12 @@ gbl_pubactions = []
 global gbl_pubargs
 gbl_pubargs = []
 
+global gbl_privactions
+gbl_privactions = []
+
+global gbl_privargs
+gbl_privargs = []
+
 global indentstr
 indentstr = "    "
 
@@ -48,7 +54,9 @@ def reformatlibfile(libpath, klibname):
     libobj = {
         "libfile": "",
         "pubactions": [],
-        "pubaction_args": []
+        "pubaction_args": [],
+        "privactions": [],
+        "privaction_args": []
     }
     # templibpath = os.path.join(temppath, "temp_" + klibname+".krnk")
     templibpath = libpath
@@ -65,6 +73,8 @@ def reformatlibfile(libpath, klibname):
         globalactions = []
         pubactions = []
         pubaction_args = []
+        privactions = []
+        privaction_args = []
 
         # for line in flib:
         for idx, line in enumerate(flib):
@@ -82,7 +92,7 @@ def reformatlibfile(libpath, klibname):
                         globalvars.append(m.group(3))
                         pass
                 # find method names
-                for vartype in ['num', 'str', 'bool', 'obj', 'public', ""]:
+                for vartype in ['num', 'str', 'bool', 'obj', 'public',"private", ""]:
                     m = re.findall(
                         r"^\s*(\b{}\b)\s*(\[\])*\s*action\s*(.*)(\()(.*)(\)).*$|^(\b{}\b)\s*(\[\])*\s*action\s*(.*).*$".format(vartype, vartype, vartype), line.strip())
                     if m:
@@ -91,16 +101,16 @@ def reformatlibfile(libpath, klibname):
                         if '(' in m[0]:
                             funcname = m[0][m[0].index('(')-1].replace("(", "")
                             funcargs = m[0][m[0].index('(')+1]
-                            test = 1
                         else:
                             funcname = m[0][-1].replace("(", "")
-                            test = 1
                         # print(funcname)
                         # print(line)
                         if vartype == "public":
                             pubactions.append(funcname)
                             pubaction_args.append(funcargs)
-                            test = 1
+                        elif vartype == "private":
+                            privactions.append(funcname)
+                            privaction_args.append(funcargs)
                         else:
                             globalactions.append(funcname)
 
@@ -140,6 +150,9 @@ def reformatlibfile(libpath, klibname):
     for act in pubactions:
         newText = re.sub('public\s*action\s*(?<![a-zA-Z0-9_]){}(?![a-zA-Z0-9_])'.format(
             act), "action " + klibname+"_"+act, newText)
+    for act in privactions:
+        newText = re.sub('private\s*action\s*(?<![a-zA-Z0-9_]){}(?![a-zA-Z0-9_])'.format(
+            act), "action " + klibname+"_"+act, newText)
 
     lines = newText.split("\n")
     lines_with_include_replaced = []
@@ -155,6 +168,8 @@ def reformatlibfile(libpath, klibname):
     # print(newText)
     libobj["pubactions"] = [klibname+"_"+act for act in pubactions]
     libobj["pubaction_args"] = pubaction_args
+    libobj["privactions"] = [klibname+"_"+act for act in privactions]
+    libobj["privaction_args"] = privaction_args
 
     # templibpath = os.path.join(temppath, "temp_" + klibname+".krnk")
 
@@ -175,6 +190,9 @@ def checkinclude(line, filepath):
     global includedlibs
     global gbl_pubactions
     global gbl_pubargs
+    global gbl_privactions
+    global gbl_privargs
+
     if line.strip().startswith("#include"):
         m = re.search("#include\s*<(.+?.krnk)>", line)
         if not (m):
@@ -195,6 +213,8 @@ def checkinclude(line, filepath):
             # write out file
             gbl_pubactions = gbl_pubactions + libobj["pubactions"]
             gbl_pubargs = gbl_pubargs + libobj["pubaction_args"]
+            gbl_privactions = gbl_privactions + libobj["privactions"]
+            gbl_privargs = gbl_privargs + libobj["privaction_args"]
             return libobj["libfile"]
 
     return False
@@ -226,6 +246,8 @@ def main():
 
     global gbl_pubactions
     global gbl_pubargs
+    global gbl_privactions
+    global gbl_privargs
     global indentstr
     # place public actions from libraries into the main script
     # start bracket search () {
@@ -239,26 +261,28 @@ def main():
             bracketstack = ""
             openbracks = ['[', '(', '{']
             closebracks = [']', ')', '}']
-            pubactionargs = ""
-            pubactioncontents = ""
+            actionargs = ""
+            actioncontents = ""
             actionname = ""
             strargs = ""
             trailingstr = ""
 
             for idx, line in enumerate(tempscript):
                 if state == "none":
-                    # r"^\s*(\b{}\b)\s*(\[\])*\s*action\s*(.*)(\().*$|^(\b{}\b)\s*(\[\])*\s*action\s*(.*).*$".format("public", "public"), line.strip())
-                    m = re.findall(
-                        r"^\s*(\bpublic\b)\s*(\[\])*\s*action\s*(.*)(\()(.*)\).*$", line.strip())
-                    if m:
-                        state = "parsepubargs"
-                        # print(m)
-                        actionname = m[0][2]
-                        strargs = m[0][4]
+                    for acttype in ['public','private']:
+                        m = re.findall(
+                            r"^\s*(\b{}\b)\s*(\[\])*\s*action\s*(.*)(\()(.*)\).*$".format(acttype), line.strip())
+                        if m:
+                            state = "parseargs"
+                            # print(m)
+                            actiontype = acttype
+                            actionname = m[0][2]
+                            strargs = m[0][4]
+                            break
                     else:
                         outscript.write(line)
                 for char in line:
-                    if state == "parsepubargs":
+                    if state == "parseargs":
                         if char in openbracks:
                             bracketstack += char
                             if startbrack == endbrack:
@@ -278,7 +302,7 @@ def main():
                                 print(bracketstack)
                                 exit()
                         elif startbrack > endbrack:
-                            pubactionargs += char
+                            actionargs += char
                     if state == "parseactcontents":
                         if bracketstack and char in closebracks:
                             if openbracks.index(bracketstack[-1]) == closebracks.index(char):
@@ -289,7 +313,7 @@ def main():
                                     state = "save"
                                     trailingstr = line[idx:]
                         if startbrack > endbrack:
-                            pubactioncontents += char
+                            actioncontents += char
                         if char in openbracks:
                             bracketstack += char
                             if startbrack == endbrack:
@@ -297,7 +321,7 @@ def main():
                         
                     # test
                     if state == "save":
-                        outscript.write("public action {}({})".format(
+                        outscript.write("{} action {}({})".format(actiontype,
                             actionname, strargs) + "{\n")
                         libactions = []
                         for x in gbl_pubactions:
@@ -305,19 +329,24 @@ def main():
                                 libactions.append(x)
                                 del gbl_pubargs[gbl_pubactions.index(x)]
                                 gbl_pubactions.remove(x)
+                        for x in gbl_privactions:
+                            if x.endswith(actionname):
+                                libactions.append(x)
+                                del gbl_privargs[gbl_privactions.index(x)]
+                                gbl_privactions.remove(x)
 
                         for x in libactions:
                             invokelibstr = re.compile(
                                 r"(?<![a-zA-Z0-9_])(\bobj\b|\bstr\b|\bnum\b|\bbool\b|\[\s*\])(?![a-zA-Z0-9_])").sub("", strargs)
                             outscript.write(
                                 "{}{}({});\n".format(indentstr, x, invokelibstr.strip()))
-                        outscript.write(pubactioncontents + "\n}\n")
+                        outscript.write(actioncontents + "\n}\n")
 
                         outscript.write(trailingstr)
                         state = "finish"
                     if state == "finish":
-                        pubactionargs = ""
-                        pubactioncontents = ""
+                        actionargs = ""
+                        actioncontents = ""
                         actionname = ""
                         strargs = ""
                         trailingstr = ""
@@ -328,36 +357,66 @@ def main():
 
             otherlibpubactions = set([x.split("_")[-1]
                                      for x in gbl_pubactions])
-            if otherlibpubactions:
+            otherlibprivactions = set([x.split("_")[-1]
+                                     for x in gbl_privactions])
+            if otherlibpubactions or otherlibprivactions:
                 outscript.write("\n\n")
                 outscript.write(
                     "# ================================================================\n")
                 outscript.write(
-                    "# auto-detected public actions from libraries\n")
+                    "# auto-detected public/private actions from libraries\n")
                 outscript.write(
                     "# ================================================================\n")
-            for x in otherlibpubactions:
-                # lookup the arguments
-                currentargs = ""
-                for g in gbl_pubactions:
-                    if g.endswith(x):
-                        currentargs = gbl_pubargs[gbl_pubactions.index(g)]
-                        break
-                # write out top level public action definition
-                outscript.write(
-                    "public action {} ({})".format(x, currentargs) + "{\n")
-                # invoke separate lib public actions
-                for gblpubact in gbl_pubactions:
-                    if gblpubact.endswith(x):
-                        # outscript.write("public action {} ({}) {" + gblpubact,)
-                        currentargs = gbl_pubargs[gbl_pubactions.index(
-                            gblpubact)]
-                        invokelibstr = re.compile(
-                            r"(?<![a-zA-Z0-9_])(\bobj\b|\bstr\b|\bnum\b|\bbool\b|\[\s*\])(?![a-zA-Z0-9_])").sub("", currentargs)
-                        outscript.write(
-                            "{}{}({});\n".format(indentstr, gblpubact, invokelibstr.strip()))
-                # end curly bracket
-                outscript.write("}\n\n")
+            
+            def autowrite(otherlibactions,gblactions,gblargs,prefix):
+                for x in otherlibactions:
+                    # lookup the arguments
+                    currentargs = ""
+                    for g in gblactions:
+                        if g.endswith(x):
+                            currentargs = gblargs[gblactions.index(g)]
+                            break
+                    # write out top level public action definition
+                    outscript.write(
+                        "{} action {} ({})".format(prefix, x, currentargs) + "{\n")
+                    # invoke separate lib public actions
+                    for gblact in gblactions:
+                        if gblact.endswith(x):
+                            # outscript.write("public action {} ({}) {" + gblact,)
+                            currentargs = gblargs[gblactions.index(
+                                gblact)]
+                            invokelibstr = re.compile(
+                                r"(?<![a-zA-Z0-9_])(\bobj\b|\bstr\b|\bnum\b|\bbool\b|\b\[\s*\]\b)(?![a-zA-Z0-9_])").sub("", currentargs)
+                            outscript.write(
+                                "{}{}({});\n".format(indentstr, gblact, invokelibstr.strip()).replace('[]',""))
+                    # end curly bracket
+                    outscript.write("}\n\n")
+
+            autowrite(otherlibpubactions,gbl_pubactions,gbl_pubargs,"public")
+            autowrite(otherlibprivactions,gbl_privactions,gbl_privargs,"")
+
+            # for x in otherlibpubactions:
+            #     # lookup the arguments
+            #     currentargs = ""
+            #     for g in gbl_pubactions:
+            #         if g.endswith(x):
+            #             currentargs = gbl_pubargs[gbl_pubactions.index(g)]
+            #             break
+            #     # write out top level public action definition
+            #     outscript.write(
+            #         "public action {} ({})".format(x, currentargs) + "{\n")
+            #     # invoke separate lib public actions
+            #     for gblpubact in gbl_pubactions:
+            #         if gblpubact.endswith(x):
+            #             # outscript.write("public action {} ({}) {" + gblpubact,)
+            #             currentargs = gbl_pubargs[gbl_pubactions.index(
+            #                 gblpubact)]
+            #             invokelibstr = re.compile(
+            #                 r"(?<![a-zA-Z0-9_])(\bobj\b|\bstr\b|\bnum\b|\bbool\b|\[\s*\])(?![a-zA-Z0-9_])").sub("", currentargs)
+            #             outscript.write(
+            #                 "{}{}({});\n".format(indentstr, gblpubact, invokelibstr.strip()))
+            #     # end curly bracket
+            #     outscript.write("}\n\n")
 
     # print(gbl_pubactions)
     print("Done! ")
