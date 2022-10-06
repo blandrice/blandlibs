@@ -79,17 +79,10 @@ num[] action objsToByteArray(obj[] objlist) {
 }
 
 num tlastbroadcast = 0;
-
-# ========================================================================================
-# cube movement
-# ========================================================================================
-
 obj[] objlist = obj[];
 num[] newdellist = num[];
 num objid = 0;
 num tnow = 0;
-
-
 
 # WARNING: pass in a fresh object only - not a reference! otherwise you risk modifying the reference
 # for example don't pass in a template object for createObject(templateBall).

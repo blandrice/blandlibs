@@ -1,11 +1,11 @@
 #include <AABB.krnk>
 # ===================================================================
-# Library: libs\ECS\bounce\ecsbounce.krnk
+# Library: \libs\ECS\components\bounce\ecsbounce.krnk
 # Author: blandrice
 #   Description: Trying bounce on ECS!!!!
 # ===================================================================
 
-action bounce(obj cube, obj[] collist){
+private action onCollide(obj tobj, obj[] collist){
     for (num j = 0; j < lengthOf collist; j++)
     {
         obj cobj = collist[j];
@@ -29,8 +29,4 @@ action bounce(obj cube, obj[] collist){
 
         }
     }
-}
-
-private action onCollide(obj tobj, obj[] collist){
-    bounce(tobj,collist);
 }

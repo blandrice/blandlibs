@@ -8,9 +8,6 @@ num w = 4.9;# player width
 num c = 8;# crouching height
 num H = 11;# standing height
 
-
-
-
 num XNEG = 0x1;
 num XPOS = 0x2;
 num YNEG = 0x4; #hit "ground"
@@ -89,12 +86,6 @@ obj[] action resolve(obj cube1,obj[] cubes) {
             ocy = (num)tcube.ogpos.y;
             ocz = (num)tcube.ogpos.z;
         }
-
-        # cr = (bool) inputs.crouch;
-        # num h = 0;
-        # h = H + 0;
-        # if(cr){h = c + 0;}
-        # else{h = H + 0;}
         
         # -x
         if(px <= cx + sx + csx && opx >= ocx + sx + csx && side(cz, sz + csz, pz) == 0 && side(cy + sy, sy + csy, py + csy) == 0){

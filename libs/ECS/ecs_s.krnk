@@ -64,11 +64,6 @@ public action onNetworkMessage(str id, obj data, str playerID) {
 
 }
 
-public action start(){
-    GAME.DEFAULT.disableServerSync();
-	GAME.DEFAULT.disablePlayerBehaviour();
-}
-
 # private action onCollide(obj tobj, obj[] objlist){
 
 # }
