@@ -91,7 +91,8 @@ num tnow = 0;
 
 
 
-# takes data from 
+# WARNING: pass in a fresh object only - not a reference! otherwise you risk modifying the reference
+# for example don't pass in a template object for createObject(templateBall).
 action createObject(obj d) {
     
     # object template!
@@ -100,19 +101,21 @@ action createObject(obj d) {
         aid: 34379,
         scale: {x:20,y:80,z:20}, # models only need x:scale which is all 3 dimensions
         position: {x:1,y:1,z:1},
+        velocity: {x:0,y:0,z:0},
         rotation: {x:0,y:0,z:0},
         color: 0x00A8F9
     };
-    if ((str) d.type != "undefined") {tobj.type = d.type;}
-    if ((str) d.aid != "undefined") {tobj.aid = d.aid;}
-    if (notEmpty (obj) d.scale) {tobj.scale = d.scale;}
-    if (notEmpty (obj) d.position) {tobj.position = d.position;}
-    if (notEmpty (obj) d.rotation) {tobj.rotation = d.rotation;}
-    if ((str) d.color != "undefined") {tobj.color = d.color;}
+    if ((str) d.type == "undefined") {d.type = tobj.type;}
+    if ((str) d.aid == "undefined") {d.aid = tobj.aid;}
+    if (!notEmpty (obj) d.scale) {d.scale = tobj.scale;}
+    if (!notEmpty (obj) d.position) {d.position = tobj.position;}
+    if (!notEmpty (obj) d.velocity) {d.velocity = tobj.velocity;}
+    if (!notEmpty (obj) d.rotation) {d.rotation = tobj.rotation;}
+    if ((str) d.color == "undefined") {d.color = tobj.color;}
 
-	tobj.objid = toNum toStr objid;
+	d.objid = toNum toStr objid;
     objid++;
-    addTo objlist tobj;
+    addTo objlist d;
 }
 
 bool action deleteObject(str id) {
@@ -133,6 +136,14 @@ obj action findObjbyID(str id){
         }
     }
     return {};
+}
+
+str[] action listObjIDs(){
+    str[] list = str[];
+    for (num i = 0; i < lengthOf objlist; i++){
+        addTo list (str) objlist[i].objid;
+    }
+    return list;
 }
 
 public action start() {

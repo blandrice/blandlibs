@@ -136,10 +136,28 @@ action lerpObj(num delta) {
     interpM = Math.min(1.5, (GAME.TIME.now() - newTime) / dataBuffer);
     for (num i = 0; i < lengthOf objlist; i++){
         obj curObj = objlist[i];
+        if (!notEmpty (obj) curObj.ogpos){
+            curObj.ogpos = {};
+        }
+        curObj.ogpos = 
+        {
+            x:curObj.position.x,
+            y:curObj.position.y,
+            z:curObj.position.z
+        };
         (num) curObj.position.x += (Math.lerp((num)curObj.oldpos.x, (num)curObj.newpos.x, interpM)-(num)curObj.position.x)*delta/1000*60/4;
         (num) curObj.position.y += (Math.lerp((num)curObj.oldpos.y, (num)curObj.newpos.y, interpM)-(num)curObj.position.y)*delta/1000*60/4;
         (num) curObj.position.z += (Math.lerp((num)curObj.oldpos.z, (num)curObj.newpos.z, interpM)-(num)curObj.position.z)*delta/1000*60/4;
+
+        if (!notEmpty (obj) curObj.velocity){
+            curObj.velocity = {};
+        }
+        curObj.velocity.x = ((num) curObj.position.x - (num) curObj.ogpos.x) / delta;
+        curObj.velocity.y = ((num) curObj.position.y - (num) curObj.ogpos.y) / delta;
+        curObj.velocity.z = ((num) curObj.position.z - (num) curObj.ogpos.z) / delta;
     }
+    
+    
      
 }
 
