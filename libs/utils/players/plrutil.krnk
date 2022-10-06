@@ -1,0 +1,29 @@
+# ===================================================================
+# header: \libs\utils\players\plrutil_c.krnk
+# Author: blandrice
+#   Description: players utilities
+# ===================================================================
+
+str action closestPlayer(obj position){
+    
+	obj[] plrs = GAME.PLAYERS.list();
+    num mindist = 0;
+	str plrid = "";
+    for (num i = 0; i < lengthOf plrs; i++) {
+		
+            obj plr = plrs[i];
+            num dist = UTILS.getDist3D(
+                (num)plr.position.x,
+                (num)plr.position.y,
+                (num)plr.position.z,
+                (num)position.x,
+                (num)position.y,
+                (num)position.z
+            );
+            if (i == 0 || dist < mindist ) {
+				mindist = dist;
+				plrid = (str) plr.id;
+			}
+        }
+	return plrid;
+}

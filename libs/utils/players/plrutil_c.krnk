@@ -1,10 +1,14 @@
 # ===================================================================
-# Library: \libs\spawnedPlayers\spawn_c.krnk (client)
+# Library: \libs\utils\players\plrutil_c.krnk
 # Author: blandrice
 #   Description: workaround to check how many players are spawned in
 # ===================================================================
 
 bool imspawned = false;
+
+public action start() {
+    imspawned = false;
+}
 
 public action onPlayerSpawn(str id) {
     obj tplr = GAME.PLAYERS.findByID(id);
@@ -17,3 +21,4 @@ public action onPlayerSpawn(str id) {
 public action onPlayerDeath(str id, str killerID) {
     imspawned = false;
 }
+
