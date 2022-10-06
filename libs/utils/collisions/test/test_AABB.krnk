@@ -1,0 +1,47 @@
+#include <AABB.krnk>
+
+obj cube1 = {};
+obj cube2 = {};
+obj plr = {};
+
+obj[] cubes = obj[];#cubes
+num w = 2.45;#half player width
+num c = 4;#half crouching height
+num H = 5.5;#half standing height
+
+public action start() {
+    # test isCollision
+    cube1 = GAME.SCENE.addCube("34379", "#f00", 0, 0, 0, 5, 5, 5, {});
+    cube2 = GAME.SCENE.addCube("34379", "#f00", 0, 0, 40, 11, 11, 11, {});
+
+    # test resolveAABB
+	addTo cubes GAME.SCENE.addCube("", "#000", 20, 10, 10, 10, 10, 10);
+	addTo cubes GAME.SCENE.addCube("", "#000", -20, 10, -25, 1, 20, 10);
+	addTo cubes GAME.SCENE.addCube("", "#000", -20, 10, -15, 1, 20, 10);
+	addTo cubes GAME.SCENE.addCube("", "#000", -20, 10, -5, 1, 20, 10);
+	addTo cubes GAME.SCENE.addCube("", "#000", -20, 10, 5, 1, 20, 10);
+}
+
+public action update(num delta) {
+    plr = GAME.PLAYERS.getSelf();
+    cube1.position.x = (num)plr.position.x;
+    cube1.position.y = (num)plr.position.y;
+    cube1.position.z = (num)plr.position.z;
+    if (AABB_isCollision(cube1,cube2)){
+        cube1.opacity = 0.5;
+        cube2.opacity = 0.5;
+        GAME.log("hit");
+    } else
+    {
+        cube1.opacity = 1;
+        cube2.opacity = 1;
+    }
+
+}
+
+
+# Player update
+public action onPlayerUpdate(str id, num delta, obj inputs) {
+    obj plr = GAME.PLAYERS.getSelf();
+    AABB_resolveplr(plr,(bool)inputs.crouch,cubes);
+}

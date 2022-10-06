@@ -1,0 +1,205 @@
+
+# ===================================================================
+# Header: \libs\collisions\AABB.krnk
+# Author: KG07 (modified by blandrice)
+# Description: AABB (axis-aligned bounding bopx bopx) collision + resolution
+# ===================================================================
+
+num w = 4.9;# player width
+num c = 8;# crouching height
+num H = 11;# standing height
+
+
+
+
+num XNEG = 0x1;
+num XPOS = 0x2;
+num YNEG = 0x4; #hit "ground"
+num YPOS = 0x8; 
+num ZNEG = 0x10;
+num ZPOS = 0x20;
+
+bool action isCollision(obj cube1, obj cube2)
+{
+    # Adapted from https://tutorialedge.net/gamedev/aabb-collision-detection-tutorial/
+    num dx = Math.abs((num)cube1.position.x - (num)cube2.position.x) - ((num)cube1.scale.x/2 + (num)cube2.scale.x/2);
+    num dy = Math.abs((num)cube1.position.y +(num)cube1.scale.y/2 - (num)cube2.position.y - (num)cube2.scale.y/2) - ((num)cube1.scale.y/2 + (num)cube2.scale.y/2);
+    num dz = (Math.abs((num)cube1.position.z - (num)cube2.position.z) - ((num)cube1.scale.z/2 + (num)cube2.scale.z/2));
+    if ((dx < 0) && (dy < 0) && (dz < 0))
+    {
+        return true;
+    }
+    return false;
+        
+}
+
+obj action CalculateAabbDistanceTo(obj cube1, obj cube2)
+{
+    num dx = Math.abs((num)cube1.position.x - (num)cube2.position.x) - ((num)cube1.scale.x/2 + (num)cube2.scale.x/2);
+    num dy = Math.abs((num)cube1.position.y +(num)cube1.scale.y/2 - (num)cube2.position.y - (num)cube2.scale.y/2) - ((num)cube1.scale.y/2 + (num)cube2.scale.y/2);
+    num dz = (Math.abs((num)cube1.position.z - (num)cube2.position.z) - ((num)cube1.scale.z/2 + (num)cube2.scale.z/2));
+
+    return {x:dx,y:dy,z:dz};
+}
+
+num st = 3;#stair height
+
+num action side(num C, num S, num input){
+	if(input <= C-S){return -1;}
+	if(input >= C+S){return 1;}
+	return 0;
+}
+
+obj[] action resolve(obj cube1,obj[] cubes) {
+    obj[] collisions = obj[];
+	for(num i = 0; i < lengthOf cubes; i++){
+        num colside = 0;
+        obj colobj = {};
+
+        num px = (num) cube1.position.x;
+        num py = (num) cube1.position.y;
+        num pz = (num) cube1.position.z;
+        num vx = (num) cube1.velocity.x;
+        num vy = (num) cube1.velocity.y;
+        num vz = (num) cube1.velocity.z;
+        
+        num csx = (num) cube1.scale.x/2;
+        num csy = (num) cube1.scale.y/2;
+        num csz = (num) cube1.scale.z/2;
+
+        obj tcube = cubes[i];
+        num cx = (num) tcube.position.x;
+        num cy = (num) tcube.position.y;
+        num cz = (num) tcube.position.z;
+        num sx = (num) tcube.scale.x / 2;
+        num sy = (num) tcube.scale.y / 2;
+        num sz = (num) tcube.scale.z / 2;
+        num opx = px;
+        num opy = py;
+        num opz = pz;
+        num ocx = cx;
+        num ocy = cy;
+        num ocz = cz;
+        
+        if (notEmpty (obj) cube1.ogpos){
+            opx = (num)cube1.ogpos.x;
+            opy = (num)cube1.ogpos.y;
+            opz = (num)cube1.ogpos.z;
+        } if (notEmpty (obj)tcube.ogpos){
+            ocx = (num)tcube.ogpos.x;
+            ocy = (num)tcube.ogpos.y;
+            ocz = (num)tcube.ogpos.z;
+        }
+
+        # cr = (bool) inputs.crouch;
+        # num h = 0;
+        # h = H + 0;
+        # if(cr){h = c + 0;}
+        # else{h = H + 0;}
+        
+        # -x
+        if(px <= cx + sx + csx && opx >= ocx + sx + csx && side(cz, sz + csz, pz) == 0 && side(cy + sy, sy + csy, py + csy) == 0){
+            if(py >= cy + 2 * sy - st && (bool) cube1.onGround){
+                cube1.position.y = cy + 2 * sy; 
+                cube1.velocity.y = (notEmpty (obj)tcube.velocity) ? (num)tcube.velocity.y : 0;
+                cube1.onGround = true;}
+            else{
+                cube1.position.x = cx + sx + csx;
+                cube1.velocity.x = (notEmpty (obj)tcube.velocity) ? (num)tcube.velocity.x : 0;
+            }
+            cube1.onWall = true;
+            colside |= XNEG;
+        }
+        # +x
+        if(px >= cx - sx - csx && opx <= ocx - sx - csx && side(cz, sz + csz, pz) == 0 && side(cy + sy, sy + csy, py + csy) == 0){
+            if(py >= cy + 2 * sy - st && (bool) cube1.onGround){
+                cube1.position.y = cy + 2 * sy; 
+                cube1.velocity.y = (notEmpty (obj)tcube.velocity) ? (num)tcube.velocity.y : 0;
+                cube1.onGround = true;}
+            else{
+                cube1.position.x = cx - sx - csx;
+                cube1.velocity.x = (notEmpty (obj)tcube.velocity) ? (num)tcube.velocity.x : 0;
+            }
+            cube1.onWall = true;
+            colside |= XPOS;
+        }
+        # -y
+        if(py <= cy + 2 * sy && opy >= ocy + 2 * sy && side(cx, sx + csx, px) == 0 && side(cz, sz + csz, pz) == 0){
+            cube1.position.y = cy + 2 * sy;
+            cube1.velocity.y = (notEmpty (obj)tcube.velocity) ? (num)tcube.velocity.y : 0;
+            cube1.onGround = true;
+
+            colside |= YNEG;
+        }
+        # +y
+        if(py + 2 * csy > cy && opy + 2 * csy <= ocy && side(cx, sx + csx, px) == 0 && side(cz, sz + csz, pz) == 0){
+            cube1.position.y = cy - 2 * csy;
+            cube1.velocity.y = (notEmpty (obj)tcube.velocity) ? (num)tcube.velocity.y : 0;
+            colside |= YPOS;
+        }
+        # -z
+        if(pz <= cz + sz + csz && opz >= ocz + sz + csz && side(cx, sx + csx, px) == 0 && side(cy + sy, sy + csz, py + csz) == 0){
+            if(py >= cy + 2 * sy - st && (bool) cube1.onGround){
+                cube1.position.y = cy + 2 * sy; 
+                cube1.velocity.y = (notEmpty (obj)tcube.velocity) ? (num)tcube.velocity.y : 0;
+                cube1.onGround = true;}
+            else{
+                cube1.position.z = cz + sz + csz;
+                cube1.velocity.z = (notEmpty (obj)tcube.velocity) ? (num)tcube.velocity.z : 0;
+                }
+            cube1.onWall = true;
+            colside |= ZNEG;
+        }
+        # +z
+        if(pz >= cz - sz - csz && opz <= ocz - sz - csz && side(cx, sx + csx, px) == 0 && side(cy + sy, sy + csy, py + csy) == 0){
+            if(py >= cy + 2 * sy - st && (bool) cube1.onGround){
+                cube1.position.y = cy + 2 * sy; 
+                cube1.velocity.y = (notEmpty (obj)tcube.velocity) ? (num)tcube.velocity.y : 0; 
+                cube1.onGround = true;
+            }
+            else{
+                cube1.position.z = cz - sz - csz;
+                cube1.velocity.z = (notEmpty (obj)tcube.velocity) ? (num)tcube.velocity.z : 0;
+            }
+            cube1.onWall = true;
+            colside |= ZPOS;
+        }
+        if (colside > 0){
+            colobj = tcube;
+            addTo collisions {colside:colside,colobj:colobj};
+        }
+	}
+    if (notEmpty (obj)cube1.ogpos) {
+        cube1.ogpos.x = (num) cube1.position.x + 0;
+        cube1.ogpos.y = (num) cube1.position.y + 0;
+        cube1.ogpos.z = (num) cube1.position.z + 0;
+    } else {
+        cube1.ogpos = 
+        {
+            x:(num)cube1.position.x + 0,
+            y:(num)cube1.position.y + 0,
+            z:(num)cube1.position.z + 0
+        };
+    }
+    return collisions;
+	
+}
+
+obj[] action resolveplr(obj plr,bool crouch,obj[] cubes){
+    if (crouch){
+        plr.scale = 
+        {
+            x:w,
+            y:c,
+            z:w
+        };
+    } else {
+        plr.scale=
+        {
+            x:w,
+            y:H,
+            z:w
+        };
+    }
+    return resolve(plr,cubes);
+}

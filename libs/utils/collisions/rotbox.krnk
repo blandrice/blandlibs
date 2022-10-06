@@ -18,10 +18,13 @@ obj action ScalMult3D(num scal, obj P) {
 num action DotProd3D(obj Pa, obj Pb) {
     return ((num) Pa.x * (num) Pb.x) + ((num) Pa.y * (num) Pb.y) + ((num) Pa.z * (num) Pb.z);
 }
-# num action Mag3D(obj P) {
-#     return Math.sqrt(Math.pow((num) P.x,2) + Math.pow((num) P.y,2) + Math.pow((num) P.z,2));
-# }
-
+num action Mag3D(obj P) {
+    return Math.sqrt(Math.pow((num) P.x,2) + Math.pow((num) P.y,2) + Math.pow((num) P.z,2));
+}
+obj action Normalize(obj P){
+    num mag = Mag3D(P);
+    return {x:(num)P.x/mag,y:(num)P.y/mag,z:(num)P.z/mag};
+}
 # obj action Proj3D(obj Pa, obj Pb) { # Projects Pa onto Pb
 #     num M = DotProd3D(Pa, Pb) / Mag3D(Pb); # magnitude of projection Vect A onto Vect B
 #     obj L = (obj) ScalMult3D(1/Mag3D(P  b),Pb); # Pb unit vector 
