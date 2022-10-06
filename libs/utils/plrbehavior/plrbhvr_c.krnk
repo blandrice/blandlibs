@@ -1,0 +1,21 @@
+#include <plrutil_c.krnk>
+# ===================================================================
+# Library: libs\utils\plrbehavior\plrbhvr_c.krnk
+# Author: blandrice
+#   Description: disable server sync + behavior for custom movement
+#   send plr position/vel to server manually
+# ===================================================================
+
+num tlastsync = 0;
+num RATE = 50; # MIN 25ms / 40 msg per second
+
+
+public action update(num delta){
+    num tnow = GAME.TIME.now();
+    if (plrutil_c_imspawned && (tnow - tlastsync> RATE)){
+        obj plr = GAME.PLAYERS.getSelf();
+        GAME.NETWORK.send("plrbhvr", {position:plr.position,velocity:plr.velocity});
+        tlastsync = tnow;
+    }
+    
+}

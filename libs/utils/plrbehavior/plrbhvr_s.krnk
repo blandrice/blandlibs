@@ -1,0 +1,24 @@
+#include <plrutil_s.krnk>
+# ===================================================================
+# Library: libs\utils\plrbehavior\plrbhvr_s.krnk
+# Author: blandrice
+#   Description: disable server sync + behavior for custom movement
+#   send plr position/vel to server manually
+# ===================================================================
+
+public action start(){
+    GAME.DEFAULT.disableServerSync();
+	GAME.DEFAULT.disablePlayerBehaviour();
+}
+
+public action onNetworkMessage(str id, obj data, str playerID) {
+    obj plr = GAME.PLAYERS.findByID(playerID);
+    if (id == "plrbhvr"){
+        plr.position.x = (num)data.position.x;
+        plr.position.y = (num)data.position.y;
+        plr.position.z = (num)data.position.z;
+        plr.velocity.x = (num)data.velocity.x;
+        plr.velocity.y = (num)data.velocity.y;
+        plr.velocity.z = (num)data.velocity.z;
+    }   
+}
