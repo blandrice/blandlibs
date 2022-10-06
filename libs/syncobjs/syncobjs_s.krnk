@@ -86,7 +86,7 @@ num tnow = 0;
 
 # WARNING: pass in a fresh object only - not a reference! otherwise you risk modifying the reference
 # for example don't pass in a template object for createObject(templateBall).
-action createObject(obj d) {
+obj action createObject(obj d) {
     
     # object template!
     obj tobj = {
@@ -109,6 +109,7 @@ action createObject(obj d) {
 	d.objid = toNum toStr objid;
     objid++;
     addTo objlist d;
+    return d;
 }
 
 bool action deleteObject(str id) {

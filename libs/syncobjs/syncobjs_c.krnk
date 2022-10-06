@@ -85,6 +85,9 @@ bool action updateobjproperties(obj currentObj, obj newObjData) {
     currentObj.oldpos.x = (num) currentObj.newpos.x;
     currentObj.oldpos.y = (num) currentObj.newpos.y;
     currentObj.oldpos.z = (num) currentObj.newpos.z;
+    currentObj.oldrot.x = (num) currentObj.newrot.x;
+    currentObj.oldrot.y = (num) currentObj.newrot.y;
+    currentObj.oldrot.z = (num) currentObj.newrot.z;
 
     if (notEmpty (obj) newObjData.position){
         currentObj.newpos.x = (num) newObjData.position.x;
@@ -103,9 +106,9 @@ bool action updateobjproperties(obj currentObj, obj newObjData) {
         currentObj.fhealth = (num)newObjData.fhealth;
     }
     if (notEmpty (obj)newObjData.rotation) {
-        currentObj.rotation.x = (num) newObjData.rotation.x;
-        currentObj.rotation.y = (num) newObjData.rotation.y;
-        currentObj.rotation.z = (num) newObjData.rotation.z;
+        currentObj.newrot.x = (num) newObjData.rotation.x;
+        currentObj.newrot.y = (num) newObjData.rotation.y;
+        currentObj.newrot.z = (num) newObjData.rotation.z;
     }
     return true;
 }
@@ -121,6 +124,10 @@ obj action createObj(obj newObjData) {
         cube.objid = (num) newObjData.objid;
         cube.oldpos = {x:(num)newObjData.position.x,y:(num)newObjData.position.y,z:(num)newObjData.position.z};
         cube.newpos = {x:(num)newObjData.position.x,y:(num)newObjData.position.y,z:(num)newObjData.position.z};
+
+        cube.oldrot = {x:(num)newObjData.rotation.x,y:(num)newObjData.rotation.y,z:(num)newObjData.rotation.z};
+        cube.newrot = {x:(num)newObjData.rotation.x,y:(num)newObjData.rotation.y,z:(num)newObjData.rotation.z};
+
         cube.health = (num)newObjData.health;
         cube.fhealth = (num)newObjData.fhealth;
         cube.hit = (num)newObjData.hit;
@@ -148,6 +155,18 @@ action lerpObj(num delta) {
         (num) curObj.position.x += (Math.lerp((num)curObj.oldpos.x, (num)curObj.newpos.x, interpM)-(num)curObj.position.x)*delta/1000*60/4;
         (num) curObj.position.y += (Math.lerp((num)curObj.oldpos.y, (num)curObj.newpos.y, interpM)-(num)curObj.position.y)*delta/1000*60/4;
         (num) curObj.position.z += (Math.lerp((num)curObj.oldpos.z, (num)curObj.newpos.z, interpM)-(num)curObj.position.z)*delta/1000*60/4;
+        if (!notEmpty (obj) curObj.ogrot){
+            curObj.ogrot = {};
+        }
+        curObj.ogrot = 
+        {
+            x:curObj.rotation.x,
+            y:curObj.rotation.y,
+            z:curObj.rotation.z
+        };
+        (num) curObj.rotation.x += (Math.lerp((num)curObj.oldrot.x, (num)curObj.newrot.x, interpM)-(num)curObj.rotation.x)*delta/1000*60/4;
+        (num) curObj.rotation.y += (Math.lerp((num)curObj.oldrot.y, (num)curObj.newrot.y, interpM)-(num)curObj.rotation.y)*delta/1000*60/4;
+        (num) curObj.rotation.z += (Math.lerp((num)curObj.oldrot.z, (num)curObj.newrot.z, interpM)-(num)curObj.rotation.z)*delta/1000*60/4;
 
         if (!notEmpty (obj) curObj.velocity){
             curObj.velocity = {};

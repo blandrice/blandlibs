@@ -1,12 +1,12 @@
 #include <syncobjs_s.krnk>
-#include <spawn_s.krnk>
+#include <plrutil_s.krnk>
 
 num created = 0;
-
+obj test = {};
 public action update(num delta){
-    if (lengthOf spawn_s_spawnedPlayers > 0 && created == 0) {
+    if (lengthOf plrutil_s_spawnedPlayers > 0 && created == 0) {
         syncobjs_s_createObject({position:{x:22,y:22,z:22},color:0xff0000});
-        syncobjs_s_createObject({rotation:{x:60,y:60,z:60},position:{x:22,y:22,z:22},color:0xff0000});
+        test = syncobjs_s_createObject({rotation:{x:0,y:0,z:0},position:{x:22,y:22,z:22},color:0x00ff00});
         # syncobjs_s_createObject({position:{x:0,y:0,z:0},color:0x00ff00});
         # syncobjs_s_createObject({position:{x:0,y:20,z:0},color:0x0000ff});
         # syncobjs_s_createObject({position:{x:0,y:40,z:0},color:0xffff00});
@@ -15,5 +15,9 @@ public action update(num delta){
         # syncobjs_s_createObject({position:{x:0,y:0,z:20},color:0x000000});
         # syncobjs_s_createObject({position:{x:0,y:0,z:40},color:0xff00ff});
         created = 1;
+    }
+
+    if (notEmpty test){
+        (num) test.rotation.x += Math.toRad(1.0*delta);
     }
 }
