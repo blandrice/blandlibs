@@ -333,18 +333,20 @@ def main():
                         outscript.write("{} action {}({})".format(actiontype,
                                                                   actionname, strargs) + "{\n")
                         libactions = []
-                        for x in gbl_pubactions:
+                        tgbl_pubactions = gbl_pubactions.copy()
+                        for x in reversed(tgbl_pubactions):
                             if x.endswith(actionname):
                                 libactions.append(x)
                                 del gbl_pubargs[gbl_pubactions.index(x)]
                                 gbl_pubactions.remove(x)
-                        for x in gbl_privactions:
+                        tgbl_privactions = gbl_privactions.copy()
+                        for x in reversed(tgbl_privactions):
                             if x.endswith(actionname):
                                 libactions.append(x)
                                 del gbl_privargs[gbl_privactions.index(x)]
                                 gbl_privactions.remove(x)
 
-                        for x in libactions:
+                        for x in reversed(libactions):
                             invokelibstr = re.compile(
                                 r"(?<![a-zA-Z0-9_])(\bobj\b|\bstr\b|\bnum\b|\bbool\b|\[\s*\])(?![a-zA-Z0-9_])").sub("", strargs)
                             outscript.write(
