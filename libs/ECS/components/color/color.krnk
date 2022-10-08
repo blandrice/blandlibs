@@ -1,0 +1,22 @@
+#include <strutils.krnk>
+#include <dtypes.krnk>
+
+# ===================================================================
+# Library: libs\ECS\components\movebehavior\aibhvr.krnk
+# Author: blandrice
+#   Description: basic movement - following player?
+# ===================================================================
+
+private action onECSUpdate(num delta, obj tobj, obj[] objlist){
+    if (notEmpty(obj)tobj.colrbehavior){
+        if((str)tobj.colrbehavior.type == "rainbow"){
+            (num)tobj.colrbehavior.hue += 1;
+            (num)tobj.colrbehavior.hue %=360;
+            # GAME.log(dtypes_hexstring2num(strutils_splice(UTILS.hexFromHue((num)tobj.colrbehavior.hue),1,7)));
+            tobj.color = dtypes_hexstring2num(strutils_splice(UTILS.hexFromHue((num)tobj.colrbehavior.hue),1,7));
+            
+        }
+        
+    }
+    # FYI TEXTURES CANNOT UPDATE YET
+}

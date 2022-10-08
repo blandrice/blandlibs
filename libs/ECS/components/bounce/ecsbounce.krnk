@@ -12,19 +12,19 @@ private action onCollide(obj tobj, obj[] collist){
         
         num side = (num) cobj.colside;
         # add bounce velocity
-        if ((notEmpty (obj)cube.bounce))
+        if ((notEmpty (obj)tobj.bounce))
         {
             if ((side & (AABB_XNEG | AABB_XPOS)) > 0) # +-x
             { 
-                cube.velocity.x = -1 * (num)cube.ogvel.x * (num)cube.bounce.x;
+                tobj.velocity.x = -1 * (num)tobj.ogvel.x * (num)tobj.bounce.x;
             }
             if ((side & (AABB_YNEG | AABB_YPOS)) > 0) # +-y
             { 
-                cube.velocity.y = -1 * (num)cube.ogvel.y * (num)cube.bounce.y ;
+                tobj.velocity.y = -1 * (num)tobj.ogvel.y * (num)tobj.bounce.y ;
             }
             if ((side & (AABB_ZNEG | AABB_ZPOS)) > 0) # +-z
             { 
-                cube.velocity.z = -1 * (num)cube.ogvel.z * (num)cube.bounce.z;
+                tobj.velocity.z = -1 * (num)tobj.ogvel.z * (num)tobj.bounce.z;
             }
 
         }
