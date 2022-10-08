@@ -1,6 +1,7 @@
 #include <syncobjs_s.krnk>
 #include <AABB.krnk>
 #include <plrbhvr_s.krnk>
+#include <gamestart_s.krnk>
 
 
 # ===================================================================
@@ -17,7 +18,15 @@
 # Components: separate "components" library
 # Systems: public + private action hooks!
 
+bool initdone = false;
 public action update(num delta){
+
+    if (gamestart_s_gameinit && !initdone){
+        onGameInit();
+        initdone = true;
+    }
+    
+
     obj[] world = GAME.OBJECTS.list();
     obj[] worldedit = obj[]; # edits to make 
 
@@ -64,17 +73,18 @@ public action onNetworkMessage(str id, obj data, str playerID) {
 
 }
 
-# private action onCollide(obj tobj, obj[] objlist){
+# private action onGameInit(){
+#     GAME.log("game has initialized");
+# }
 
+# private action onCollide(obj tobj, obj[] objlist){
 # }
 
 # private action onECSUpdate(num delta, obj tobj, obj[] objlist){
-
 # }
 
-# private action onPlayerCollision(){
+# private action onPlayerCollision(){???
 #     obj[] plrs = GAME.PLAYERS.list();
 #     for (num i = 0; i < lengthOf plrs; i++){
-
 #     }
 # }

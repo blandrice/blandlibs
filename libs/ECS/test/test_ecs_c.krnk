@@ -1,8 +1,25 @@
 #include <ecs_c.krnk>
 
+num prevovjlen = 0;
+
 public action onKeyPress(str key, num code) {
     if (key == "t"){
         GAME.NETWORK.send("reset", {});
     }
+    if (key == "y"){
+        GAME.NETWORK.send("more", {});
+    }
+    if (key == "r") {
+        GAME.NETWORK.send("refreshobjs", {});
+        GAME.log("client requesting refresh");
+    }
 }
 
+
+public action update(num delta){
+    if (lengthOf syncobjs_c_objlist != prevovjlen){
+        GAME.log("number of objects: ", lengthOf syncobjs_c_objlist);
+        prevovjlen = lengthOf syncobjs_c_objlist;
+    }
+    
+}

@@ -1,26 +1,35 @@
 #include <plrutil_s.krnk>
+#include <gamestart_s.krnk>
 #include <plrbhvr_s.krnk>
 #include <ecsbounce.krnk>
 #include <ecsgrav.krnk>
 #include <ecsphysics.krnk>
 #include <aibhvr.krnk>
+#include <color.krnk>
+
 #include <ecs_s.krnk>
 
 action createobjs(){
     # syncobjs_s_createObject({scale:{x:10,y:10,z:10},position:{x:22,y:22,z:22},velocity:{x:0,y:20,z:0},color:0x00FF00,onGround:false,bounce:{x:0,y:1,z:0}});
-    # syncobjs_s_createObject({scale:{x:10,y:10,z:10},position:{x:-22,y:22,z:22},velocity:{x:100,y:0,z:50},color:0xFF00FF,onGround:false,bounce:{x:1,y:0.99,z:1},gravity:{x:0,y:-100,z:0}});
-    # syncobjs_s_createObject({scale:{x:10,y:10,z:10},position:{x:-22,y:22,z:22},velocity:{x:0,y:0,z:10},color:0xFF00FF,onGround:false,bounce:{x:1,y:0,z:1},gravity:{x:0,y:-100,z:0}});
-    syncobjs_s_createObject({scale:{x:10,y:10,z:10},position:{x:-22,y:40,z:-22},velocity:{x:0,y:0,z:0},color:0xFF0000,onGround:false,bounce:{x:0,y:0.99,z:0},gravity:{x:0,y:-100,z:0},behavior:{default:"followplr"},walkspeed:{x:20,z:20}});
-    syncobjs_s_createObject({scale:{x:10,y:10,z:10},position:{x:-22,y:22,z:-22},velocity:{x:0,y:0,z:0},color:0x0000FF,onGround:false,gravity:{x:0,y:-100,z:0},behavior:{default:"followplr"},walkspeed:{x:50,z:50},debug:"1"});
+    for (num i = 0; i < 1; i++){
+        syncobjs_s_createObject({scale:{x:10,y:10,z:10},position:{x:-22,y:22,z:22},velocity:{x:UTILS.randInt(-100, 100),y:0,z:UTILS.randInt(-100, 100)},color:0xFF00FF,onGround:false,bounce:{x:1,y:0.99,z:1},gravity:{x:0,y:-100,z:0}});
+    }
+    # syncobjs_s_createObject({scale:{x:40,y:10,z:40},position:{x:-22,y:10,z:22},velocity:{x:0,y:0,z:30},color:0xFF00FF,onGround:false,bounce:{x:1,y:0,z:1},gravity:{x:0,y:-100,z:0}});
+    # syncobjs_s_createObject({scale:{x:10,y:10,z:10},position:{x:-22,y:40,z:-22},velocity:{x:0,y:0,z:0},color:0xFF0000,onGround:false,bounce:{x:0,y:0.99,z:0},gravity:{x:0,y:-100,z:0},behavior:{default:"followplr"},walkspeed:{x:20,z:20}});
+    # syncobjs_s_createObject({scale:{x:10,y:10,z:10},position:{x:-22,y:22,z:-22},velocity:{x:0,y:0,z:0},color:0x0000FF,onGround:false,gravity:{x:0,y:-100,z:0},behavior:{default:"followplr"},walkspeed:{x:50,z:50}});
     # syncobjs_s_createObject({scale:{x:10,y:10,z:10},position:{x:22,y:22,z:-22},color:0xFF0000,onGround:false,gravity:{x:0,y:-100,z:0}});
 
     # debug:"1"
 }
 num created = 0;
+
 public action update(num delta){
     if (lengthOf plrutil_s_spawnedPlayers > 0) {
         if (created == 0){
-            createobjs();
+            # createobjs();
+            # 
+            syncobjs_s_createObject({colrbehavior:{type:"rainbow",hue:0},aid:11676,scale:{x:10,y:10,z:10},position:{x:-22,y:22,z:22},velocity:{x:UTILS.randInt(-100, 100),y:0,z:UTILS.randInt(-100, 100)},color:0xFFFFFF,onGround:false,bounce:{x:1,y:0.99,z:1},gravity:{x:0,y:-100,z:0}});
+            # syncobjs_s_createObject({aid:11676,scale:{x:10,y:10,z:10},position:{x:-22,y:22,z:22},color:0xFFFFFF,onGround:false});
             created = 1;
         }
 
@@ -29,8 +38,12 @@ public action update(num delta){
 
 public action onNetworkMessage(str id, obj data, str playerID) {
     if (id == "reset"){
-        syncobjs_s_objlist = obj[];
+        syncobjs_s_deleteAllObjs();
         GAME.NETWORK.broadcast("clear", {});
         createobjs();
+    } else if (id == "more"){
+        for (num i = 0; i < 20; i++){
+            syncobjs_s_createObject({scale:{x:10,y:10,z:10},position:{x:-22,y:22,z:22},velocity:{x:UTILS.randInt(-100, 100),y:0,z:UTILS.randInt(-100, 100)},color:0x000000,onGround:false,bounce:{x:1,y:0.99,z:1},gravity:{x:0,y:-100,z:0}});
+        }
     }
 }
