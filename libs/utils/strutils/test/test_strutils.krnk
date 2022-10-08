@@ -1,0 +1,27 @@
+#include <strutils.krnk>
+
+public action start() {
+    #splice:
+    # keeps start character, does not keep end character
+    #input:
+    str thestr = "asdf";
+    GAME.log("splice 01",strutils_splice(thestr,0,1));
+    GAME.log("splice 23",strutils_splice(thestr,2,3));
+    #output:
+    # [KRUNKSCRIPT] splice 01 a
+    # [KRUNKSCRIPT] splice 23 d
+    thestr = "kansas city";
+    GAME.log("splice 0 to lengthOf string",strutils_splice(thestr,0,lengthOf thestr));
+    #output:
+    # [KRUNKSCRIPT] splice 0 to lengthOf string kansas city
+    thestr = "abcdefghijklmnopqrstuvwxyz";
+    str lstr = strutils_splice(thestr,0,15);
+    str rstr = strutils_splice(thestr,15,lengthOf thestr);
+    GAME.log("splice 0 to 15",lstr);
+    GAME.log("splice 15 to end",rstr);
+    #output:
+    # [KRUNKSCRIPT] splice 0 to 15 abcdefghijklmno
+    # [KRUNKSCRIPT] splice 15 to end pqrstuvwxyz
+
+}
+

@@ -19,3 +19,12 @@ num action minlist(num[] list){
     }
     return 0;
 }
+
+bool action instrlist(str s, str[] list){
+    for(num i = 0; i < lengthOf list; i++){
+        if (s == list[i]) {
+            return true;
+        }
+    }
+    return false;
+}

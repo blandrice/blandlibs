@@ -181,14 +181,29 @@ num[] action ColorToByteArray(num color) {
 	return retArray;
 }
 
+str[] lookup = str["0","1","2","3","4","5","6","7","8","9","A","B","C","D","E","F"];
+
 str action num2hexstring(num n){
 	str hexstr = "";
-	str[] lookup = str["0","1","2","3","4","5","6","7","8","9","A","B","C","D","E","F"];
 	for (num i =0; i < 6; i++){
 		hexstr = lookup[n & 0xF] + hexstr;
 		n = n >> 4;
 	}
 	return hexstr;
+}
+
+num action hexstring2num(str h){
+	num n = 0;
+	h = UTILS.toUpper(h);
+	for (num i = 0; i < lengthOf h; i++){
+		for (num j = 0; j < lengthOf lookup; j++){
+			if (lookup[j] == h[i]){
+				n |= j << (lengthOf h - 1 - i)*4;
+				break;
+			}
+		}
+	}
+	return n;
 }
 
 num action constrainRadians(num x){
