@@ -1,0 +1,7 @@
+#include <plrutil_c.krnk>
+# ===================================================================
+# Library: libs\gamestart\gamestart_c.krnk
+# Author: blandrice
+#   Description: Detect game start in a map with a countdown.
+# ===================================================================
+

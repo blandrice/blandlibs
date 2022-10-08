@@ -1,0 +1,26 @@
+#include <plrutil_s.krnk>
+## include <g.krnk>
+# ===================================================================
+# Library: libs\gamestart\gamestart_s.krnk
+# Author: blandrice
+#   Description: Detect game start in a map with a countdown.
+#   Editor Warmup = 0.1 --> 6 seconds of warmup countdown
+# ===================================================================
+
+num DURATION_WARMUP = 11000; # 6 secs warmup + 5 secs countdown 
+num tnow = 0;
+
+bool gameinit = false;
+
+private action onGameInit(){
+    GAME.log("game initialized");
+}
+public action update(num delta){
+    tnow = GAME.TIME.now();
+    if (!gameinit && plrutil_s_tFirstSpawnedPlayer > 0 && (tnow - plrutil_s_tFirstSpawnedPlayer > DURATION_WARMUP)) {
+        gameinit = true;
+    }
+    if (gameinit){
+        # GAME.log("game init done");
+    }
+}
