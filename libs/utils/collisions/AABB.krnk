@@ -48,6 +48,7 @@ num action side(num C, num S, num input){
 
 obj[] action resolve(obj cube1,obj[] cubes) {
     obj[] collisions = obj[];
+    num totalcolside = 0;
 	for(num i = 0; i < lengthOf cubes; i++){
         num colside = 0;
         obj colobj = {};
@@ -89,10 +90,11 @@ obj[] action resolve(obj cube1,obj[] cubes) {
         
         # -x
         if(px <= cx + sx + csx && opx >= ocx + sx + csx && side(cz, sz + csz, pz) == 0 && side(cy + sy, sy + csy, py + csy) == 0){
-            if(py >= cy + 2 * sy - st && (bool) cube1.onGround){
+            if(py >= cy + 2 * sy - st && ((bool) cube1.onGround)){
                 cube1.position.y = cy + 2 * sy; 
                 cube1.velocity.y = (notEmpty (obj)tcube.velocity) ? (num)tcube.velocity.y : 0;
-                cube1.onGround = true;}
+                cube1.onGround = true;
+                }
             else{
                 cube1.position.x = cx + sx + csx;
                 cube1.velocity.x = (notEmpty (obj)tcube.velocity) ? (num)tcube.velocity.x : 0;
@@ -102,10 +104,11 @@ obj[] action resolve(obj cube1,obj[] cubes) {
         }
         # +x
         if(px >= cx - sx - csx && opx <= ocx - sx - csx && side(cz, sz + csz, pz) == 0 && side(cy + sy, sy + csy, py + csy) == 0){
-            if(py >= cy + 2 * sy - st && (bool) cube1.onGround){
+            if(py >= cy + 2 * sy - st && ((bool) cube1.onGround)){
                 cube1.position.y = cy + 2 * sy; 
                 cube1.velocity.y = (notEmpty (obj)tcube.velocity) ? (num)tcube.velocity.y : 0;
-                cube1.onGround = true;}
+                cube1.onGround = true;
+                }
             else{
                 cube1.position.x = cx - sx - csx;
                 cube1.velocity.x = (notEmpty (obj)tcube.velocity) ? (num)tcube.velocity.x : 0;
@@ -118,7 +121,6 @@ obj[] action resolve(obj cube1,obj[] cubes) {
             cube1.position.y = cy + 2 * sy;
             cube1.velocity.y = (notEmpty (obj)tcube.velocity) ? (num)tcube.velocity.y : 0;
             cube1.onGround = true;
-
             colside |= YNEG;
         }
         # +y
@@ -129,10 +131,11 @@ obj[] action resolve(obj cube1,obj[] cubes) {
         }
         # -z
         if(pz <= cz + sz + csz && opz >= ocz + sz + csz && side(cx, sx + csx, px) == 0 && side(cy + sy, sy + csz, py + csz) == 0){
-            if(py >= cy + 2 * sy - st && (bool) cube1.onGround){
+            if(py >= cy + 2 * sy - st && ((bool) cube1.onGround)){
                 cube1.position.y = cy + 2 * sy; 
                 cube1.velocity.y = (notEmpty (obj)tcube.velocity) ? (num)tcube.velocity.y : 0;
-                cube1.onGround = true;}
+                cube1.onGround = true;
+            }
             else{
                 cube1.position.z = cz + sz + csz;
                 cube1.velocity.z = (notEmpty (obj)tcube.velocity) ? (num)tcube.velocity.z : 0;
@@ -142,7 +145,7 @@ obj[] action resolve(obj cube1,obj[] cubes) {
         }
         # +z
         if(pz >= cz - sz - csz && opz <= ocz - sz - csz && side(cx, sx + csx, px) == 0 && side(cy + sy, sy + csy, py + csy) == 0){
-            if(py >= cy + 2 * sy - st && (bool) cube1.onGround){
+            if(py >= cy + 2 * sy - st && ((bool) cube1.onGround)){
                 cube1.position.y = cy + 2 * sy; 
                 cube1.velocity.y = (notEmpty (obj)tcube.velocity) ? (num)tcube.velocity.y : 0; 
                 cube1.onGround = true;
@@ -157,7 +160,8 @@ obj[] action resolve(obj cube1,obj[] cubes) {
         if (colside > 0){
             colobj = tcube;
             addTo collisions {colside:colside,colobj:colobj};
-        }
+        } 
+        totalcolside |= colside;
 	}
     if (notEmpty (obj)cube1.ogpos) {
         cube1.ogpos.x = (num) cube1.position.x + 0;
@@ -171,6 +175,7 @@ obj[] action resolve(obj cube1,obj[] cubes) {
             z:(num)cube1.position.z + 0
         };
     }
+    # GAME.log(collisions);
     return collisions;
 	
 }
