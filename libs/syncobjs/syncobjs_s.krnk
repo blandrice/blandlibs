@@ -1,5 +1,71 @@
 #include <dtypes.krnk>
 #include <b91.krnk>
+#include <strutils.krnk>
+#include <listutil.krnk>
+
+# Binary decoding of an array of bytes to Objects
+obj[] action byteArrayToObjs(num[] byteArray) {
+	obj[] objlist = obj[];
+	num i = 0;
+	while (i < lengthOf byteArray-1){
+		obj tobj = {};
+		# contents byte
+		num contents = byteArray[i];
+		tobj.hit = ((contents & 0x80) > 0) ? 1:0; ## contents parsing
+		i++;
+		# object id 2 bytes
+		tobj.objid = dtypes_merge2Bytes(byteArray[i],byteArray[i+1]);
+		i+=2;
+		# 4 bytes health / fullhealth
+		if ((contents & 0x40) > 0) {
+			tobj.health = dtypes_merge2Bytes(byteArray[i],byteArray[i+1]);
+			tobj.fhealth = dtypes_merge2Bytes(byteArray[i+2],byteArray[i+3]);
+			i+= 4;
+		}
+		# 6 bytes position
+		if ((contents & 0x20) > 0){
+			tobj.position = {
+				x : dtypes_Int16ToNum(dtypes_merge2Bytes(byteArray[i],byteArray[i+1])),
+				y : dtypes_Int16ToNum(dtypes_merge2Bytes(byteArray[i+2],byteArray[i+3])),
+				z : dtypes_Int16ToNum(dtypes_merge2Bytes(byteArray[i+4],byteArray[i+5]))
+			};
+			i+= 6;
+		}
+		# 6 bytes rotation
+		if ((contents & 0x10) > 0) {
+			tobj.rotation ={
+				x: dtypes_float16ToNum(dtypes_merge2Bytes(byteArray[i],byteArray[i+1])),
+				y: dtypes_float16ToNum(dtypes_merge2Bytes(byteArray[i+2],byteArray[i+3])),
+				z: dtypes_float16ToNum(dtypes_merge2Bytes(byteArray[i+4],byteArray[i+5]))
+			};
+			i+= 6;
+		}
+		# 6 bytes scale
+		if ((contents & 0x08) > 0) {
+			tobj.scale = {
+				x: dtypes_Int16ToNum(dtypes_merge2Bytes(byteArray[i],byteArray[i+1])),
+				y: dtypes_Int16ToNum(dtypes_merge2Bytes(byteArray[i+2],byteArray[i+3])),
+				z: dtypes_Int16ToNum(dtypes_merge2Bytes(byteArray[i+4],byteArray[i+5]))
+			};
+			i+= 6;
+		}
+		# 7 bytes details (2 type, 2 texture, 3 color)
+		if ((contents & 0x04) > 0) {
+			tobj.type = dtypes_merge2Bytes(byteArray[i],byteArray[i+1]);
+            i+=2;
+		}
+        if ((contents & 0x02) > 0) {
+			tobj.aid = dtypes_merge2Bytes(byteArray[i],byteArray[i+1]);
+            i+=2;
+		}
+        if ((contents & 0x01) > 0) {
+			tobj.color = byteArray[i] | (byteArray[i+1] << 8) | (byteArray[i+2] << 16);
+            i+=3;
+		}
+		addTo objlist tobj;
+	}
+	return objlist;
+}
 
 
 # ===================================================================
@@ -9,9 +75,11 @@
 # ===================================================================
 
 num SYNC_INTERVAL = 50;
+num DESIRED_FPS = 5;
+num MAXLEN_NETDATA = 1500;
 
 # object contents
-num[] action objsToByteArray(obj[] objlist) {
+num[] action objsToByteArray(obj[] objlist,bool reset, obj plr, obj[] plrs) {
 	num[] retArray = num[];
 	for (num i = 0; i < lengthOf objlist; i++) {
 		obj tObj = objlist[i];
@@ -28,10 +96,10 @@ num[] action objsToByteArray(obj[] objlist) {
 
 		# 4 bytes health/fhealth
 		if (notEmpty (obj) tObj.health) {
-			contents |=  0x40;
-			tArray = dtypes_int16toByteArray(dtypes_numToUint16((num)tObj.health.h)); addTo retArray tArray[0]; addTo retArray tArray[1];
-			tArray = dtypes_int16toByteArray(dtypes_numToUint16((num)tObj.health.fh)); addTo retArray tArray[0]; addTo retArray tArray[1];
-		}
+                contents |=  0x40;
+                tArray = dtypes_int16toByteArray(dtypes_numToUint16((num)tObj.health.h)); addTo retArray tArray[0]; addTo retArray tArray[1];
+                tArray = dtypes_int16toByteArray(dtypes_numToUint16((num)tObj.health.fh)); addTo retArray tArray[0]; addTo retArray tArray[1];
+            }
 		# 6 bytes position
 		if (notEmpty (obj) tObj.position) {
 			contents |=  0x20;
@@ -54,24 +122,38 @@ num[] action objsToByteArray(obj[] objlist) {
 			tArray = dtypes_int16toByteArray(dtypes_numToInt16((num)tObj.scale.y)); addTo retArray tArray[0]; addTo retArray tArray[1];
 			tArray = dtypes_int16toByteArray(dtypes_numToInt16((num)tObj.scale.z)); addTo retArray tArray[0]; addTo retArray tArray[1];
 		}
-		# 7 bytes details (2 type, 2 texture, 3 color)
-        if (!!tObj.type && (num)tObj.type != (num)tObj.type_old){
-            # type (cube, sphere, modelID)
-			tObj.type_old = tObj.type;
-            tArray = dtypes_int16toByteArray((num)tObj.type); addTo retArray tArray[0]; addTo retArray tArray[1];    
+        # 7 bytes details (2 type, 2 texture, 3 color)
+        # type (cube, sphere, modelID)
+        if ((str)tObj.type != "undefined" && (((!listutil_instrlist((str)plr.id,(str[])tObj.type_old_plrs))) || reset))
+        {   
+            
             contents |=  0x04;
+            tArray = dtypes_int16toByteArray((num)tObj.type); addTo retArray tArray[0]; addTo retArray tArray[1];    
+            addTo  (str[]) tObj.type_old_plrs (str)plr.id;
+            if (((num) tObj.type != (num) tObj.type_old) && (lengthOf (str[])tObj.type_old_plrs >= lengthOf plrs)){
+                tObj.type_old_plrs = str[];
+            }
+            
         }
-        if (!!tObj.aid && (num)tObj.aid != (num)tObj.aid_old){
-            # type (cube, sphere, modelID)
-            tArray = dtypes_int16toByteArray((num)tObj.aid); addTo retArray tArray[0]; addTo retArray tArray[1];    
-			tObj.aid_old = tObj.aid;
+        # aid (texture) CANNOT BE UPDATED YET IN KS
+        if ((str)tObj.aid!="undefined" && (((!listutil_instrlist((str)plr.id,(str[])tObj.aid_old_plrs))) || reset)){
             contents |=  0x02;
+            tArray = dtypes_int16toByteArray((num)tObj.aid); addTo retArray tArray[0]; addTo retArray tArray[1];    
+			addTo  (str[]) tObj.aid_old_plrs (str)plr.id;
+            if (((num) tObj.aid != (num) tObj.aid_old) && (lengthOf (str[])tObj.aid_old_plrs >= lengthOf plrs)){
+                tObj.aid_old_plrs = str[];
+            }
+            
         }
-		if ((str) tObj.color !="undefined" && (str)tObj.color != (str)tObj.color_old){
-            # type (cube, sphere, modelID)
+        # color
+		if ((str) tObj.color !="undefined" && (((str)tObj.color != (str)tObj.color_old) || reset)){
+            contents |=  0x01;
 			tObj.color_old = tObj.color;
             tArray = dtypes_ColorToByteArray((num)tObj.color); addTo retArray tArray[0]; addTo retArray tArray[1]; addTo retArray tArray[2];
-            contents |=  0x01;
+            addTo  (str[]) tObj.clr_old_plrs (str)plr.id;
+            if (((num) tObj.clr != (num) tObj.clr_old) && (lengthOf (str[])tObj.clr_old_plrs >= lengthOf plrs)){
+                tObj.clr_old_plrs = str[];
+            }
         }
 		retArray[contentsidx] = contents;
 	}
@@ -99,12 +181,26 @@ obj action createObject(obj d) {
         color: 0x00A8F9
     };
     if ((str) d.type == "undefined") {d.type = tobj.type;}
+    d.type_old = (str)d.type + "a";
+    d.type_old_plrs = str[];
     if ((str) d.aid == "undefined") {d.aid = tobj.aid;}
+    d.aid_old_plrs = str[];
+    d.type_old = (num)d.type + 1;
     if (!notEmpty (obj) d.scale) {d.scale = tobj.scale;}
+    d.scale_old_plrs = str[];
+    d.scale_old = {x:0,y:0,z:(num)d.scale.z+1};
     if (!notEmpty (obj) d.position) {d.position = tobj.position;}
+    d.pos_old_plrs = str[];
+    d.pos_old = {x:0,y:0,z:(num)d.position.z+1};
     if (!notEmpty (obj) d.velocity) {d.velocity = tobj.velocity;}
+    d.vel_old_plrs = str[];
+    d.vel_old = {x:0,y:0,z:(num)d.velocity.z+1};
     if (!notEmpty (obj) d.rotation) {d.rotation = tobj.rotation;}
+    d.rot_old_plrs = str[];
+    d.rot_old = {x:0,y:0,z:(num)d.rotation.z+1};
     if ((str) d.color == "undefined") {d.color = tobj.color;}
+    d.clr_old_plrs = str[];
+    d.clr_old = (num)d.color+1;
 
 	d.objid = toNum toStr objid;
     objid++;
@@ -121,6 +217,13 @@ bool action deleteObject(str id) {
         }
     }
     return false;
+}
+
+action deleteAllObjs(){
+    for (num i = lengthOf objlist - 1; i >= 0; i--) {
+        addTo newdellist toNum objlist[i].objid;
+        remove objlist[i];
+    }
 }
 
 obj action findObjbyID(str id){
@@ -152,13 +255,63 @@ public action update(num delta) {
     if ((tnow - tlastbroadcast) > SYNC_INTERVAL) {
         tlastbroadcast = tnow;
         # str encodedobjdata = objencoding();
-        str encodedobjdata = b91_encode(objsToByteArray(objlist));
-
+        # str encodedobjdata = b91_encode(objsToByteArray(objlist,false)); # send new data only
         # bool success = GAME.NETWORK.broadcast("sync", {data:objdata});
         obj[] plrs = GAME.PLAYERS.list();
         bool success=true;
         for (num i = 0; i < lengthOf plrs; i++) {
-            success = GAME.NETWORK.send("sync", {d:encodedobjdata, dellist:newdellist}, (str)plrs[i].id);    
+
+            obj plr = plrs[i];
+            str datatosend = "";
+            bool reset = false;
+            # guard for initializing netdata
+            if ((str) plr.netdata == "undefined" || (bool) plr.netreset == true)
+            {
+                reset = true;
+            }
+            if ((str)plr.netdata == "" || (str) plr.netdata == "undefined" || (bool) plr.netreset == true){
+                plr.netdata = b91_encode(objsToByteArray(objlist,reset,plr,plrs)); # resend all data regardless of age
+                plr.netdatalen = Math.ceil((lengthOf (str)plr.netdata) / MAXLEN_NETDATA);
+                if (reset) {
+                    GAME.log(byteArrayToObjs(b91_decode((str)plr.netdata)));
+                }
+                
+
+                # check size of encoded data is too large and warn
+                if (lengthOf (str)plr.netdata > MAXLEN_NETDATA){
+                    num netneeded = Math.ceil((lengthOf (str)plr.netdata) / MAXLEN_NETDATA);
+                    num t_fps = 1000/(SYNC_INTERVAL * netneeded);
+                    if (t_fps < DESIRED_FPS){
+                        GAME.log("WARN: data length is ", lengthOf (str)plr.netdata);
+                        GAME.log("takes ", SYNC_INTERVAL * netneeded, "ms to send update or FPS is  ", t_fps);
+                    }
+                }
+            } 
+            
+            
+            # plr.netdatalen = Math.ceil((lengthOf encodedobjdata) / MAXLEN_NETDATA);
+            
+            # fill network data if it DNE yet
+            # if (lengthOf (str) plr.netdata == 0)
+            # {
+                # plr.netdata = encodedobjdata;
+                # plr.netdatalen = Math.ceil((lengthOf encodedobjdata) / MAXLEN_NETDATA);
+            # }
+            # send over netdata in the max size allowed
+            if (lengthOf (str) plr.netdata > MAXLEN_NETDATA){
+                datatosend = strutils_splice((str)plr.netdata,0,MAXLEN_NETDATA);
+                plr.netdata = strutils_splice((str)plr.netdata,MAXLEN_NETDATA,lengthOf (str)plr.netdata);
+                
+            } else {
+                datatosend = (str) plr.netdata;
+                plr.netdata = "";
+            }
+            
+        
+            # pcnt is percentage of load complete
+            num pcnt = Math.floor(( 1 - ((lengthOf (str) plr.netdata) / ((num)plr.netdatalen * MAXLEN_NETDATA)))*100);
+            success = GAME.NETWORK.send("sync", {d:datatosend, dellist:newdellist,pcnt:pcnt,rst:(bool)plr.netreset ? 1:0}, (str)plrs[i].id);    
+            plr.netreset = false;
         }
         if (!success) {
             GAME.log("ERROR: sync not sent!!!");
@@ -172,4 +325,11 @@ public action update(num delta) {
 public action onGameEnd() {
     # delete all objects client side
     GAME.NETWORK.broadcast("clear", {});
+}
+
+public action onNetworkMessage(str id, obj data, str playerID) {
+    if (id == "refreshobjs"){
+        obj plr = GAME.PLAYERS.findByID(playerID);
+        plr.netreset = true;
+    }
 }

@@ -72,6 +72,7 @@ obj[] action byteArrayToObjs(num[] byteArray) {
 }
 
 obj[] objlist = obj[];
+str netdata = "";
 str[] delList = str[];
 
 # interpolation
@@ -110,6 +111,9 @@ bool action updateobjproperties(obj currentObj, obj newObjData) {
         currentObj.newrot.y = (num) newObjData.rotation.y;
         currentObj.newrot.z = (num) newObjData.rotation.z;
     }
+    if ((str)newObjData.color !="undefined"){
+        currentObj.emissive = "#"+(str)newObjData.color;
+    }
     return true;
 }
 
@@ -119,8 +123,8 @@ obj action createObj(obj newObjData) {
         # str aid = (str) newObjData.aid;
         # str aid = "34379"; # temp fix for now
         str colr = "#" + dtypes_num2hexstring((num) newObjData.color);
-        
-        obj cube = GAME.SCENE.addCube(toStr (num)newObjData.aid, colr, (num)newObjData.position.x,(num)newObjData.position.y,(num)newObjData.position.z, 0,0,0);
+        # obj cube = GAME.SCENE.addCube(toStr (num)newObjData.aid, colr, (num)newObjData.position.x,(num)newObjData.position.y,(num)newObjData.position.z, 0,0,0);
+        obj cube = GAME.SCENE.addCube(toStr (num)newObjData.aid, colr, (num)newObjData.position.x,(num)newObjData.position.y,(num)newObjData.position.z, (num)newObjData.scale.x,(num)newObjData.scale.y,(num)newObjData.scale.z);
         cube.objid = (num) newObjData.objid;
         cube.oldpos = {x:(num)newObjData.position.x,y:(num)newObjData.position.y,z:(num)newObjData.position.z};
         cube.newpos = {x:(num)newObjData.position.x,y:(num)newObjData.position.y,z:(num)newObjData.position.z};
@@ -200,6 +204,14 @@ action deleteobj(num id) {
     }
 }
 
+action clearAllObjs(){
+    for (num i = lengthOf objlist - 1; i >= 0; i--) {
+        deleteobj((num)objlist[i].objid);
+    }
+    objlist = obj[];
+    delList = str[];
+}
+
 bool action objIDWasDeleted(str id) {
     for (num i = 0; i < lengthOf delList; i++) {
         if (id == delList[i]) {
@@ -248,20 +260,33 @@ public action start() {
 public action onNetworkMessage(str id, obj data) {
     if (id == "sync") {
         
-        obj[] netobjs = byteArrayToObjs(b91_decode((str)data.d));
-        oldTime = newTime;
-        newTime = GAME.TIME.now();
-        dataBuffer = newTime - oldTime;
+        # clear all object / network data if reset given
+        if ((str)data.rst != "undefined" && (num)data.rst == 1){
+            clearAllObjs();
+            netdata = "";
+        }
+        netdata += (str)data.d;
+
+        if ((str)data.pcnt != "undefined" && (num)data.pcnt == 100)
+        {
+            # data sent, perform decode and update objects
+            obj[] netobjs = byteArrayToObjs(b91_decode(netdata));
+            oldTime = newTime;
+            newTime = GAME.TIME.now();
+            dataBuffer = newTime - oldTime;
+            
+            updateobjs(netobjs);
+            num[] newdellist = (num[]) data.dellist;
+            for (num i = 0; i < lengthOf newdellist; i++) {
+                deleteobj(newdellist[i]);
+            }
+            # clear netdata string buffer
+            netdata = "";
+        }
+
         
-        updateobjs(netobjs);
-        num[] newdellist = (num[]) data.dellist;
-        for (num i = 0; i < lengthOf newdellist; i++) {
-            deleteobj(newdellist[i]);
-        }
     } else if (id == "clear") {
-        for (num i = lengthOf objlist - 1; i >= 0; i--) {
-            deleteobj((num)objlist[i].objid);
-        }
+        clearAllObjs();       
     }
 }
 
