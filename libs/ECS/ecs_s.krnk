@@ -15,7 +15,7 @@
 # ===================================================================
 
 # Entities: obj list
-# Components: separate "components" library
+# Components: separate "components" libraries
 # Systems: public + private action hooks!
 
 bool initdone = false;
