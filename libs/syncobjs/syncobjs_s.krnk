@@ -96,63 +96,104 @@ num[] action objsToByteArray(obj[] objlist,bool reset, obj plr, obj[] plrs) {
 
 		# 4 bytes health/fhealth
 		if (notEmpty (obj) tObj.health) {
-                contents |=  0x40;
-                tArray = dtypes_int16toByteArray(dtypes_numToUint16((num)tObj.health.h)); addTo retArray tArray[0]; addTo retArray tArray[1];
-                tArray = dtypes_int16toByteArray(dtypes_numToUint16((num)tObj.health.fh)); addTo retArray tArray[0]; addTo retArray tArray[1];
+                bool healthchanged = ((num) tObj.health.h != (num) tObj.health_old.h) || ((num) tObj.health.fh != (num) tObj.health_old.fh);
+                if (healthchanged){
+                    tObj.health_old = str[];
+                    tObj.health_old = {x:tObj.health.h,y:tObj.health.fh};
+                }
+                if (healthchanged || ((!listutil_instrlist((str)plr.id,(str[])tObj.health_old_plrs))) || reset) {
+                    contents |=  0x40;
+                    tArray = dtypes_int16toByteArray(dtypes_numToUint16((num)tObj.health.h)); addTo retArray tArray[0]; addTo retArray tArray[1];
+                    tArray = dtypes_int16toByteArray(dtypes_numToUint16((num)tObj.health.fh)); addTo retArray tArray[0]; addTo retArray tArray[1];
+                    addTo  (str[]) tObj.health_old_plrs (str)plr.id;
+                }
             }
 		# 6 bytes position
-		if (notEmpty (obj) tObj.position) {
-			contents |=  0x20;
-			tArray = dtypes_int16toByteArray(dtypes_numToInt16((num)tObj.position.x)); addTo retArray tArray[0]; addTo retArray tArray[1];
-			tArray = dtypes_int16toByteArray(dtypes_numToInt16((num)tObj.position.y)); addTo retArray tArray[0]; addTo retArray tArray[1];
-			tArray = dtypes_int16toByteArray(dtypes_numToInt16((num)tObj.position.z)); addTo retArray tArray[0]; addTo retArray tArray[1];
+		# if (notEmpty (obj) tObj.position) {}
+        if (notEmpty (obj) tObj.position) {
+            bool poschanged = ((num) tObj.position.x != (num) tObj.pos_old.x) || ((num) tObj.position.y != (num) tObj.pos_old.y)  || ((num) tObj.position.z != (num) tObj.pos_old.z);
+            if (poschanged){
+                tObj.pos_old_plrs = str[];
+                tObj.pos_old = {x:tObj.position.x,y:tObj.position.y,z:tObj.position.z};
+            }
+            if (poschanged || ((!listutil_instrlist((str)plr.id,(str[])tObj.pos_old_plrs))) || reset){
+                contents |=  0x20;
+                tArray = dtypes_int16toByteArray(dtypes_numToInt16((num)tObj.position.x)); addTo retArray tArray[0]; addTo retArray tArray[1];
+                tArray = dtypes_int16toByteArray(dtypes_numToInt16((num)tObj.position.y)); addTo retArray tArray[0]; addTo retArray tArray[1];
+                tArray = dtypes_int16toByteArray(dtypes_numToInt16((num)tObj.position.z)); addTo retArray tArray[0]; addTo retArray tArray[1];
+                addTo  (str[]) tObj.pos_old_plrs (str)plr.id;
+            }
 		}
 		# 6 bytes rotation
 		if (notEmpty (obj) tObj.rotation) {
-			contents |=  0x10;
-			tArray = dtypes_int16toByteArray(dtypes_numToFloat16((num)tObj.rotation.x)); addTo retArray tArray[0]; addTo retArray tArray[1];
-            # GAME.log("x: ",dtypes_numToFloat16((num)tObj.rotation.x), printBinary(dtypes_numToFloat16((num)tObj.rotation.x)));
-			tArray = dtypes_int16toByteArray(dtypes_numToFloat16((num)tObj.rotation.y)); addTo retArray tArray[0]; addTo retArray tArray[1];
-			tArray = dtypes_int16toByteArray(dtypes_numToFloat16((num)tObj.rotation.z)); addTo retArray tArray[0]; addTo retArray tArray[1];
+            bool rotchanged = ((num) tObj.rotation.x != (num) tObj.rot_old.x) || ((num) tObj.rotation.y != (num) tObj.rot_old.y)  || ((num) tObj.rotation.z != (num) tObj.rot_old.z);
+            if (rotchanged){
+                tObj.rot_old_plrs = str[];
+                tObj.rot_old = {x:tObj.rotation.x,y:tObj.rotation.y,z:tObj.rotation.z};
+            }
+            if (rotchanged || ((!listutil_instrlist((str)plr.id,(str[])tObj.rot_old_plrs))) || reset){
+                contents |=  0x10;
+                tArray = dtypes_int16toByteArray(dtypes_numToFloat16((num)tObj.rotation.x)); addTo retArray tArray[0]; addTo retArray tArray[1];
+                # GAME.log("x: ",dtypes_numToFloat16((num)tObj.rotation.x), printBinary(dtypes_numToFloat16((num)tObj.rotation.x)));
+                tArray = dtypes_int16toByteArray(dtypes_numToFloat16((num)tObj.rotation.y)); addTo retArray tArray[0]; addTo retArray tArray[1];
+                tArray = dtypes_int16toByteArray(dtypes_numToFloat16((num)tObj.rotation.z)); addTo retArray tArray[0]; addTo retArray tArray[1];
+                addTo  (str[]) tObj.rot_old_plrs (str)plr.id;
+            }
 		}
 		# 6 bytes scale
 		if (notEmpty (obj) tObj.scale) {
-			contents |=  0x08;
-			tArray = dtypes_int16toByteArray(dtypes_numToInt16((num)tObj.scale.x)); addTo retArray tArray[0]; addTo retArray tArray[1];
-			tArray = dtypes_int16toByteArray(dtypes_numToInt16((num)tObj.scale.y)); addTo retArray tArray[0]; addTo retArray tArray[1];
-			tArray = dtypes_int16toByteArray(dtypes_numToInt16((num)tObj.scale.z)); addTo retArray tArray[0]; addTo retArray tArray[1];
+            bool scalechanged = ((num) tObj.scale.x != (num) tObj.scale_old.x) || ((num) tObj.scale.y != (num) tObj.scale_old.y)  || ((num) tObj.scale.z != (num) tObj.scale_old.z);
+            if (scalechanged){
+                tObj.scale_old_plrs = str[];
+                tObj.scale_old = {x:tObj.scale.x,y:tObj.scale.y,z:tObj.scale.z};
+            }
+            if (scalechanged || ((!listutil_instrlist((str)plr.id,(str[])tObj.scale_old_plrs))) || reset){
+                contents |=  0x08;
+                tArray = dtypes_int16toByteArray(dtypes_numToInt16((num)tObj.scale.x)); addTo retArray tArray[0]; addTo retArray tArray[1];
+                tArray = dtypes_int16toByteArray(dtypes_numToInt16((num)tObj.scale.y)); addTo retArray tArray[0]; addTo retArray tArray[1];
+                tArray = dtypes_int16toByteArray(dtypes_numToInt16((num)tObj.scale.z)); addTo retArray tArray[0]; addTo retArray tArray[1];
+                addTo  (str[]) tObj.scale_old_plrs (str)plr.id;
+            }
 		}
         # 7 bytes details (2 type, 2 texture, 3 color)
-        # type (cube, sphere, modelID)
-        if ((str)tObj.type != "undefined" && (((!listutil_instrlist((str)plr.id,(str[])tObj.type_old_plrs))) || reset))
+        # type (cube, sphere, sprite, modelID)
+        if ((str)tObj.type != "undefined")
         {   
-            
-            contents |=  0x04;
-            tArray = dtypes_int16toByteArray((num)tObj.type); addTo retArray tArray[0]; addTo retArray tArray[1];    
-            addTo  (str[]) tObj.type_old_plrs (str)plr.id;
-            if (((num) tObj.type != (num) tObj.type_old) && (lengthOf (str[])tObj.type_old_plrs >= lengthOf plrs)){
+            bool typechanged = ((num) tObj.type != (num) tObj.type_old);
+            if (typechanged){
                 tObj.type_old_plrs = str[];
+                tObj.type_old = (num)tObj.type;
             }
-            
+            if (typechanged || ((!listutil_instrlist((str)plr.id,(str[])tObj.type_old_plrs))) || reset){
+                contents |=  0x04;
+                tArray = dtypes_int16toByteArray((num)tObj.type); addTo retArray tArray[0]; addTo retArray tArray[1];    
+                addTo  (str[]) tObj.type_old_plrs (str)plr.id;
+            }
         }
         # aid (texture) CANNOT BE UPDATED YET IN KS
-        if ((str)tObj.aid!="undefined" && (((!listutil_instrlist((str)plr.id,(str[])tObj.aid_old_plrs))) || reset)){
-            contents |=  0x02;
-            tArray = dtypes_int16toByteArray((num)tObj.aid); addTo retArray tArray[0]; addTo retArray tArray[1];    
-			addTo  (str[]) tObj.aid_old_plrs (str)plr.id;
-            if (((num) tObj.aid != (num) tObj.aid_old) && (lengthOf (str[])tObj.aid_old_plrs >= lengthOf plrs)){
+        if ((str)tObj.aid!="undefined"){
+            bool aid_changed = ((num) tObj.aid != (num) tObj.aid_old);
+            if (aid_changed){
                 tObj.aid_old_plrs = str[];
+                tObj.aid_old = (num)tObj.aid;
             }
-            
+            if (aid_changed || ((!listutil_instrlist((str)plr.id,(str[])tObj.aid_old_plrs))) || reset){
+                contents |=  0x02;
+                tArray = dtypes_int16toByteArray((num)tObj.aid); addTo retArray tArray[0]; addTo retArray tArray[1];    
+                addTo  (str[]) tObj.aid_old_plrs (str)plr.id;
+                }
         }
         # color
-		if ((str) tObj.color !="undefined" && (((str)tObj.color != (str)tObj.color_old) || reset)){
-            contents |=  0x01;
-			tObj.color_old = tObj.color;
-            tArray = dtypes_ColorToByteArray((num)tObj.color); addTo retArray tArray[0]; addTo retArray tArray[1]; addTo retArray tArray[2];
-            addTo  (str[]) tObj.clr_old_plrs (str)plr.id;
-            if (((num) tObj.clr != (num) tObj.clr_old) && (lengthOf (str[])tObj.clr_old_plrs >= lengthOf plrs)){
-                tObj.clr_old_plrs = str[];
+		if ((str) tObj.color !="undefined"){
+            bool color_changed = ((num) tObj.color != (num) tObj.color_old);
+            if (color_changed){
+                tObj.color_old_plrs = str[];
+                tObj.color_old = (num)tObj.color;
+            }
+            if (color_changed || ((!listutil_instrlist((str)plr.id,(str[])tObj.color_old_plrs))) || reset){
+                contents |=  0x01;
+                tArray = dtypes_ColorToByteArray((num)tObj.color); addTo retArray tArray[0]; addTo retArray tArray[1]; addTo retArray tArray[2];
+                addTo  (str[]) tObj.color_old_plrs (str)plr.id;
             }
         }
 		retArray[contentsidx] = contents;
@@ -198,9 +239,13 @@ obj action createObject(obj d) {
     if (!notEmpty (obj) d.rotation) {d.rotation = tobj.rotation;}
     d.rot_old_plrs = str[];
     d.rot_old = {x:0,y:0,z:(num)d.rotation.z+1};
+    #if health is there, add old data container
+    if (notEmpty (obj)d.health){
+        d.health_old = {h:0,fh:(num)d.health.fh-1};
+    }
     if ((str) d.color == "undefined") {d.color = tobj.color;}
-    d.clr_old_plrs = str[];
-    d.clr_old = (num)d.color+1;
+    d.color_old_plrs = str[];
+    d.color_old = (num)d.color+1;
 
 	d.objid = toNum toStr objid;
     objid++;
@@ -311,11 +356,13 @@ public action update(num delta) {
             # pcnt is percentage of load complete
             num pcnt = Math.floor(( 1 - ((lengthOf (str) plr.netdata) / ((num)plr.netdatalen * MAXLEN_NETDATA)))*100);
             success = GAME.NETWORK.send("sync", {d:datatosend, dellist:newdellist,pcnt:pcnt,rst:(bool)plr.netreset ? 1:0}, (str)plrs[i].id);    
+            if (!success) {
+                GAME.log("ERROR: sync not sent!!!");
+                GAME.log({d:datatosend, dellist:newdellist,pcnt:pcnt,rst:(bool)plr.netreset ? 1:0});
+            }
             plr.netreset = false;
         }
-        if (!success) {
-            GAME.log("ERROR: sync not sent!!!");
-        } else {
+        if (success) {
             newdellist = num[];
         }
     }
