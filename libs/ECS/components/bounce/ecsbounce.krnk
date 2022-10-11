@@ -5,7 +5,7 @@
 #   Description: Trying bounce on ECS!!!!
 # ===================================================================
 
-private action onCollide(obj tobj, obj[] collist){
+private action onCollideWorld(obj tobj, obj[] collist){
     for (num j = 0; j < lengthOf collist; j++)
     {
         obj cobj = collist[j];

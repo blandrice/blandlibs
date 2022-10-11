@@ -18,6 +18,11 @@
 # Components: separate "components" libraries
 # Systems: public + private action hooks!
 
+num COL_WORLD = 0x1;
+num COL_OBJS = 0x2;
+num COL_PLRS = 0x4;
+
+
 bool initdone = false;
 public action update(num delta){
 
@@ -55,11 +60,30 @@ public action update(num delta){
         # CUSTOM ACTION THAT BUNDLES ALL UPDATE EVENTS
         onECSUpdate(delta, tobj, syncobjs_s_objlist);
         
-        # resolve collision
-        obj[] res = AABB_resolve(tobj,worldedit);
+        if (notEmpty (obj) tobj.collide)
+        {
+            num coltype = (num) tobj.collide.type;
+            if ((coltype & COL_WORLD) > 0)
+            {
+                # resolve collision. currently default will stop object (vel = 0)
+                obj[] res = AABB_resolve(tobj,worldedit);
+                # CUSTOM ACTION THAT BUNDLES ALL COLLISION EVENTS
+                onCollideWorld(tobj,res);
+            }
+            if ((coltype & COL_PLRS) > 0)
+            {
+                # resolve collision. currently detects face but does NOT stop
+                obj[] plrs = GAME.PLAYERS.list();
+                obj[] res = AABB_detect(tobj,plrs);
+                if (lengthOf res > 0){
+                    onCollidePlrs(tobj,res);    
+                }
+            }
+            
+        }
+        
 
-        # CUSTOM ACTION THAT BUNDLES ALL COLLISION EVENTS
-        onCollide(tobj,res);
+        
 
         if ((str) tobj.debug == "1"){
             GAME.log(tobj);
