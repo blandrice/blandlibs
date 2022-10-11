@@ -1,5 +1,6 @@
 #include <dtypes.krnk>
 #include <b91.krnk>
+#include <syncobjs_h.krnk>
 
 # ===================================================================
 # Library: \libs\syncobjs\syncobjs_c.krnk
@@ -7,73 +8,73 @@
 #   Description: not ready!
 # ===================================================================
 
-# Binary decoding of an array of bytes to Objects
-obj[] action byteArrayToObjs(num[] byteArray) {
-	obj[] objlist = obj[];
-	num i = 0;
-	while (i < lengthOf byteArray-1){
-		obj tobj = {};
-		# contents byte
-		num contents = byteArray[i];
-		i++;
-		# object id 2 bytes
-		tobj.objid = dtypes_merge2Bytes(byteArray[i],byteArray[i+1]);
-		i+=2;
-		# 4 bytes health / fullhealth
-		if ((contents & 0x40) > 0) {
-			tobj.health = dtypes_merge2Bytes(byteArray[i],byteArray[i+1]);
-			tobj.fhealth = dtypes_merge2Bytes(byteArray[i+2],byteArray[i+3]);
-			i+= 4;
-		}
-		# 6 bytes position
-		if ((contents & 0x20) > 0){
-			tobj.position = {
-				x : dtypes_Int16ToNum(dtypes_merge2Bytes(byteArray[i],byteArray[i+1])),
-				y : dtypes_Int16ToNum(dtypes_merge2Bytes(byteArray[i+2],byteArray[i+3])),
-				z : dtypes_Int16ToNum(dtypes_merge2Bytes(byteArray[i+4],byteArray[i+5]))
-			};
-			i+= 6;
-		}
-		# 6 bytes rotation
-		if ((contents & 0x10) > 0) {
-			tobj.rotation ={
-				x: dtypes_float16ToNum(dtypes_merge2Bytes(byteArray[i],byteArray[i+1])),
-				y: dtypes_float16ToNum(dtypes_merge2Bytes(byteArray[i+2],byteArray[i+3])),
-				z: dtypes_float16ToNum(dtypes_merge2Bytes(byteArray[i+4],byteArray[i+5]))
-			};
-			i+= 6;
-		}
-		# 6 bytes scale
-		if ((contents & 0x08) > 0) {
-			tobj.scale = {
-				x: dtypes_Int16ToNum(dtypes_merge2Bytes(byteArray[i],byteArray[i+1])),
-				y: dtypes_Int16ToNum(dtypes_merge2Bytes(byteArray[i+2],byteArray[i+3])),
-				z: dtypes_Int16ToNum(dtypes_merge2Bytes(byteArray[i+4],byteArray[i+5]))
-			};
-			i+= 6;
-		}
-		# 7 bytes details (2 type, 2 texture, 3 color)
-		if ((contents & 0x04) > 0) {
-			tobj.type = dtypes_merge2Bytes(byteArray[i],byteArray[i+1]);
-            i+=2;
-		}
-        if ((contents & 0x02) > 0) {
-			tobj.aid = dtypes_merge2Bytes(byteArray[i],byteArray[i+1]);
-            i+=2;
-		}
-        if ((contents & 0x01) > 0) {
-			tobj.color = byteArray[i] | (byteArray[i+1] << 8) | (byteArray[i+2] << 16);
-            i+=3;
-		}
-        if ((contents & 0x80) > 0) {
-			tobj.emissive = byteArray[i] | (byteArray[i+1] << 8) | (byteArray[i+2] << 16);
-            i+=3;
-		}
+# # Binary decoding of an array of bytes to Objects
+# obj[] action syncobjs_h_byteArrayToObjs(num[] byteArray) {
+# 	obj[] objlist = obj[];
+# 	num i = 0;
+# 	while (i < lengthOf byteArray-1){
+# 		obj tobj = {};
+# 		# contents byte
+# 		num contents = byteArray[i];
+# 		i++;
+# 		# object id 2 bytes
+# 		tobj.objid = dtypes_merge2Bytes(byteArray[i],byteArray[i+1]);
+# 		i+=2;
+# 		# 4 bytes health / fullhealth
+# 		if ((contents & 0x40) > 0) {
+# 			tobj.health = dtypes_merge2Bytes(byteArray[i],byteArray[i+1]);
+# 			tobj.fhealth = dtypes_merge2Bytes(byteArray[i+2],byteArray[i+3]);
+# 			i+= 4;
+# 		}
+# 		# 6 bytes position
+# 		if ((contents & 0x20) > 0){
+# 			tobj.position = {
+# 				x : dtypes_Int16ToNum(dtypes_merge2Bytes(byteArray[i],byteArray[i+1])),
+# 				y : dtypes_Int16ToNum(dtypes_merge2Bytes(byteArray[i+2],byteArray[i+3])),
+# 				z : dtypes_Int16ToNum(dtypes_merge2Bytes(byteArray[i+4],byteArray[i+5]))
+# 			};
+# 			i+= 6;
+# 		}
+# 		# 6 bytes rotation
+# 		if ((contents & 0x10) > 0) {
+# 			tobj.rotation ={
+# 				x: dtypes_float16ToNum(dtypes_merge2Bytes(byteArray[i],byteArray[i+1])),
+# 				y: dtypes_float16ToNum(dtypes_merge2Bytes(byteArray[i+2],byteArray[i+3])),
+# 				z: dtypes_float16ToNum(dtypes_merge2Bytes(byteArray[i+4],byteArray[i+5]))
+# 			};
+# 			i+= 6;
+# 		}
+# 		# 6 bytes scale
+# 		if ((contents & 0x08) > 0) {
+# 			tobj.scale = {
+# 				x: dtypes_Int16ToNum(dtypes_merge2Bytes(byteArray[i],byteArray[i+1])),
+# 				y: dtypes_Int16ToNum(dtypes_merge2Bytes(byteArray[i+2],byteArray[i+3])),
+# 				z: dtypes_Int16ToNum(dtypes_merge2Bytes(byteArray[i+4],byteArray[i+5]))
+# 			};
+# 			i+= 6;
+# 		}
+# 		# 7 bytes details (2 type, 2 texture, 3 color)
+# 		if ((contents & 0x04) > 0) {
+# 			tobj.type = dtypes_merge2Bytes(byteArray[i],byteArray[i+1]);
+#             i+=2;
+# 		}
+#         if ((contents & 0x02) > 0) {
+# 			tobj.aid = dtypes_merge2Bytes(byteArray[i],byteArray[i+1]);
+#             i+=2;
+# 		}
+#         if ((contents & 0x01) > 0) {
+# 			tobj.color = byteArray[i] | (byteArray[i+1] << 8) | (byteArray[i+2] << 16);
+#             i+=3;
+# 		}
+#         if ((contents & 0x80) > 0) {
+# 			tobj.emissive = byteArray[i] | (byteArray[i+1] << 8) | (byteArray[i+2] << 16);
+#             i+=3;
+# 		}
         
-		addTo objlist tobj;
-	}
-	return objlist;
-}
+# 		addTo objlist tobj;
+# 	}
+# 	return objlist;
+# }
 
 obj[] objlist = obj[];
 str netdata = "";
@@ -275,7 +276,7 @@ public action onNetworkMessage(str id, obj data) {
         if ((str)data.pcnt != "undefined" && (num)data.pcnt == 100)
         {
             # data sent, perform decode and update objects
-            obj[] netobjs = byteArrayToObjs(b91_decode(netdata));
+            obj[] netobjs = syncobjs_h_byteArrayToObjs(b91_decode(netdata));
             oldTime = newTime;
             newTime = GAME.TIME.now();
             dataBuffer = newTime - oldTime;
