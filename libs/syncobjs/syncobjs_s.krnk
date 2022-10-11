@@ -89,7 +89,7 @@ num[] action objsToByteArray(obj[] objlist,bool reset, obj plr, obj[] plrs) {
 		num contents = 0x00;
 		num contentsidx = lengthOf retArray;
 		addTo retArray contents;
-		if ((num) tObj.hit>0) {contents |=  0x80;}
+		# if ((num) tObj.hit>0) {contents |=  0x80;}
 		
 		# 2 bytes objid
 		tArray = dtypes_int16toByteArray(dtypes_numToUint16((num)tObj.objid)); addTo retArray tArray[0]; addTo retArray tArray[1];
@@ -196,6 +196,20 @@ num[] action objsToByteArray(obj[] objlist,bool reset, obj plr, obj[] plrs) {
                 addTo  (str[]) tObj.color_old_plrs (str)plr.id;
             }
         }
+        # emissive
+		if ((str) tObj.emissive !="undefined"){
+            bool emissive_changed = ((num) tObj.emissive != (num) tObj.emissive_old);
+            if (emissive_changed){
+                str colr = "#" + dtypes_num2hexstring((num) tObj.emissive);
+                tObj.emissive_old_plrs = str[];
+                tObj.emissive_old = (num)tObj.emissive;
+            }
+            if (emissive_changed || ((!listutil_instrlist((str)plr.id,(str[])tObj.emissive_old_plrs))) || reset){
+                contents |=  0x80;
+                tArray = dtypes_ColorToByteArray((num)tObj.emissive); addTo retArray tArray[0]; addTo retArray tArray[1]; addTo retArray tArray[2];
+                addTo  (str[]) tObj.emissive_old_plrs (str)plr.id;
+            }
+        }
 		retArray[contentsidx] = contents;
 	}
 	return retArray;
@@ -219,7 +233,10 @@ obj action createObject(obj d) {
         position: {x:1,y:1,z:1},
         velocity: {x:0,y:0,z:0},
         rotation: {x:0,y:0,z:0},
-        color: 0x00A8F9
+        color: 0x00A8F9,
+        emissive:0x000000,
+        collide: {type:1,resolve:""}
+        # type:1 = COL_WORLD 
     };
     if ((str) d.type == "undefined") {d.type = tobj.type;}
     d.type_old = (str)d.type + "a";
@@ -246,6 +263,14 @@ obj action createObject(obj d) {
     if ((str) d.color == "undefined") {d.color = tobj.color;}
     d.color_old_plrs = str[];
     d.color_old = (num)d.color+1;
+
+    if ((str) d.emissive == "undefined") {d.emissive = tobj.emissive;}
+    d.emissive_old_plrs = str[];
+    d.emissive_old = (num)d.emissive+1;
+
+    if (!notEmpty (obj)d.collide) {
+        d.collide = {type:tobj.collide.type,resolve:""};
+    }
 
 	d.objid = toNum toStr objid;
     objid++;

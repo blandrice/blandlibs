@@ -15,7 +15,6 @@ obj[] action byteArrayToObjs(num[] byteArray) {
 		obj tobj = {};
 		# contents byte
 		num contents = byteArray[i];
-		tobj.hit = ((contents & 0x80) > 0) ? 1:0; ## contents parsing
 		i++;
 		# object id 2 bytes
 		tobj.objid = dtypes_merge2Bytes(byteArray[i],byteArray[i+1]);
@@ -66,6 +65,11 @@ obj[] action byteArrayToObjs(num[] byteArray) {
 			tobj.color = byteArray[i] | (byteArray[i+1] << 8) | (byteArray[i+2] << 16);
             i+=3;
 		}
+        if ((contents & 0x80) > 0) {
+			tobj.emissive = byteArray[i] | (byteArray[i+1] << 8) | (byteArray[i+2] << 16);
+            i+=3;
+		}
+        
 		addTo objlist tobj;
 	}
 	return objlist;
@@ -111,8 +115,9 @@ bool action updateobjproperties(obj currentObj, obj newObjData) {
         currentObj.newrot.y = (num) newObjData.rotation.y;
         currentObj.newrot.z = (num) newObjData.rotation.z;
     }
-    if ((str)newObjData.color !="undefined"){
-        currentObj.emissive = "#"+(str)newObjData.color;
+    if ((str)newObjData.emissive !="undefined"){
+        str colr = "#" + dtypes_num2hexstring((num) newObjData.emissive);
+        currentObj.emissive = colr;
     }
     return true;
 }
