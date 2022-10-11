@@ -1,0 +1,16 @@
+# ===================================================================
+# Library: \libs\ECS\ecs_h.krnk
+# Author: blandrice
+#   Description: Entity! Component!! System!!!
+# ===================================================================
+
+private action onCollideWorld(obj tobj, obj[] collist){
+
+}
+
+private action onECSUpdate(num delta, obj tobj, obj[] objlist){
+}
+
+private action onCollide(obj tobj, obj[] objlist){
+
+}

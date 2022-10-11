@@ -2,6 +2,7 @@
 #include <AABB.krnk>
 #include <plrbhvr_s.krnk>
 #include <gamestart_s.krnk>
+#include <ecs_h.krnk>
 
 
 # ===================================================================
@@ -112,3 +113,5 @@ public action onNetworkMessage(str id, obj data, str playerID) {
 #     for (num i = 0; i < lengthOf plrs; i++){
 #     }
 # }
+
+# private action onCollideWorld(obj tobj, obj[] collist){}
