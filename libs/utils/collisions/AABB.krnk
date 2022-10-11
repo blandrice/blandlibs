@@ -1,7 +1,7 @@
 # ===================================================================
 # Header: \libs\collisions\AABB.krnk
 # Author: KG07 (modified by blandrice)
-# Description: AABB (axis-aligned bounding bopx bopx) collision + resolution
+# Description: AABB (axis-aligned bounding box-box) collision + resolution
 # ===================================================================
 
 num w = 4.9;# player width
@@ -124,7 +124,7 @@ obj[] action resolve(obj cube1,obj[] cubes) {
             colside |= YNEG;
         }
         # +y
-        if(py + 2 * csy > cy && opy + 2 * csy <= ocy && side(cx, sx + csx, px) == 0 && side(cz, sz + csz, pz) == 0){
+        if(py + 2 * csy >= cy && opy + 2 * csy <= ocy && side(cx, sx + csx, px) == 0 && side(cz, sz + csz, pz) == 0){
             cube1.position.y = cy - 2 * csy;
             cube1.velocity.y = (notEmpty (obj)tcube.velocity) ? (num)tcube.velocity.y : 0;
             colside |= YPOS;
@@ -180,6 +180,113 @@ obj[] action resolve(obj cube1,obj[] cubes) {
 	
 }
 
+obj[] action detect(obj cube1,obj[] cubes) {
+    obj[] collisions = obj[];
+    num totalcolside = 0;
+	for(num i = 0; i < lengthOf cubes; i++){
+        num colside = 0;
+        obj colobj = {};
+
+        num px = (num) cube1.position.x;
+        num py = (num) cube1.position.y;
+        num pz = (num) cube1.position.z;
+        num vx = (num) cube1.velocity.x;
+        num vy = (num) cube1.velocity.y;
+        num vz = (num) cube1.velocity.z;
+        
+        num csx = (num) cube1.scale.x/2;
+        num csy = (num) cube1.scale.y/2;
+        num csz = (num) cube1.scale.z/2;
+
+        obj tcube = cubes[i];
+        num cx = (num) tcube.position.x;
+        num cy = (num) tcube.position.y;
+        num cz = (num) tcube.position.z;
+        num sx = (num) tcube.scale.x / 2;
+        num sy = (num) tcube.scale.y / 2;
+        num sz = (num) tcube.scale.z / 2;
+        num opx = px;
+        num opy = py;
+        num opz = pz;
+        num ocx = cx;
+        num ocy = cy;
+        num ocz = cz;
+        
+        if (notEmpty (obj) cube1.ogpos){
+            opx = (num)cube1.ogpos.x;
+            opy = (num)cube1.ogpos.y;
+            opz = (num)cube1.ogpos.z;
+        } if (notEmpty (obj)tcube.ogpos){
+            ocx = (num)tcube.ogpos.x;
+            ocy = (num)tcube.ogpos.y;
+            ocz = (num)tcube.ogpos.z;
+        }
+        
+        # -x
+        if(px <= cx + sx + csx && opx >= ocx + sx + csx && side(cz, sz + csz, pz) == 0 && side(cy + sy, sy + csy, py + csy) == 0){
+            if(py >= cy + 2 * sy - st && ((bool) cube1.onGround)){
+                cube1.onGround = true;
+            }
+            cube1.onWall = true;
+            colside |= XNEG;
+        }
+        # +x
+        if(px >= cx - sx - csx && opx <= ocx - sx - csx && side(cz, sz + csz, pz) == 0 && side(cy + sy, sy + csy, py + csy) == 0){
+            if(py >= cy + 2 * sy - st && ((bool) cube1.onGround)){
+                cube1.onGround = true;
+            }
+            cube1.onWall = true;
+            colside |= XPOS;
+        }
+        # -y
+        if(py <= cy + 2 * sy && opy >= ocy + 2 * sy && side(cx, sx + csx, px) == 0 && side(cz, sz + csz, pz) == 0){
+            cube1.onGround = true;
+            colside |= YNEG;
+        }
+        # +y
+        if(py + 2 * csy >= cy && opy + 2 * csy <= ocy && side(cx, sx + csx, px) == 0 && side(cz, sz + csz, pz) == 0){
+            colside |= YPOS;
+        }
+        # -z
+        if(pz <= cz + sz + csz && opz >= ocz + sz + csz && side(cx, sx + csx, px) == 0 && side(cy + sy, sy + csz, py + csz) == 0){
+            if(py >= cy + 2 * sy - st && ((bool) cube1.onGround)){
+                cube1.onGround = true;
+            }
+            cube1.onWall = true;
+            colside |= ZNEG;
+        }
+        # +z
+        if(pz >= cz - sz - csz && opz <= ocz - sz - csz && side(cx, sx + csx, px) == 0 && side(cy + sy, sy + csy, py + csy) == 0){
+            if(py >= cy + 2 * sy - st && ((bool) cube1.onGround)){
+                cube1.onGround = true;
+            }
+            cube1.onWall = true;
+            colside |= ZPOS;
+        }
+        if (colside > 0){
+            colobj = tcube;
+            addTo collisions {colside:colside,colobj:colobj};
+        } 
+        totalcolside |= colside;
+	}
+    if (notEmpty (obj)cube1.ogpos) {
+        cube1.ogpos.x = (num) cube1.position.x + 0;
+        cube1.ogpos.y = (num) cube1.position.y + 0;
+        cube1.ogpos.z = (num) cube1.position.z + 0;
+    } else {
+        cube1.ogpos = 
+        {
+            x:(num)cube1.position.x + 0,
+            y:(num)cube1.position.y + 0,
+            z:(num)cube1.position.z + 0
+        };
+    }
+    # GAME.log(collisions);
+    return collisions;
+	
+}
+
+
 obj[] action resolveplr(obj plr,bool crouch,obj[] cubes){
     if (crouch){
         plr.scale = 
@@ -197,4 +304,9 @@ obj[] action resolveplr(obj plr,bool crouch,obj[] cubes){
         };
     }
     return resolve(plr,cubes);
+}
+
+public action onPlayerSpawn(str id) {
+    obj plr = GAME.PLAYERS.findByID(id);
+    plr.scale = {x:w,y:w,z:H};
 }

@@ -1,0 +1,44 @@
+# ===================================================================
+# Library: libs\ECS\components\shake\shake_s.krnk
+# Author: blandrice
+#   Description: time to shake that!
+# ===================================================================
+
+private action onECSUpdate(num delta, obj tobj, obj[] objlist){
+    if (notEmpty (obj) tobj.shake){
+        if ((num)tobj.shake.en == 1){
+            if (!notEmpty (obj)tobj.shake.og) {
+                tobj.shake.og = {
+                    x:(num)tobj.position.x,
+                    y:(num)tobj.position.y,
+                    z:(num)tobj.position.z
+                };
+            }
+            if (!notEmpty (obj)tobj.shake.intensity) {
+                    tobj.shake.intensity = {x:1,y:0,z:1};
+            } 
+            if ((str) tobj.shake.tlastshake == "undefined"){
+                tobj.shake.tlastshake = g_tnow;
+            }
+            if ((num) tobj.shake.tlastshake == 0) {
+                tobj.shake.tlastshake = g_tnow;
+            }
+            if (g_tnow - (num)tobj.shake.tlastshake > (num)tobj.shake.duration){
+                tobj.shake.tlastshake = 0;
+                tobj.shake.en = 0;
+            } else {
+                tobj.position.x = ((num)tobj.shake.intensity.x != 0) ? (num)tobj.shake.og.x + UTILS.randInt(-(num)tobj.shake.intensity.x, (num)tobj.shake.intensity.x) : (num)tobj.position.x;
+                tobj.position.y = ((num)tobj.shake.intensity.y != 0) ? (num)tobj.shake.og.y + UTILS.randInt(-(num)tobj.shake.intensity.y, (num)tobj.shake.intensity.z) : (num)tobj.position.y;
+                tobj.position.z = ((num)tobj.shake.intensity.z != 0) ? (num)tobj.shake.og.z + UTILS.randInt(-(num)tobj.shake.intensity.z, (num)tobj.shake.intensity.z) : (num)tobj.position.z;
+            }
+        } else 
+        {
+            if (notEmpty (obj)tobj.shake.og) {
+                tobj.position.x = ((num)tobj.shake.intensity.x != 0) ? (num)tobj.shake.og.x : (num) tobj.position.x;
+                tobj.position.y = ((num)tobj.shake.intensity.y != 0) ? (num)tobj.shake.og.y : (num) tobj.position.y;
+                tobj.position.z = ((num)tobj.shake.intensity.z != 0) ? (num)tobj.shake.og.z : (num) tobj.position.z;
+                tobj.shake.og = {};
+            }
+        }
+    }
+}

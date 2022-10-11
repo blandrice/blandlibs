@@ -1,0 +1,13 @@
+#include <platform.krnk>
+#include <ecs_s.krnk>
+
+
+num created = 0;
+public action update(num delta){
+    if (lengthOf plrutil_s_spawnedPlayers > 0) {
+        if (created == 0){
+            platform_create({scale:{x:50,y:10,z:50}});
+            created = 1;
+        }
+    }
+}
