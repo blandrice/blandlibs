@@ -148,7 +148,6 @@ obj action createObj(obj newObjData) {
     return {};
 }
 
-
 action lerpObj(num delta) {
     interpM = Math.min(1.5, (GAME.TIME.now() - newTime) / dataBuffer);
     for (num i = 0; i < lengthOf objlist; i++){
@@ -276,13 +275,15 @@ public action onNetworkMessage(str id, obj data) {
         if ((str)data.pcnt != "undefined" && (num)data.pcnt == 100)
         {
             # data sent, perform decode and update objects
-            obj[] netobjs = syncobjs_h_byteArrayToObjs(b91_decode(netdata));
+            obj decodeddata = syncobjs_h_byteArrayToObjs(b91_decode(netdata));
+            obj[] netobjs = (obj[]) decodeddata.objlist;
             oldTime = newTime;
             newTime = GAME.TIME.now();
             dataBuffer = newTime - oldTime;
             
             updateobjs(netobjs);
-            num[] newdellist = (num[]) data.dellist;
+            num[] newdellist = (num[]) decodeddata.delList;
+            # num[] newdellist = (num[]) data.dellist;
             for (num i = 0; i < lengthOf newdellist; i++) {
                 deleteobj(newdellist[i]);
             }

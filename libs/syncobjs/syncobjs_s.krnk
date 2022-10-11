@@ -1,3 +1,4 @@
+#include <g.krnk>
 #include <dtypes.krnk>
 #include <b91.krnk>
 #include <strutils.krnk>
@@ -17,12 +18,28 @@ num MAXLEN_NETDATA = 1500;
 # object contents
 num[] action objsToByteArray(obj[] objlist,bool reset, obj plr, obj[] plrs) {
 	num[] retArray = num[];
+    num[] delArray = num[];
+    num totalobjs = 0;
+
+    # 1 byte length of objects
+    addTo retArray 0;
+
+    # 1 byte length of del list
+    addTo retArray 0;
+
 	for (num i = 0; i < lengthOf objlist; i++) {
 		obj tObj = objlist[i];
-		num[] tArray = num[];
+        if ((str)tObj.del != "undefined" && (bool)tObj.del == true){
+            if (!listutil_instrlist((str)plr.id,(str[])tObj.delplrids)){
+                addTo (str[])tObj.delplrids (str)plr.id;
+                addTo delArray toNum (str) tObj.objid;
+                continue;
+            }
+        } else{
+            totalobjs++;
+        }
 
-        # 1 byte length of objects
-        addTo retArray lengthOf objlist;
+		num[] tArray = num[];
 
 		# 1 byte (8bits) object contents
 		num contents = 0x00;
@@ -151,6 +168,12 @@ num[] action objsToByteArray(obj[] objlist,bool reset, obj plr, obj[] plrs) {
         }
 		retArray[contentsidx] = contents;
 	}
+
+    for (num i = 0; i < lengthOf delArray; i++){
+        addTo retArray delArray[i];
+    }
+    retArray[0] = totalobjs;
+    retArray[1] = lengthOf delArray;
 	return retArray;
 }
 
@@ -220,9 +243,13 @@ obj action createObject(obj d) {
 bool action deleteObject(str id) {
     for (num i = lengthOf objlist - 1; i >= 0; i--) {
         if ((str) objlist[i].objid == id) {
-            addTo newdellist toNum objlist[i].objid;
-            remove objlist[i];
-            return true;
+            if ((str)objlist[i].del == "undefined" || (bool)objlist[i].del == false){
+                # addTo newdellist toNum objlist[i].objid;
+                # remove objlist[i];
+                objlist[i].del=true;
+                objlist[i].delplrids=str[];
+                return true;
+            }
         }
     }
     return false;
@@ -230,8 +257,11 @@ bool action deleteObject(str id) {
 
 action deleteAllObjs(){
     for (num i = lengthOf objlist - 1; i >= 0; i--) {
-        addTo newdellist toNum objlist[i].objid;
-        remove objlist[i];
+        # addTo newdellist toNum objlist[i].objid;
+        # remove objlist[i];
+        objlist[i].del=true;
+        objlist[i].delplrids=str[];
+        
     }
 }
 
@@ -258,7 +288,7 @@ public action start() {
 }
 
 public action update(num delta) {
-	tnow = GAME.TIME.now();
+	tnow = g_tnow;
 
     # Broadcast Synced Objects data
     if ((tnow - tlastbroadcast) > SYNC_INTERVAL) {
@@ -319,16 +349,29 @@ public action update(num delta) {
         
             # pcnt is percentage of load complete
             num pcnt = Math.floor(( 1 - ((lengthOf (str) plr.netdata) / ((num)plr.netdatalen * MAXLEN_NETDATA)))*100);
-            success = GAME.NETWORK.send("sync", {d:datatosend, dellist:newdellist,pcnt:pcnt,rst:(bool)plr.netreset ? 1:0}, (str)plrs[i].id);    
+            # success = GAME.NETWORK.send("sync", {d:datatosend, dellist:newdellist,pcnt:pcnt,rst:(bool)plr.netreset ? 1:0}, (str)plrs[i].id);    
+            success = GAME.NETWORK.send("sync", {d:datatosend,pcnt:pcnt,rst:(bool)plr.netreset ? 1:0}, (str)plrs[i].id);    
             if (!success) {
                 GAME.log("ERROR: sync not sent!!!");
-                GAME.log({d:datatosend, dellist:newdellist,pcnt:pcnt,rst:(bool)plr.netreset ? 1:0});
+                GAME.log({d:datatosend,pcnt:pcnt,rst:(bool)plr.netreset ? 1:0});
+                # GAME.log({d:datatosend, dellist:newdellist,pcnt:pcnt,rst:(bool)plr.netreset ? 1:0});
+            } 
+        }
+
+        # find all objects that are fully deleted (sent delete to all players)
+        for (num i = lengthOf objlist - 1; i >= 0; i--)
+        {
+            obj tObj = objlist[i];
+            if ((str)tObj.del != "undefined" && (bool)tObj.del == true){
+                if (lengthOf (str[])tObj.delplrids >= lengthOf plrs){
+                    remove objlist[i];
+                }
             }
-            plr.netreset = false;
         }
-        if (success) {
-            newdellist = num[];
-        }
+
+        # if (success) {
+        #     newdellist = num[];
+        # }
     }
 }
 

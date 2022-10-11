@@ -1,0 +1,38 @@
+#include <plrbhvr_s.krnk>
+#include <platform.krnk>
+
+#include <ecs_s.krnk>
+
+
+num WIDTH = 30;
+num HEIGHT = 5;
+num SEP = 10;
+num created = 0;
+num dimplat = 4;
+num LAYERS = 3;
+num LAYERS_OFFSET = 100;
+num HEIGHT_START = 100;
+num offset = (dimplat-1)*(WIDTH+SEP)/2;
+
+public action start(){
+    # if (created == 0){
+    for (num i = 0; i < dimplat; i++){
+        for (num j = 0; j < dimplat; j++){
+            for (num k = 0; k < LAYERS; k++){
+                platform_create({
+                scale:{x:WIDTH,y:HEIGHT,z:WIDTH},
+                position:{x:i*(WIDTH + SEP) - offset,y:HEIGHT_START+k*LAYERS_OFFSET,z:j*(WIDTH + SEP) - offset}
+            });
+            }
+            
+        }
+    }
+        # created = 1;
+    # }
+}
+
+public action onGameEnd() {
+    syncobjs_s_deleteAllObjs();
+}
+
+

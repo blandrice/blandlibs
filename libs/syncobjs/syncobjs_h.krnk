@@ -5,15 +5,19 @@
 # ===================================================================
 
 # Binary decoding of an array of bytes to Objects
-obj[] action byteArrayToObjs(num[] byteArray) {
+obj action byteArrayToObjs(num[] byteArray) {
 	obj[] objlist = obj[];
+	num[] delList = num[];
 	num i = 0;
 	num j = 0;
 	num totalobjs = 0;
-	if (lengthOf byteArray > 0)
+	num totaldelobjs = 0;
+	if (lengthOf byteArray >=2)
 	{
         totalobjs = byteArray[0];
         i++;
+		totaldelobjs = byteArray[1];
+		i++;
     } else
 	{
         return objlist;
@@ -81,5 +85,13 @@ obj[] action byteArrayToObjs(num[] byteArray) {
 		addTo objlist tobj;
 		j++;
 	}
-	return objlist;
+	for (num k = 0; k < totaldelobjs; k++){
+		addTo delList byteArray[i+k];
+		# GAME.log("new delete object with id",byteArray[i+k]);
+		i++;
+		
+	}
+
+
+	return {objlist:objlist,delList:delList};
 }

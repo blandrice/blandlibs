@@ -141,7 +141,7 @@ def reformatlibfile(libpath, klibname):
     for var in globalvars:
         # newText = newText.replace(var, klibname+"_"+var)
         newText = re.sub(
-            r'(?<![a-zA-Z0-9_.]){}(?![a-zA-Z0-9_])'.format(var), klibname+"_"+var, newText)
+            r'(?<![a-zA-Z0-9_.\"]){}(?![a-zA-Z0-9_\"])'.format(var), klibname+"_"+var, newText)
     # print(globalactions)
     for act in globalactions:
         newText = re.sub(

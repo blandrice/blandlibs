@@ -1,3 +1,4 @@
+#include <g.krnk>
 #include <plrutil_s.krnk>
 # ===================================================================
 # Library: libs\utils\plrbehavior\plrbhvr_s.krnk
@@ -5,6 +6,10 @@
 #   Description: disable server sync + behavior for custom movement
 #   send plr position/vel to server manually
 # ===================================================================
+
+num tlastbroadcast = 0;
+num INTERVAL_BROADCAST = 100;
+str[] plrsleft = str[];
 
 public action start(){
     GAME.DEFAULT.disableServerSync();
@@ -20,5 +25,44 @@ public action onNetworkMessage(str id, obj data, str playerID) {
         plr.velocity.x = (num)data.velocity.x;
         plr.velocity.y = (num)data.velocity.y;
         plr.velocity.z = (num)data.velocity.z;
+        plr.rotation.x = (num)data.rotation.x;
+        plr.rotation.y = (num)data.rotation.y;
     }   
+}
+
+public action update(num delta) {
+    obj[] plrs = GAME.PLAYERS.list();
+    obj[] plrsposrot = obj[];
+    if ((g_tnow - tlastbroadcast) > INTERVAL_BROADCAST){
+        tlastbroadcast = g_tnow;
+
+        for (num i = 0; i < lengthOf plrs; i++){
+            obj plr = plrs[i];
+            addTo plrsposrot {
+                n: (str)plr.username,
+                id: (str)plr.id,
+                pos:{
+                    x:Math.round((num)plr.position.x),
+                    y:Math.round((num)plr.position.y),
+                    z:Math.round((num)plr.position.z)
+                },
+                rot: {
+                    x:Math.roundDecimal((num)plr.rotation.x,2),
+                    y:Math.roundDecimal((num)plr.rotation.y,2)
+                }
+            };
+        }
+        GAME.NETWORK.broadcast("plrs", {plrs:plrsposrot,left:plrsleft});
+        plrsleft = str[];
+    }
+    
+    
+}
+
+public action onPlayerSpawn(str id) {}
+public action onPlayerDeath(str id, str killerID) {}
+public action onPlayerLeave(str playerID) {
+    GAME.log("player left");
+    addTo plrsleft playerID;
+
 }

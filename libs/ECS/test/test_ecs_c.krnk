@@ -18,7 +18,6 @@ public action onKeyPress(str key, num code) {
 
 public action update(num delta){
     if (lengthOf syncobjs_c_objlist != prevovjlen){
-        GAME.log("number of objects: ", lengthOf syncobjs_c_objlist);
         prevovjlen = lengthOf syncobjs_c_objlist;
     }
     

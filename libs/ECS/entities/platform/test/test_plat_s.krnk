@@ -1,13 +1,31 @@
+#include <plrbhvr_s.krnk>
 #include <platform.krnk>
 #include <ecs_s.krnk>
 
 
+num WIDTH = 30;
+num HEIGHT = 5;
+num SEP = 10;
 num created = 0;
 public action update(num delta){
     if (lengthOf plrutil_s_spawnedPlayers > 0) {
         if (created == 0){
-            platform_create({scale:{x:50,y:10,z:50}});
+            for (num i = 0; i < 5; i++){
+                for (num j = 0; j < 5; j++){
+                    for (num k = 0; k < 6; k++){
+                        platform_create({
+                        scale:{x:WIDTH,y:HEIGHT,z:WIDTH},
+                        position:{x:i*(WIDTH + SEP),y:k*50,z:j*(WIDTH + SEP)}
+                    });
+                    }
+                    
+                }
+            }
             created = 1;
         }
     }
+}
+
+private action onGameInit(){
+    GAME.log("game initialized");
 }

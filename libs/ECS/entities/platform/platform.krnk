@@ -23,8 +23,8 @@ action create(obj props){
         emissive:0x000000,
         onGround:false,
         collide:{type:0x1|0x4},
-        plat:{crumble:3,int_crumble:1000,tlastcrumble:0,lifetime:2000},
-        shake:{x:0,y:0,z:0,en:0,intensity:{x:1,y:0,z:1},duration:900}
+        plat:{crumble:3,int_crumble:500,tlastcrumble:0,lifetime:1000},
+        shake:{x:0,y:0,z:0,en:0,intensity:{x:1,y:0,z:1},duration:400}
     };
     if (notEmpty (obj)props.position){
         newObj.position.x = (num)props.position.x;
@@ -63,9 +63,8 @@ private action onCollidePlrs(obj tobj, obj[] plrs){
 private action onECSUpdate(num delta, obj tobj, obj[] objlist){
     if (notEmpty (obj) tobj.plat){
         if ((num)tobj.plat.crumble == 0 && (g_tnow - (num)tobj.plat.tlastcrumble) > (num)tobj.plat.lifetime){
-            GAME.log("deleting object");
-            GAME.log(tobj);
             syncobjs_s_deleteObject((str)tobj.objid);
+            
         }
     }
 }

@@ -1,0 +1,20 @@
+#include <ecs_c.krnk>
+
+public action onKeyPress(str key, num code) {
+    # if (key == "t"){
+    #     GAME.NETWORK.send("reset", {});
+    # }
+    # if (key == "y"){
+    #     GAME.NETWORK.send("more", {});
+    # }
+    # if (key == "r") {
+    #     GAME.NETWORK.send("refreshobjs", {});
+    #     GAME.log("client requesting refresh");
+    # }
+}
+
+
+public action update(num delta){
+    
+    
+}

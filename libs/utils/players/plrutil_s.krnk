@@ -1,3 +1,4 @@
+#include <g.krnk>
 # ===================================================================
 # Library: \libs\spawnedPlayers\plrutil_s.krnk
 # Author: blandrice
@@ -7,11 +8,13 @@
 str[] spawnedPlayers = str[];
 bool sologame = true;
 num tFirstSpawnedPlayer = 0;
+num tLastSpawnedPlayer = 0;
 
 
 public action start() {
     spawnedPlayers = str[];
     tFirstSpawnedPlayer = 0;
+    tLastSpawnedPlayer = 0;
     sologame = true;
 }
 
@@ -43,6 +46,7 @@ public action onNetworkMessage(str id, obj data, str playerID) {
         }
         if (!hasSpawned) {addTo spawnedPlayers playerID;}
         if (lengthOf spawnedPlayers >= 2) {sologame = false;}
-        if (tFirstSpawnedPlayer == 0) {tFirstSpawnedPlayer = GAME.TIME.now();}
+        if (tFirstSpawnedPlayer == 0) {tFirstSpawnedPlayer = g_tnow;}
+        tLastSpawnedPlayer = g_tnow;
     }
 }
