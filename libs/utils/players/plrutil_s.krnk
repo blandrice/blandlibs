@@ -42,7 +42,10 @@ public action onNetworkMessage(str id, obj data, str playerID) {
     if (id == "spawn") {
         bool hasSpawned = false;
         for (num i = 0; i < lengthOf spawnedPlayers; i++) {
-            hasSpawned = (spawnedPlayers[i] == id) ? true : hasSpawned;
+            if (spawnedPlayers[i] == id) {
+                hasSpawned = true;
+                break;
+            }
         }
         if (!hasSpawned) {addTo spawnedPlayers playerID;}
         if (lengthOf spawnedPlayers >= 2) {sologame = false;}

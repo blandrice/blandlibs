@@ -59,8 +59,8 @@ public action update(num delta) {
     
 }
 
-public action onPlayerSpawn(str id) {}
-public action onPlayerDeath(str id, str killerID) {}
+# public action onPlayerSpawn(str id) {}
+# public action onPlayerDeath(str id, str killerID) {}
 public action onPlayerLeave(str playerID) {
     GAME.log("player left");
     addTo plrsleft playerID;

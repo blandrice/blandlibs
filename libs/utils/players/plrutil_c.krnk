@@ -19,6 +19,9 @@ public action onPlayerSpawn(str id) {
 }
 
 public action onPlayerDeath(str id, str killerID) {
-    imspawned = false;
+    obj tplr = GAME.PLAYERS.findByID(id);
+    if ((bool)tplr.isYou) {
+        imspawned = false;    
+    }
 }
 
