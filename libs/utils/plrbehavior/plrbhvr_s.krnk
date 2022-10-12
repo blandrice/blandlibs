@@ -66,3 +66,7 @@ public action onPlayerLeave(str playerID) {
     addTo plrsleft playerID;
 
 }
+
+public action onGameEnd(){
+    GAME.NETWORK.broadcast("clrplrs", {});
+}

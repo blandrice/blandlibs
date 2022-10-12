@@ -10,7 +10,7 @@ num SEP = 10;
 num created = 0;
 num dimplat = 4;
 num LAYERS = 3;
-num LAYERS_OFFSET = 100;
+num LAYERS_OFFSET = 60;
 num HEIGHT_START = 100;
 num offset = (dimplat-1)*(WIDTH+SEP)/2;
 

@@ -175,6 +175,12 @@ public action onNetworkMessage(str id, obj data) {
                 };
             }
         }
+    } else if (id == "clrplrs"){
+        for (num i = lengthOf plrs - 1; i >= 0; i++){
+            obj plr = plrs[i];
+            plr.model.delete();
+            remove plrs[i];
+        }
     }
 }
 
@@ -193,13 +199,13 @@ public action onPlayerDeath(str id, str killerID) {
     }
 }
 
-public action onGameEnd(){
-    for (num i = lengthOf plrs - 1; i >= 0; i++){
-        obj plr = plrs[i];
-        plr.model.delete();
-        remove plrs[i];
-    }
-}
+# public action onGameEnd(){
+#     for (num i = lengthOf plrs - 1; i >= 0; i++){
+#         obj plr = plrs[i];
+#         plr.model.delete();
+#         remove plrs[i];
+#     }
+# }
 
 public action start(){
     self = GAME.PLAYERS.getSelf();
