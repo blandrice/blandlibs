@@ -205,7 +205,7 @@ obj action createObject(obj d) {
     d.type_old_plrs = str[];
     if ((str) d.aid == "undefined") {d.aid = tobj.aid;}
     d.aid_old_plrs = str[];
-    d.type_old = (num)d.type + 1;
+    d.aid_old = (num)d.aid + 1;
     if (!notEmpty (obj) d.scale) {d.scale = tobj.scale;}
     d.scale_old_plrs = str[];
     d.scale_old = {x:0,y:0,z:(num)d.scale.z+1};
