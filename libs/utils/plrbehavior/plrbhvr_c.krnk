@@ -22,6 +22,12 @@ num oldTime = 0;
 num dataBuffer = 0;
 num interpM = 0;
 
+# walking on platforms
+bool cr = false;
+num MAXWALKSPEED = 0.04;
+num tnow = 0;
+
+
 action lerpPlrs(num delta) {
     interpM = Math.min(1.5, (g_tnow - newTime) / dataBuffer);
     for (num i = 0; i < lengthOf plrs; i++){
@@ -246,5 +252,57 @@ public action onPlayerUpdate(str id, num delta, obj inputs) {
             }
         };
     }
-}
 
+    tnow = g_tnow;
+    cr = (bool)inputs.crouch;
+    obj tPlr = GAME.PLAYERS.findByID(id);
+    
+    if (notEmpty tPlr) {
+        obj[] res = AABB_resolveplr(tPlr,cr,syncobjs_c_objlist);
+        if ((str)tPlr.tOnObjIdle == "undefined"){
+            tPlr.tOnObjIdle = 0;
+        } 
+        if ((str)tPlr.tOnObjMov == "undefined"){
+            tPlr.tOnObjMov = 0;
+        } 
+        for (num i = 0; i < lengthOf res; i++){
+            obj cdata = res[i];
+            num colside = (num) cdata.colside;
+            obj cobj = (obj)cdata.colobj;
+
+            if (colside == AABB_YNEG){
+                if ((str)inputs.movDir !="undefined"){
+                    if ((num)tPlr.tOnObjMov == 0)
+                    {
+                        tPlr.tOnObjMov = tnow;
+                        tPlr.tOnObjIdle = 0;
+                    } 
+                    num movDir = (num)inputs.movDir;
+                    movDir -= ((num)inputs.mouseX);
+                    # velocity relative to moving platform
+                    if (Math.abs((num) cobj.velocity.x) > 0) {
+                        tPlr.velocity.x = (num)cobj.velocity.x + (MAXWALKSPEED * Math.cos(movDir)) * (tnow-(num)tPlr.tOnObjMov)/((tnow-(num)tPlr.tOnObjMov)+100) ;
+                    }
+                    if (Math.abs((num) cobj.velocity.z) > 0) {
+                        tPlr.velocity.z = (num)cobj.velocity.z + (MAXWALKSPEED * Math.sin(movDir)) * (tnow-(num)tPlr.tOnObjMov)/((tnow-(num)tPlr.tOnObjMov)+100) ;
+                    }
+                }
+                else
+                {
+                    if ((num)tPlr.tOnObjIdle ==0) 
+                    {
+                        tPlr.tOnObjIdle = tnow;
+                        tPlr.tOnObjMov = 0;
+                    } 
+                    # deccelerate relative to moving platform
+                    if (Math.abs((num) cobj.velocity.x) > 0) {
+                        (num) tPlr.velocity.x += ((num)cobj.velocity.x - (num)tPlr.velocity.x) * (tnow-(num)tPlr.tOnObjIdle)/((tnow-(num)tPlr.tOnObjIdle)+150);
+                    } 
+                    if (Math.abs((num) cobj.velocity.z) > 0) {
+                        (num) tPlr.velocity.z += ((num)cobj.velocity.z - (num)tPlr.velocity.z) * (tnow-(num)tPlr.tOnObjIdle)/((tnow-(num)tPlr.tOnObjIdle)+150);
+                    } 
+                } 
+            }   
+        }
+    }
+}
