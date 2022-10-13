@@ -1,0 +1,1044 @@
+# ===================================================================
+# Header: \libs\utils\global\g.krnk
+# Author: blandrice
+#   Description: some global vars that other libs can reference to reduce calls
+# ===================================================================
+
+
+num g_tnow = 0;
+
+action g_update(num delta){
+    g_tnow = GAME.TIME.now();
+}
+# ===================================================================
+# Header: \libs\float\dtypes.krnk
+# Author: blandrice
+#   Description: custom float data types--> binary representation calculations.
+#   Goal was to pack float data into 16-bits and send over NetworkMessage 
+#   (much smaller than ASCII string representation)
+# ===================================================================
+num action dtypes_findMSBLoc(num v){
+	# v better be an integer u dumbo
+	num r = -1;
+	# v = v >> 1;
+	while (v > 0) {
+		r++;
+		v = v >> 1;
+	}
+	return r;
+}
+num action dtypes_fmod(num x, num r){
+	return x - (r*Math.floor(x / r));	
+}
+str action dtypes_printBinary(num f){
+	str retstr = "";
+	for (num i = 32-1; i >= 0; i--) {
+		retstr += toStr (f >> i & 0x1);
+	}
+	return retstr;
+}
+num action dtypes_ones(num f){
+	num retnum = 0;
+	for (num i = 0; i < f; i++){
+		retnum = (retnum << 1) | 1;
+	}
+	return retnum;	
+}
+
+
+# adapted from IEEE 754 Standard for Single Precision 32 bit floating
+# but allows for you to select # of exponent / mantissa bits
+# half-precision (16 bit), single-precision (32 bit)
+# num dtypes_MAX_BITS = 32; num BITS_EXP = 8;
+num dtypes_MAX_BITS = 16; num BITS_EXP = 5; 
+#don't change to something like 16-3.. error up to 30 units observed
+
+# (e.g. 32-bit) from left to right:
+# 1 bit - Sign bit (2's complement) += (-1) * 2^place in exponent
+# 8 bits - Exponent (2^e)
+# 23 bits - Mantissa (part after decimal)
+# range = 2^BITS_EXP 
+# precision = 1/(2^dtypes_BITS_MANT)
+
+num dtypes_BIAS = 2**(BITS_EXP-1)-1;
+num dtypes_BITS_MANT = dtypes_MAX_BITS - 1 - BITS_EXP;
+num dtypes_SIGN_LOC = dtypes_MAX_BITS-1;
+
+num action dtypes_numToFloat16(num data) {
+	# 1. determine the sign bit
+	num signbit = 0;
+	if (data < 0) {signbit = 1; data = -data;}
+    if (data == 0) {return 0;}
+	# 2. Convert  whole / decimal bits to pure binary
+	num whole = Math.floor(data); # floor it so it's just an integer (will be between 0 and 2^bitsexp). max is the 2 ^ bits of the exponent
+	num decimal = (data - whole > 0) ? data - whole : 0;
+	num decbit = 0x000; 
+	for (num i = 0; i < dtypes_BITS_MANT; i++){ # convert decimals into binary
+		decimal *= 2;
+		num tdecbit = (decimal >= 1 ? 1 : 0);
+		decbit |=  tdecbit << (dtypes_BITS_MANT-1-i); # 12 - i 
+		if (decimal >= 1) {decimal -=1;}
+	}
+		# GAME.log("decbit",dtypes_printBinary(decbit));
+
+	num purbinary = (whole << dtypes_BITS_MANT) | decbit;
+		# GAME.log("purbinary",dtypes_printBinary(purbinary));
+		# GAME.log("dtypes_findMSBLoc(purbinary)",dtypes_findMSBLoc(purbinary));
+	
+	# 3. normalize to determine mantissa and unbiased exponent
+	num unbiasedexp = dtypes_findMSBLoc(purbinary) - dtypes_BITS_MANT;
+		# GAME.log("unbiasedexp",unbiasedexp);
+	# 4. determine biased exponent
+	num biasedexp = unbiasedexp + dtypes_BIAS;
+	# 5. remove leading 1 (MSB)
+		# align first
+	num mantissa = purbinary;
+	num alignmantissa = (dtypes_BITS_MANT-1)-dtypes_findMSBLoc(mantissa);
+	if (alignmantissa > 0) {
+		mantissa = mantissa << alignmantissa;
+	} else {
+		mantissa = mantissa >> (-1 * alignmantissa);
+	}
+	mantissa = (mantissa ^ (1 << (dtypes_findMSBLoc(mantissa)))) << 1; # remove leading 1
+		# GAME.log("mantissa:",dtypes_printBinary(mantissa));
+		# GAME.log("left-shift by:",alignmantissa);	
+	num float16 = (signbit << dtypes_SIGN_LOC) | (biasedexp << dtypes_BITS_MANT) | ( mantissa );
+	return float16;
+}
+
+num action dtypes_float16ToNum(num f) {
+	if (f == 0) {return 0;}
+    # Determine sign
+	num sign = (((f >> dtypes_SIGN_LOC) & 0x1) > 0) ? -1 : 1;
+	# Determine exponent 2*e 
+	num exp = (f >> dtypes_BITS_MANT) & dtypes_ones(BITS_EXP); 
+	exp -= dtypes_BIAS;
+	# Convert mantissa to denary
+	num mantissa = f & dtypes_ones(dtypes_BITS_MANT);
+	# GAME.log("mantissa: ", dtypes_printBinary(mantissa));
+	num mantden = 0;
+	for (num i = dtypes_findMSBLoc(mantissa); i >=0 ; i--) {
+		num tman = 1/(2**(dtypes_BITS_MANT-i)) * ((mantissa >> i) & 0x1);
+		mantden += tman;
+		
+	}
+	mantden += 1; # add 1 back 
+	num Rad = sign * mantden * (2 ** exp);
+	return Rad;
+}
+
+num action dtypes_numToUint16(num x){
+	return (x & 0xFFFF); # cap 65536 
+}
+
+num action dtypes_numToInt16(num x){
+	# return (x & 0xFF); # cap 65536 
+	num retnum = 0;
+	x = Math.round(x);
+	x = (x > 32767) ? 32767 : x;
+	x = (x < -32767) ? -32767 : x;
+	# cap to largest / smallest int size
+
+	num sign = x < 0 ? 1 : 0;
+
+	if (sign == 1) {
+		x = -x;
+	}
+	retnum |= sign << 15;
+
+	num i = 14; # 15 - 1
+	while (x > 0) {
+		if (x / (2**i) >= 1) {
+			retnum |=  (1 << i);
+			x-= (2**i);
+		}
+		i--;
+	}
+	return retnum;
+}
+
+num[] action dtypes_numTo_uint16ByteArray(num data) {
+	data = Math.round(data);
+	num[] retArray = num[];
+	addTo retArray (data >> 8) & 0xff;
+	addTo retArray (data >> 0) & 0xff;
+	
+	return retArray;
+
+}
+
+num action dtypes_merge2Bytes(num a,num b) {
+	return (b << 8) | a;
+}
+
+num action dtypes_Int16ToNum(num bin) {
+	# num bin = (b << 0xff) | a;
+	num sign = ((bin & 0x8000) > 0) ? -1 : 1;
+	num denary = bin & 0x7FFF;
+
+	return sign * denary;
+}
+
+# int Numbers to byte array
+num[] action dtypes_int16toByteArray(num data){
+	return num[((data >> 0) & 0xff),(data >> 8) & 0xff];
+}
+
+num[] action dtypes_ColorToByteArray(num color) {
+	num[] retArray = num[];
+	addTo retArray (color >> 0) & 0xff;
+	addTo retArray (color >> 8) & 0xff;
+	addTo retArray (color >> 16) & 0xff;
+	
+	return retArray;
+}
+
+str[] dtypes_lookup = str["0","1","2","3","4","5","6","7","8","9","A","B","C","D","E","F"];
+
+str action dtypes_num2hexstring(num n){
+	str hexstr = "";
+	for (num i =0; i < 6; i++){
+		hexstr = dtypes_lookup[n & 0xF] + hexstr;
+		n = n >> 4;
+	}
+	return hexstr;
+}
+
+num action dtypes_hexstring2num(str h){
+	num n = 0;
+	h = UTILS.toUpper(h);
+	for (num i = 0; i < lengthOf h; i++){
+		for (num j = 0; j < lengthOf dtypes_lookup; j++){
+			if (dtypes_lookup[j] == h[i]){
+				n |= j << (lengthOf h - 1 - i)*4;
+				break;
+			}
+		}
+	}
+	return n;
+}
+
+num action dtypes_constrainRadians(num x){
+	x = dtypes_fmod(x,Math.PI2);
+	if (x < 0){
+		x += 360;
+	}
+    return x;
+}
+
+
+# ===================================================================
+# Header: b91encoding\b91.krnk
+# Author: SlxTnT
+# Description: Base91 decoding converted from https://github.com/KvanTTT/BaseNcoding
+# ===================================================================
+
+
+obj b91_base91 = {
+    alphabet: "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!#$%&()*+,./:;<=>?@[]^_`{|}~-"
+};
+
+# Recursion due to loop limits
+num action b91_getValue(str c, num index) {
+	if(index >= lengthOf b91_base91.alphabet) {
+		return -1;
+	}
+	
+	if((str)b91_base91.alphabet[index] == c) {
+		return index;
+	}
+	
+	return b91_getValue(c, index + 1);
+}
+
+num[] action b91_decode(str data) {
+    num dv = -1;
+    num dn = 0;
+    num dbq = 0;
+    num[] result = num[];
+
+    for(num i = 0; i < lengthOf data; i++) {
+        num iv = b91_getValue(data[i], 0);
+
+        if(iv == -1) { continue; }
+
+        if(dv == -1) {
+            dv = iv; 
+        }
+        else {
+            dv += iv * 91;
+            dbq |= (dv << dn);
+
+            if((dv & 8191) > 88) {
+                dn += 13;
+            }
+            else {
+                dn += 14;
+            }
+
+            # do ... while?
+            bool first = true;
+
+            while(first || dn > 7) {
+                addTo result dbq % 256;
+                dbq >>>= 8;
+                dn -= 8;
+                
+                first = false;
+            }
+
+            dv = -1;
+        }
+    }
+
+	if(dv != -1) {
+		addTo result (dbq | dv << dn) & 255;
+	}
+
+	return result;
+}
+
+# Being used server-side
+str action b91_encode(num[] data) {
+    num en = 0;
+    num ebq = 0;
+    str result = "";
+
+	for(num i = 0; i < lengthOf data; i++) {
+		ebq |= (data[i] & 255) << en;
+		en += 8;
+		
+		if(en > 13) {
+			num ev = ebq & 8191;
+			
+			if(ev > 88) {
+				ebq >>>= 13;
+				en -= 13;
+			}
+			else {
+				ev = ebq & 16383;
+				ebq >>>= 14;
+				en -= 14;
+			}
+			
+			num quotient = Math.floor(ev / 91);
+			num remainder = ev % 91;
+		
+			result += (str)b91_base91.alphabet[remainder];
+			result += (str)b91_base91.alphabet[quotient];
+		}
+	}
+
+	if(en > 0) {
+			num quotient = Math.floor(ebq / 91);
+			num remainder = ebq % 91;
+
+			result += (str)b91_base91.alphabet[remainder];
+
+			if(en > 7 || ebq > 90) {
+				result += (str)b91_base91.alphabet[quotient];
+			}
+	}
+
+	return result;
+}
+# ===================================================================
+# Header: \strutils\strutils.krnk
+# Author: blandrice, ProfNoob (replaceall), ManiaMapper (Splice)
+# Description: Additional String utilities
+# ===================================================================
+str action strutils_truncate(str text, num ln) {
+    str ret = "";
+    for (num i = 0; i < ln; i++) {
+        ret += text[i];
+    }
+    return ret;
+}
+
+str action strutils_splice(str input, num start, num end) {
+    num charsLen = lengthOf input;
+    if(charsLen == 0 || start >= charsLen || start >= end) {
+        return '';
+    }
+    if(end > charsLen) {
+        end = charsLen;
+    }
+    str output = '';
+    for(num i = start; i < end; i++) {
+        output += input[i];
+    }
+    return output;
+}
+
+bool action strutils_starts(str text,str value) {
+    if (UTILS.textContains(strutils_truncate(text, lengthOf value), value)) {return true;} 
+	return false;}
+
+str[] action strutils_split(str s, str delim) {
+	str[] output = str[];
+	num idx_matchstart = 0;
+
+    # iterate over string
+    for(num i = 0; i < lengthOf s; i++) {
+        bool match = false;
+        
+        # match delimiter
+        for (num j = 0; j < lengthOf delim; j++) {
+			match = true;
+            if (s[i+j] != delim[j]) {
+				match = false; break;
+			}
+		}
+
+        # matches, parse out the string previous
+        if (match) { 
+            str word = "";
+            for (num j = idx_matchstart; j < i; j++) {
+                word += s[j];
+            }
+            addTo output word;
+
+            # skip delimiter
+            i += lengthOf delim - 1;
+            idx_matchstart = i+1;
+        }
+    } 
+    
+    # also parse last string
+    str word = "";
+    for (num i = idx_matchstart; i < lengthOf s; i++) {
+        word += s[i];
+    }
+    addTo output word;
+
+	return output;
+}
+
+str action strutils_replace_all(str string, str to_replace, str replace_with){
+    while(UTILS.replaceText(string, to_replace, replace_with) != string){
+        string = UTILS.replaceText(string, to_replace, replace_with);
+    }
+    return string;
+}
+
+# ===================================================================
+# Header: libs\utils\lists\listutil.krnk
+# Author: blandrice
+# Description: Additional string utilities
+# ===================================================================
+
+num action listutil_minlist(num[] list){
+    if (lengthOf list > 2){
+        num min = list[0];
+        for (num i = 1; i < lengthOf list; i++){
+            min = (list[i] < min) ? list[i] : min;
+        }
+		return min;
+    } else if (lengthOf list == 1){
+        return list[0];
+    }
+    else if (lengthOf list == 2) {
+        return Math.min(list[0],list[1]);
+    }
+    return 0;
+}
+
+bool action listutil_instrlist(str s, str[] list){
+    for(num i = 0; i < lengthOf list; i++){
+        if (s == list[i]) {
+            return true;
+        }
+    }
+    return false;
+}
+# ===================================================================
+# header: \libs\syncobjs\syncobjs_h.krnk
+# Author: blandrice
+#   Description: not ready!
+# ===================================================================
+
+# Binary decoding of an array of bytes to Objects
+obj action syncobjs_h_byteArrayToObjs(num[] byteArray) {
+	obj[] objlist = obj[];
+	num[] delList = num[];
+	num i = 0;
+	num j = 0;
+	num totalobjs = 0;
+	num totaldelobjs = 0;
+	if (lengthOf byteArray >=2)
+	{
+        totalobjs = byteArray[0];
+        i++;
+		totaldelobjs = byteArray[1];
+		i++;
+    } else
+	{
+        return objlist;
+    }
+	
+	while (j < totalobjs){
+		obj tobj = {};
+		# contents byte
+		num contents = byteArray[i];
+		i++;
+		# object id 2 bytes
+		tobj.objid = dtypes_merge2Bytes(byteArray[i],byteArray[i+1]);
+		i+=2;
+		# 4 bytes health / fullhealth
+		if ((contents & 0x40) > 0) {
+			tobj.health = dtypes_merge2Bytes(byteArray[i],byteArray[i+1]);
+			tobj.fhealth = dtypes_merge2Bytes(byteArray[i+2],byteArray[i+3]);
+			i+= 4;
+		}
+		# 6 bytes position
+		if ((contents & 0x20) > 0){
+			tobj.position = {
+				x : dtypes_Int16ToNum(dtypes_merge2Bytes(byteArray[i],byteArray[i+1])),
+				y : dtypes_Int16ToNum(dtypes_merge2Bytes(byteArray[i+2],byteArray[i+3])),
+				z : dtypes_Int16ToNum(dtypes_merge2Bytes(byteArray[i+4],byteArray[i+5]))
+			};
+			i+= 6;
+		}
+		# 6 bytes rotation
+		if ((contents & 0x10) > 0) {
+			tobj.rotation ={
+				x: dtypes_float16ToNum(dtypes_merge2Bytes(byteArray[i],byteArray[i+1])),
+				y: dtypes_float16ToNum(dtypes_merge2Bytes(byteArray[i+2],byteArray[i+3])),
+				z: dtypes_float16ToNum(dtypes_merge2Bytes(byteArray[i+4],byteArray[i+5]))
+			};
+			i+= 6;
+		}
+		# 6 bytes scale
+		if ((contents & 0x08) > 0) {
+			tobj.scale = {
+				x: dtypes_Int16ToNum(dtypes_merge2Bytes(byteArray[i],byteArray[i+1])),
+				y: dtypes_Int16ToNum(dtypes_merge2Bytes(byteArray[i+2],byteArray[i+3])),
+				z: dtypes_Int16ToNum(dtypes_merge2Bytes(byteArray[i+4],byteArray[i+5]))
+			};
+			i+= 6;
+		}
+		# 7 bytes details (2 type, 2 texture, 3 color)
+		if ((contents & 0x04) > 0) {
+			tobj.type = dtypes_merge2Bytes(byteArray[i],byteArray[i+1]);
+            i+=2;
+		}
+        if ((contents & 0x02) > 0) {
+			tobj.aid = dtypes_merge2Bytes(byteArray[i],byteArray[i+1]);
+            i+=2;
+		}
+        if ((contents & 0x01) > 0) {
+			tobj.color = byteArray[i] | (byteArray[i+1] << 8) | (byteArray[i+2] << 16);
+            i+=3;
+		}
+        if ((contents & 0x80) > 0) {
+			tobj.emissive = byteArray[i] | (byteArray[i+1] << 8) | (byteArray[i+2] << 16);
+            i+=3;
+		}
+        
+		addTo objlist tobj;
+		j++;
+	}
+	for (num k = 0; k < totaldelobjs; k++){
+		addTo delList byteArray[i+k];
+		# GAME.log("new delete object with id",byteArray[i+k]);
+		i++;
+		
+	}
+
+
+	return {objlist:objlist,delList:delList};
+}
+
+# ===================================================================
+# Library: \libs\syncobjs\syncobjs_s.krnk
+# Author: blandrice
+#   Description: not ready!
+# ===================================================================
+
+num syncobjs_s_SYNC_INTERVAL = 50;
+num syncobjs_s_DESIRED_FPS = 5;
+num syncobjs_s_MAXLEN_NETDATA = 1500;
+
+# object contents
+num[] action syncobjs_s_objsToByteArray(obj[] syncobjs_s_objlist,bool reset, obj plr, obj[] plrs) {
+	num[] retArray = num[];
+    num[] delArray = num[];
+    num totalobjs = 0;
+
+    # 1 byte length of objects
+    addTo retArray 0;
+
+    # 1 byte length of del list
+    addTo retArray 0;
+
+	for (num i = 0; i < lengthOf syncobjs_s_objlist; i++) {
+		obj tObj = syncobjs_s_objlist[i];
+        if ((str)tObj.del != "undefined" && (bool)tObj.del == true){
+            if (!listutil_instrlist((str)plr.id,(str[])tObj.delplrids)){
+                addTo (str[])tObj.delplrids (str)plr.id;
+                addTo delArray toNum (str) tObj.objid;
+                continue;
+            }
+        } else{
+            totalobjs++;
+        }
+
+		num[] tArray = num[];
+
+		# 1 byte (8bits) object contents
+		num contents = 0x00;
+		num contentsidx = lengthOf retArray;
+		addTo retArray contents;
+		# if ((num) tObj.hit>0) {contents |=  0x80;}
+		
+		# 2 bytes syncobjs_s_objid
+		tArray = dtypes_int16toByteArray(dtypes_numToUint16((num)tObj.objid)); addTo retArray tArray[0]; addTo retArray tArray[1];
+
+		# 4 bytes health/fhealth
+		if (notEmpty (obj) tObj.health) {
+                bool healthchanged = ((num) tObj.health.h != (num) tObj.health_old.h) || ((num) tObj.health.fh != (num) tObj.health_old.fh);
+                if (healthchanged){
+                    tObj.health_old = str[];
+                    tObj.health_old = {x:tObj.health.h,y:tObj.health.fh};
+                }
+                if (healthchanged || ((!listutil_instrlist((str)plr.id,(str[])tObj.health_old_plrs))) || reset) {
+                    contents |=  0x40;
+                    tArray = dtypes_int16toByteArray(dtypes_numToUint16((num)tObj.health.h)); addTo retArray tArray[0]; addTo retArray tArray[1];
+                    tArray = dtypes_int16toByteArray(dtypes_numToUint16((num)tObj.health.fh)); addTo retArray tArray[0]; addTo retArray tArray[1];
+                    addTo  (str[]) tObj.health_old_plrs (str)plr.id;
+                }
+            }
+		# 6 bytes position
+		# if (notEmpty (obj) tObj.position) {}
+        if (notEmpty (obj) tObj.position) {
+            bool poschanged = ((num) tObj.position.x != (num) tObj.pos_old.x) || ((num) tObj.position.y != (num) tObj.pos_old.y)  || ((num) tObj.position.z != (num) tObj.pos_old.z);
+            if (poschanged){
+                tObj.pos_old_plrs = str[];
+                tObj.pos_old = {x:tObj.position.x,y:tObj.position.y,z:tObj.position.z};
+            }
+            if (poschanged || ((!listutil_instrlist((str)plr.id,(str[])tObj.pos_old_plrs))) || reset){
+                contents |=  0x20;
+                tArray = dtypes_int16toByteArray(dtypes_numToInt16((num)tObj.position.x)); addTo retArray tArray[0]; addTo retArray tArray[1];
+                tArray = dtypes_int16toByteArray(dtypes_numToInt16((num)tObj.position.y)); addTo retArray tArray[0]; addTo retArray tArray[1];
+                tArray = dtypes_int16toByteArray(dtypes_numToInt16((num)tObj.position.z)); addTo retArray tArray[0]; addTo retArray tArray[1];
+                addTo  (str[]) tObj.pos_old_plrs (str)plr.id;
+            }
+		}
+		# 6 bytes rotation
+		if (notEmpty (obj) tObj.rotation) {
+            bool rotchanged = ((num) tObj.rotation.x != (num) tObj.rot_old.x) || ((num) tObj.rotation.y != (num) tObj.rot_old.y)  || ((num) tObj.rotation.z != (num) tObj.rot_old.z);
+            if (rotchanged){
+                tObj.rot_old_plrs = str[];
+                tObj.rot_old = {x:tObj.rotation.x,y:tObj.rotation.y,z:tObj.rotation.z};
+            }
+            if (rotchanged || ((!listutil_instrlist((str)plr.id,(str[])tObj.rot_old_plrs))) || reset){
+                contents |=  0x10;
+                tArray = dtypes_int16toByteArray(dtypes_numToFloat16((num)tObj.rotation.x)); addTo retArray tArray[0]; addTo retArray tArray[1];
+                # GAME.log("x: ",dtypes_numToFloat16((num)tObj.rotation.x), printBinary(dtypes_numToFloat16((num)tObj.rotation.x)));
+                tArray = dtypes_int16toByteArray(dtypes_numToFloat16((num)tObj.rotation.y)); addTo retArray tArray[0]; addTo retArray tArray[1];
+                tArray = dtypes_int16toByteArray(dtypes_numToFloat16((num)tObj.rotation.z)); addTo retArray tArray[0]; addTo retArray tArray[1];
+                addTo  (str[]) tObj.rot_old_plrs (str)plr.id;
+            }
+		}
+		# 6 bytes scale
+		if (notEmpty (obj) tObj.scale) {
+            bool scalechanged = ((num) tObj.scale.x != (num) tObj.scale_old.x) || ((num) tObj.scale.y != (num) tObj.scale_old.y)  || ((num) tObj.scale.z != (num) tObj.scale_old.z);
+            if (scalechanged){
+                tObj.scale_old_plrs = str[];
+                tObj.scale_old = {x:tObj.scale.x,y:tObj.scale.y,z:tObj.scale.z};
+            }
+            if (scalechanged || ((!listutil_instrlist((str)plr.id,(str[])tObj.scale_old_plrs))) || reset){
+                contents |=  0x08;
+                tArray = dtypes_int16toByteArray(dtypes_numToInt16((num)tObj.scale.x)); addTo retArray tArray[0]; addTo retArray tArray[1];
+                tArray = dtypes_int16toByteArray(dtypes_numToInt16((num)tObj.scale.y)); addTo retArray tArray[0]; addTo retArray tArray[1];
+                tArray = dtypes_int16toByteArray(dtypes_numToInt16((num)tObj.scale.z)); addTo retArray tArray[0]; addTo retArray tArray[1];
+                addTo  (str[]) tObj.scale_old_plrs (str)plr.id;
+            }
+		}
+        # 7 bytes details (2 type, 2 texture, 3 color)
+        # type (cube, sphere, sprite, modelID)
+        if ((str)tObj.type != "undefined")
+        {   
+            bool typechanged = ((num) tObj.type != (num) tObj.type_old);
+            if (typechanged){
+                tObj.type_old_plrs = str[];
+                tObj.type_old = (num)tObj.type;
+            }
+            if (typechanged || ((!listutil_instrlist((str)plr.id,(str[])tObj.type_old_plrs))) || reset){
+                contents |=  0x04;
+                tArray = dtypes_int16toByteArray((num)tObj.type); addTo retArray tArray[0]; addTo retArray tArray[1];    
+                addTo  (str[]) tObj.type_old_plrs (str)plr.id;
+            }
+        }
+        # aid (texture) CANNOT BE UPDATED YET IN KS
+        if ((str)tObj.aid!="undefined"){
+            bool aid_changed = ((num) tObj.aid != (num) tObj.aid_old);
+            if (aid_changed){
+                tObj.aid_old_plrs = str[];
+                tObj.aid_old = (num)tObj.aid;
+            }
+            if (aid_changed || ((!listutil_instrlist((str)plr.id,(str[])tObj.aid_old_plrs))) || reset){
+                contents |=  0x02;
+                tArray = dtypes_int16toByteArray((num)tObj.aid); addTo retArray tArray[0]; addTo retArray tArray[1];    
+                addTo  (str[]) tObj.aid_old_plrs (str)plr.id;
+                }
+        }
+        # color
+		if ((str) tObj.color !="undefined"){
+            bool color_changed = ((num) tObj.color != (num) tObj.color_old);
+            if (color_changed){
+                tObj.color_old_plrs = str[];
+                tObj.color_old = (num)tObj.color;
+            }
+            if (color_changed || ((!listutil_instrlist((str)plr.id,(str[])tObj.color_old_plrs))) || reset){
+                contents |=  0x01;
+                tArray = dtypes_ColorToByteArray((num)tObj.color); addTo retArray tArray[0]; addTo retArray tArray[1]; addTo retArray tArray[2];
+                addTo  (str[]) tObj.color_old_plrs (str)plr.id;
+            }
+        }
+        # emissive
+		if ((str) tObj.emissive !="undefined"){
+            bool emissive_changed = ((num) tObj.emissive != (num) tObj.emissive_old);
+            if (emissive_changed){
+                str colr = "#" + dtypes_num2hexstring((num) tObj.emissive);
+                tObj.emissive_old_plrs = str[];
+                tObj.emissive_old = (num)tObj.emissive;
+            }
+            if (emissive_changed || ((!listutil_instrlist((str)plr.id,(str[])tObj.emissive_old_plrs))) || reset){
+                contents |=  0x80;
+                tArray = dtypes_ColorToByteArray((num)tObj.emissive); addTo retArray tArray[0]; addTo retArray tArray[1]; addTo retArray tArray[2];
+                addTo  (str[]) tObj.emissive_old_plrs (str)plr.id;
+            }
+        }
+		retArray[contentsidx] = contents;
+	}
+
+    for (num i = 0; i < lengthOf delArray; i++){
+        addTo retArray delArray[i];
+    }
+    retArray[0] = totalobjs;
+    retArray[1] = lengthOf delArray;
+	return retArray;
+}
+
+num syncobjs_s_tlastbroadcast = 0;
+obj[] syncobjs_s_objlist = obj[];
+num[] syncobjs_s_newdellist = num[];
+num syncobjs_s_objid = 0;
+num syncobjs_s_tnow = 0;
+
+# WARNING: pass in a fresh object only - not a reference! otherwise you risk modifying the reference
+# for example don't pass in a template object for syncobjs_s_createObject(templateBall).
+obj action syncobjs_s_createObject(obj d) {
+    
+    # object template!
+    obj tobj = {
+        type: 0, #0 = cube, 1 = sphere, 2 = cylinder, all else = modelID
+        aid: 34379,
+        scale: {x:20,y:80,z:20}, # models only need x:scale which is all 3 dimensions
+        position: {x:1,y:1,z:1},
+        velocity: {x:0,y:0,z:0},
+        rotation: {x:0,y:0,z:0},
+        color: 0x00A8F9,
+        emissive:0x000000,
+        collide: {type:1,resolve:""}
+        # type:1 = COL_WORLD 
+    };
+    if ((str) d.type == "undefined") {d.type = tobj.type;}
+    d.type_old = (str)d.type + "a";
+    d.type_old_plrs = str[];
+    if ((str) d.aid == "undefined") {d.aid = tobj.aid;}
+    d.aid_old_plrs = str[];
+    d.aid_old = (num)d.aid + 1;
+    if (!notEmpty (obj) d.scale) {d.scale = tobj.scale;}
+    d.scale_old_plrs = str[];
+    d.scale_old = {x:0,y:0,z:(num)d.scale.z+1};
+    if (!notEmpty (obj) d.position) {d.position = tobj.position;}
+    d.pos_old_plrs = str[];
+    d.pos_old = {x:0,y:0,z:(num)d.position.z+1};
+    if (!notEmpty (obj) d.velocity) {d.velocity = tobj.velocity;}
+    d.vel_old_plrs = str[];
+    d.vel_old = {x:0,y:0,z:(num)d.velocity.z+1};
+    if (!notEmpty (obj) d.rotation) {d.rotation = tobj.rotation;}
+    d.rot_old_plrs = str[];
+    d.rot_old = {x:0,y:0,z:(num)d.rotation.z+1};
+    #if health is there, add old data container
+    if (notEmpty (obj)d.health){
+        d.health_old = {h:0,fh:(num)d.health.fh-1};
+    }
+    if ((str) d.color == "undefined") {d.color = tobj.color;}
+    d.color_old_plrs = str[];
+    d.color_old = (num)d.color+1;
+
+    if ((str) d.emissive == "undefined") {d.emissive = tobj.emissive;}
+    d.emissive_old_plrs = str[];
+    d.emissive_old = (num)d.emissive+1;
+
+    if (!notEmpty (obj)d.collide) {
+        d.collide = {type:tobj.collide.type,resolve:""};
+    }
+
+	d.objid = toNum toStr syncobjs_s_objid;
+    syncobjs_s_objid++;
+    addTo syncobjs_s_objlist d;
+    return d;
+}
+
+bool action syncobjs_s_deleteObject(str id) {
+    for (num i = lengthOf syncobjs_s_objlist - 1; i >= 0; i--) {
+        if ((str) syncobjs_s_objlist[i].objid == id) {
+            if ((str)syncobjs_s_objlist[i].del == "undefined" || (bool)syncobjs_s_objlist[i].del == false){
+                # addTo syncobjs_s_newdellist toNum syncobjs_s_objlist[i].objid;
+                # remove syncobjs_s_objlist[i];
+                syncobjs_s_objlist[i].del=true;
+                syncobjs_s_objlist[i].delplrids=str[];
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+action syncobjs_s_deleteAllObjs(){
+    for (num i = lengthOf syncobjs_s_objlist - 1; i >= 0; i--) {
+        # addTo syncobjs_s_newdellist toNum syncobjs_s_objlist[i].objid;
+        # remove syncobjs_s_objlist[i];
+        syncobjs_s_objlist[i].del=true;
+        syncobjs_s_objlist[i].delplrids=str[];
+        
+    }
+}
+
+obj action syncobjs_s_findObjbyID(str id){
+    for (num i = lengthOf syncobjs_s_objlist - 1; i >= 0; i--) {
+        if ((str) syncobjs_s_objlist[i].objid == id) {
+            return syncobjs_s_objlist[i];
+        }
+    }
+    return {};
+}
+
+str[] action syncobjs_s_listObjIDs(){
+    str[] list = str[];
+    for (num i = 0; i < lengthOf syncobjs_s_objlist; i++){
+        addTo list (str) syncobjs_s_objlist[i].objid;
+    }
+    return list;
+}
+
+action syncobjs_s_start() {
+    syncobjs_s_objlist = obj[];
+    syncobjs_s_objid=0;
+}
+
+action syncobjs_s_update(num delta) {
+	syncobjs_s_tnow = g_tnow;
+
+    # Broadcast Synced Objects data
+    if ((syncobjs_s_tnow - syncobjs_s_tlastbroadcast) > syncobjs_s_SYNC_INTERVAL) {
+        syncobjs_s_tlastbroadcast = syncobjs_s_tnow;
+        # str encodedobjdata = objencoding();
+        # str encodedobjdata = b91_encode(syncobjs_s_objsToByteArray(syncobjs_s_objlist,false)); # send new data only
+        # bool success = GAME.NETWORK.broadcast("sync", {data:objdata});
+        obj[] plrs = GAME.PLAYERS.list();
+        bool success=true;
+        for (num i = 0; i < lengthOf plrs; i++) {
+
+            obj plr = plrs[i];
+            str datatosend = "";
+            bool reset = false;
+            # guard for initializing netdata
+            if ((str) plr.netdata == "undefined" || (bool) plr.netreset == true)
+            {
+                reset = true;
+            }
+            if ((str)plr.netdata == "" || (str) plr.netdata == "undefined" || (bool) plr.netreset == true){
+                plr.netdata = b91_encode(syncobjs_s_objsToByteArray(syncobjs_s_objlist,reset,plr,plrs)); # resend all data regardless of age
+                plr.netdatalen = Math.ceil((lengthOf (str)plr.netdata) / syncobjs_s_MAXLEN_NETDATA);
+                if (reset) {
+                    GAME.log(syncobjs_h_byteArrayToObjs(b91_decode((str)plr.netdata)));
+                }
+                
+
+                # check size of encoded data is too large and warn
+                if (lengthOf (str)plr.netdata > syncobjs_s_MAXLEN_NETDATA){
+                    num netneeded = Math.ceil((lengthOf (str)plr.netdata) / syncobjs_s_MAXLEN_NETDATA);
+                    num t_fps = 1000/(syncobjs_s_SYNC_INTERVAL * netneeded);
+                    if (t_fps < syncobjs_s_DESIRED_FPS){
+                        GAME.log("WARN: data length is ", lengthOf (str)plr.netdata);
+                        GAME.log("takes ", syncobjs_s_SYNC_INTERVAL * netneeded, "ms to send update or FPS is  ", t_fps);
+                    }
+                }
+            } 
+            
+            
+            # plr.netdatalen = Math.ceil((lengthOf encodedobjdata) / syncobjs_s_MAXLEN_NETDATA);
+            
+            # fill network data if it DNE yet
+            # if (lengthOf (str) plr.netdata == 0)
+            # {
+                # plr.netdata = encodedobjdata;
+                # plr.netdatalen = Math.ceil((lengthOf encodedobjdata) / syncobjs_s_MAXLEN_NETDATA);
+            # }
+            # send over netdata in the max size allowed
+            if (lengthOf (str) plr.netdata > syncobjs_s_MAXLEN_NETDATA){
+                datatosend = strutils_splice((str)plr.netdata,0,syncobjs_s_MAXLEN_NETDATA);
+                plr.netdata = strutils_splice((str)plr.netdata,syncobjs_s_MAXLEN_NETDATA,lengthOf (str)plr.netdata);
+                
+            } else {
+                datatosend = (str) plr.netdata;
+                plr.netdata = "";
+            }
+            
+        
+            # pcnt is percentage of load complete
+            num pcnt = Math.floor(( 1 - ((lengthOf (str) plr.netdata) / ((num)plr.netdatalen * syncobjs_s_MAXLEN_NETDATA)))*100);
+            # success = GAME.NETWORK.send("sync", {d:datatosend, dellist:syncobjs_s_newdellist,pcnt:pcnt,rst:(bool)plr.netreset ? 1:0}, (str)plrs[i].id);    
+            success = GAME.NETWORK.send("sync", {d:datatosend,pcnt:pcnt,rst:(bool)plr.netreset ? 1:0}, (str)plrs[i].id);    
+            if (!success) {
+                GAME.log("ERROR: sync not sent!!!");
+                GAME.log({d:datatosend,pcnt:pcnt,rst:(bool)plr.netreset ? 1:0});
+                # GAME.log({d:datatosend, dellist:syncobjs_s_newdellist,pcnt:pcnt,rst:(bool)plr.netreset ? 1:0});
+            } 
+        }
+
+        # find all objects that are fully deleted (sent delete to all players)
+        for (num i = lengthOf syncobjs_s_objlist - 1; i >= 0; i--)
+        {
+            obj tObj = syncobjs_s_objlist[i];
+            if ((str)tObj.del != "undefined" && (bool)tObj.del == true){
+                if (lengthOf (str[])tObj.delplrids >= lengthOf plrs){
+                    remove syncobjs_s_objlist[i];
+                }
+            }
+        }
+
+        # if (success) {
+        #     syncobjs_s_newdellist = num[];
+        # }
+    }
+}
+
+# Runs when the round ends
+action syncobjs_s_onGameEnd() {
+    # delete all objects client side
+    GAME.NETWORK.broadcast("clear", {});
+}
+
+action syncobjs_s_onNetworkMessage(str id, obj data, str playerID) {
+    if (id == "refreshobjs"){
+        obj plr = GAME.PLAYERS.findByID(playerID);
+        plr.netreset = true;
+    }
+}
+#include <g.krnk>
+# ===================================================================
+# Library: \libs\plrutil_s_spawnedPlayers\plrutil_s.krnk
+# Author: blandrice
+#   Description: workaround to check how many players are spawned in
+# ===================================================================
+
+str[] plrutil_s_spawnedPlayers = str[];
+bool plrutil_s_sologame = true;
+num plrutil_s_tFirstSpawnedPlayer = 0;
+num plrutil_s_tLastSpawnedPlayer = 0;
+
+
+action plrutil_s_start() {
+    plrutil_s_spawnedPlayers = str[];
+    plrutil_s_tFirstSpawnedPlayer = 0;
+    plrutil_s_tLastSpawnedPlayer = 0;
+    plrutil_s_sologame = true;
+}
+
+
+# Player died
+action plrutil_s_onPlayerDeath(str id, str killerID) {
+    for (num i = lengthOf plrutil_s_spawnedPlayers-1; i >=0; i--) {
+        if (id == plrutil_s_spawnedPlayers[i]) {
+            remove plrutil_s_spawnedPlayers[i];
+            break;
+        }
+    }
+}
+# When a player leaves the server
+action plrutil_s_onPlayerLeave(str playerID) {
+    for (num i = lengthOf plrutil_s_spawnedPlayers-1; i >=0; i--) {
+        if (playerID == plrutil_s_spawnedPlayers[i]) {
+            remove plrutil_s_spawnedPlayers[i];
+            break;
+        }
+    }
+}
+# Spawn Notification must come from Client
+action plrutil_s_onNetworkMessage(str id, obj data, str playerID) {
+    if (id == "spawn") {
+        bool hasSpawned = false;
+        for (num i = 0; i < lengthOf plrutil_s_spawnedPlayers; i++) {
+            if (plrutil_s_spawnedPlayers[i] == id) {
+                hasSpawned = true;
+                break;
+            }
+        }
+        if (!hasSpawned) {addTo plrutil_s_spawnedPlayers playerID;}
+        if (lengthOf plrutil_s_spawnedPlayers >= 2) {plrutil_s_sologame = false;}
+        if (plrutil_s_tFirstSpawnedPlayer == 0) {plrutil_s_tFirstSpawnedPlayer = g_tnow;}
+        plrutil_s_tLastSpawnedPlayer = g_tnow;
+    }
+}
+
+num created = 0;
+obj test = {};
+public action update(num delta){
+    g_update(delta);
+    syncobjs_s_update(delta);
+
+    if (lengthOf plrutil_s_spawnedPlayers > 0 && created == 0) {
+        syncobjs_s_createObject({position:{x:22,y:22,z:22},color:0xff0000});
+        syncobjs_s_createObject({rotation:{x:0,y:0,z:0},position:{x:22,y:22,z:22},color:0x00ff00});
+
+        for (num i = 0; i < 70; i++){
+            syncobjs_s_createObject({rotation:{x:0,y:0,z:0},position:{x:22,y:22,z:22+i*5},color:0x00ff00 + i});
+        }
+        # syncobjs_s_createObject({position:{x:0,y:0,z:0},color:0x00ff00});
+        # syncobjs_s_createObject({position:{x:0,y:20,z:0},color:0x0000ff});
+        # syncobjs_s_createObject({position:{x:0,y:40,z:0},color:0xffff00});
+        # syncobjs_s_createObject({position:{x:20,y:0,z:0},color:0x00ffff});
+        # syncobjs_s_createObject({position:{x:40,y:0,z:0},color:0xffffff});
+        # syncobjs_s_createObject({position:{x:0,y:0,z:20},color:0x000000});
+        # syncobjs_s_createObject({position:{x:0,y:0,z:40},color:0xff00ff});
+        created = 1;
+    }
+
+    # if (notEmpty test){
+    #     (num) test.rotation.x += Math.toRad(1.0*delta);
+    # }
+
+}
+
+
+# ================================================================
+# auto-detected public actions from libraries
+# ================================================================
+public action onNetworkMessage (str id, obj data, str playerID){
+    syncobjs_s_onNetworkMessage(id,  data,  playerID);
+    plrutil_s_onNetworkMessage(id,  data,  playerID);
+}
+
+public action onPlayerLeave (str playerID){
+    plrutil_s_onPlayerLeave(playerID);
+}
+
+public action onPlayerDeath (str id, str killerID){
+    plrutil_s_onPlayerDeath(id,  killerID);
+}
+
+public action start (){
+    syncobjs_s_start();
+    plrutil_s_start();
+}
+
+public action onGameEnd (){
+    syncobjs_s_onGameEnd();
+}
+

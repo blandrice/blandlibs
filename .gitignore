@@ -2,3 +2,4 @@
 /out
 /maps/temp
 libs/test
+!**/ex

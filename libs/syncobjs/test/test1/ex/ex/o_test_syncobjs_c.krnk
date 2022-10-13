@@ -1,0 +1,725 @@
+# ===================================================================
+# Header: \libs\float\dtypes.krnk
+# Author: blandrice
+#   Description: custom float data types--> binary representation calculations.
+#   Goal was to pack float data into 16-bits and send over NetworkMessage 
+#   (much smaller than ASCII string representation)
+# ===================================================================
+num action dtypes_findMSBLoc(num v){
+	# v better be an integer u dumbo
+	num r = -1;
+	# v = v >> 1;
+	while (v > 0) {
+		r++;
+		v = v >> 1;
+	}
+	return r;
+}
+num action dtypes_fmod(num x, num r){
+	return x - (r*Math.floor(x / r));	
+}
+str action dtypes_printBinary(num f){
+	str retstr = "";
+	for (num i = 32-1; i >= 0; i--) {
+		retstr += toStr (f >> i & 0x1);
+	}
+	return retstr;
+}
+num action dtypes_ones(num f){
+	num retnum = 0;
+	for (num i = 0; i < f; i++){
+		retnum = (retnum << 1) | 1;
+	}
+	return retnum;	
+}
+
+
+# adapted from IEEE 754 Standard for Single Precision 32 bit floating
+# but allows for you to select # of exponent / mantissa bits
+# half-precision (16 bit), single-precision (32 bit)
+# num dtypes_MAX_BITS = 32; num BITS_EXP = 8;
+num dtypes_MAX_BITS = 16; num BITS_EXP = 5; 
+#don't change to something like 16-3.. error up to 30 units observed
+
+# (e.g. 32-bit) from left to right:
+# 1 bit - Sign bit (2's complement) += (-1) * 2^place in exponent
+# 8 bits - Exponent (2^e)
+# 23 bits - Mantissa (part after decimal)
+# range = 2^BITS_EXP 
+# precision = 1/(2^dtypes_BITS_MANT)
+
+num dtypes_BIAS = 2**(BITS_EXP-1)-1;
+num dtypes_BITS_MANT = dtypes_MAX_BITS - 1 - BITS_EXP;
+num dtypes_SIGN_LOC = dtypes_MAX_BITS-1;
+
+num action dtypes_numToFloat16(num data) {
+	# 1. determine the sign bit
+	num signbit = 0;
+	if (data < 0) {signbit = 1; data = -data;}
+    if (data == 0) {return 0;}
+	# 2. Convert  whole / decimal bits to pure binary
+	num whole = Math.floor(data); # floor it so it's just an integer (will be between 0 and 2^bitsexp). max is the 2 ^ bits of the exponent
+	num decimal = (data - whole > 0) ? data - whole : 0;
+	num decbit = 0x000; 
+	for (num i = 0; i < dtypes_BITS_MANT; i++){ # convert decimals into binary
+		decimal *= 2;
+		num tdecbit = (decimal >= 1 ? 1 : 0);
+		decbit |=  tdecbit << (dtypes_BITS_MANT-1-i); # 12 - i 
+		if (decimal >= 1) {decimal -=1;}
+	}
+		# GAME.log("decbit",dtypes_printBinary(decbit));
+
+	num purbinary = (whole << dtypes_BITS_MANT) | decbit;
+		# GAME.log("purbinary",dtypes_printBinary(purbinary));
+		# GAME.log("dtypes_findMSBLoc(purbinary)",dtypes_findMSBLoc(purbinary));
+	
+	# 3. normalize to determine mantissa and unbiased exponent
+	num unbiasedexp = dtypes_findMSBLoc(purbinary) - dtypes_BITS_MANT;
+		# GAME.log("unbiasedexp",unbiasedexp);
+	# 4. determine biased exponent
+	num biasedexp = unbiasedexp + dtypes_BIAS;
+	# 5. remove leading 1 (MSB)
+		# align first
+	num mantissa = purbinary;
+	num alignmantissa = (dtypes_BITS_MANT-1)-dtypes_findMSBLoc(mantissa);
+	if (alignmantissa > 0) {
+		mantissa = mantissa << alignmantissa;
+	} else {
+		mantissa = mantissa >> (-1 * alignmantissa);
+	}
+	mantissa = (mantissa ^ (1 << (dtypes_findMSBLoc(mantissa)))) << 1; # remove leading 1
+		# GAME.log("mantissa:",dtypes_printBinary(mantissa));
+		# GAME.log("left-shift by:",alignmantissa);	
+	num float16 = (signbit << dtypes_SIGN_LOC) | (biasedexp << dtypes_BITS_MANT) | ( mantissa );
+	return float16;
+}
+
+num action dtypes_float16ToNum(num f) {
+	if (f == 0) {return 0;}
+    # Determine sign
+	num sign = (((f >> dtypes_SIGN_LOC) & 0x1) > 0) ? -1 : 1;
+	# Determine exponent 2*e 
+	num exp = (f >> dtypes_BITS_MANT) & dtypes_ones(BITS_EXP); 
+	exp -= dtypes_BIAS;
+	# Convert mantissa to denary
+	num mantissa = f & dtypes_ones(dtypes_BITS_MANT);
+	# GAME.log("mantissa: ", dtypes_printBinary(mantissa));
+	num mantden = 0;
+	for (num i = dtypes_findMSBLoc(mantissa); i >=0 ; i--) {
+		num tman = 1/(2**(dtypes_BITS_MANT-i)) * ((mantissa >> i) & 0x1);
+		mantden += tman;
+		
+	}
+	mantden += 1; # add 1 back 
+	num Rad = sign * mantden * (2 ** exp);
+	return Rad;
+}
+
+num action dtypes_numToUint16(num x){
+	return (x & 0xFFFF); # cap 65536 
+}
+
+num action dtypes_numToInt16(num x){
+	# return (x & 0xFF); # cap 65536 
+	num retnum = 0;
+	x = Math.round(x);
+	x = (x > 32767) ? 32767 : x;
+	x = (x < -32767) ? -32767 : x;
+	# cap to largest / smallest int size
+
+	num sign = x < 0 ? 1 : 0;
+
+	if (sign == 1) {
+		x = -x;
+	}
+	retnum |= sign << 15;
+
+	num i = 14; # 15 - 1
+	while (x > 0) {
+		if (x / (2**i) >= 1) {
+			retnum |=  (1 << i);
+			x-= (2**i);
+		}
+		i--;
+	}
+	return retnum;
+}
+
+num[] action dtypes_numTo_uint16ByteArray(num data) {
+	data = Math.round(data);
+	num[] retArray = num[];
+	addTo retArray (data >> 8) & 0xff;
+	addTo retArray (data >> 0) & 0xff;
+	
+	return retArray;
+
+}
+
+num action dtypes_merge2Bytes(num a,num b) {
+	return (b << 8) | a;
+}
+
+num action dtypes_Int16ToNum(num bin) {
+	# num bin = (b << 0xff) | a;
+	num sign = ((bin & 0x8000) > 0) ? -1 : 1;
+	num denary = bin & 0x7FFF;
+
+	return sign * denary;
+}
+
+# int Numbers to byte array
+num[] action dtypes_int16toByteArray(num data){
+	return num[((data >> 0) & 0xff),(data >> 8) & 0xff];
+}
+
+num[] action dtypes_ColorToByteArray(num color) {
+	num[] retArray = num[];
+	addTo retArray (color >> 0) & 0xff;
+	addTo retArray (color >> 8) & 0xff;
+	addTo retArray (color >> 16) & 0xff;
+	
+	return retArray;
+}
+
+str[] dtypes_lookup = str["0","1","2","3","4","5","6","7","8","9","A","B","C","D","E","F"];
+
+str action dtypes_num2hexstring(num n){
+	str hexstr = "";
+	for (num i =0; i < 6; i++){
+		hexstr = dtypes_lookup[n & 0xF] + hexstr;
+		n = n >> 4;
+	}
+	return hexstr;
+}
+
+num action dtypes_hexstring2num(str h){
+	num n = 0;
+	h = UTILS.toUpper(h);
+	for (num i = 0; i < lengthOf h; i++){
+		for (num j = 0; j < lengthOf dtypes_lookup; j++){
+			if (dtypes_lookup[j] == h[i]){
+				n |= j << (lengthOf h - 1 - i)*4;
+				break;
+			}
+		}
+	}
+	return n;
+}
+
+num action dtypes_constrainRadians(num x){
+	x = dtypes_fmod(x,Math.PI2);
+	if (x < 0){
+		x += 360;
+	}
+    return x;
+}
+
+
+# ===================================================================
+# Header: b91encoding\b91.krnk
+# Author: SlxTnT
+# Description: Base91 decoding converted from https://github.com/KvanTTT/BaseNcoding
+# ===================================================================
+
+
+obj b91_base91 = {
+    alphabet: "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!#$%&()*+,./:;<=>?@[]^_`{|}~-"
+};
+
+# Recursion due to loop limits
+num action b91_getValue(str c, num index) {
+	if(index >= lengthOf b91_base91.alphabet) {
+		return -1;
+	}
+	
+	if((str)b91_base91.alphabet[index] == c) {
+		return index;
+	}
+	
+	return b91_getValue(c, index + 1);
+}
+
+num[] action b91_decode(str data) {
+    num dv = -1;
+    num dn = 0;
+    num dbq = 0;
+    num[] result = num[];
+
+    for(num i = 0; i < lengthOf data; i++) {
+        num iv = b91_getValue(data[i], 0);
+
+        if(iv == -1) { continue; }
+
+        if(dv == -1) {
+            dv = iv; 
+        }
+        else {
+            dv += iv * 91;
+            dbq |= (dv << dn);
+
+            if((dv & 8191) > 88) {
+                dn += 13;
+            }
+            else {
+                dn += 14;
+            }
+
+            # do ... while?
+            bool first = true;
+
+            while(first || dn > 7) {
+                addTo result dbq % 256;
+                dbq >>>= 8;
+                dn -= 8;
+                
+                first = false;
+            }
+
+            dv = -1;
+        }
+    }
+
+	if(dv != -1) {
+		addTo result (dbq | dv << dn) & 255;
+	}
+
+	return result;
+}
+
+# Being used server-side
+str action b91_encode(num[] data) {
+    num en = 0;
+    num ebq = 0;
+    str result = "";
+
+	for(num i = 0; i < lengthOf data; i++) {
+		ebq |= (data[i] & 255) << en;
+		en += 8;
+		
+		if(en > 13) {
+			num ev = ebq & 8191;
+			
+			if(ev > 88) {
+				ebq >>>= 13;
+				en -= 13;
+			}
+			else {
+				ev = ebq & 16383;
+				ebq >>>= 14;
+				en -= 14;
+			}
+			
+			num quotient = Math.floor(ev / 91);
+			num remainder = ev % 91;
+		
+			result += (str)b91_base91.alphabet[remainder];
+			result += (str)b91_base91.alphabet[quotient];
+		}
+	}
+
+	if(en > 0) {
+			num quotient = Math.floor(ebq / 91);
+			num remainder = ebq % 91;
+
+			result += (str)b91_base91.alphabet[remainder];
+
+			if(en > 7 || ebq > 90) {
+				result += (str)b91_base91.alphabet[quotient];
+			}
+	}
+
+	return result;
+}
+# ===================================================================
+# header: \libs\syncobjs\syncobjs_h.krnk
+# Author: blandrice
+#   Description: not ready!
+# ===================================================================
+
+# Binary decoding of an array of bytes to Objects
+obj action syncobjs_h_byteArrayToObjs(num[] byteArray) {
+	obj[] objlist = obj[];
+	num[] delList = num[];
+	num i = 0;
+	num j = 0;
+	num totalobjs = 0;
+	num totaldelobjs = 0;
+	if (lengthOf byteArray >=2)
+	{
+        totalobjs = byteArray[0];
+        i++;
+		totaldelobjs = byteArray[1];
+		i++;
+    } else
+	{
+        return objlist;
+    }
+	
+	while (j < totalobjs){
+		obj tobj = {};
+		# contents byte
+		num contents = byteArray[i];
+		i++;
+		# object id 2 bytes
+		tobj.objid = dtypes_merge2Bytes(byteArray[i],byteArray[i+1]);
+		i+=2;
+		# 4 bytes health / fullhealth
+		if ((contents & 0x40) > 0) {
+			tobj.health = dtypes_merge2Bytes(byteArray[i],byteArray[i+1]);
+			tobj.fhealth = dtypes_merge2Bytes(byteArray[i+2],byteArray[i+3]);
+			i+= 4;
+		}
+		# 6 bytes position
+		if ((contents & 0x20) > 0){
+			tobj.position = {
+				x : dtypes_Int16ToNum(dtypes_merge2Bytes(byteArray[i],byteArray[i+1])),
+				y : dtypes_Int16ToNum(dtypes_merge2Bytes(byteArray[i+2],byteArray[i+3])),
+				z : dtypes_Int16ToNum(dtypes_merge2Bytes(byteArray[i+4],byteArray[i+5]))
+			};
+			i+= 6;
+		}
+		# 6 bytes rotation
+		if ((contents & 0x10) > 0) {
+			tobj.rotation ={
+				x: dtypes_float16ToNum(dtypes_merge2Bytes(byteArray[i],byteArray[i+1])),
+				y: dtypes_float16ToNum(dtypes_merge2Bytes(byteArray[i+2],byteArray[i+3])),
+				z: dtypes_float16ToNum(dtypes_merge2Bytes(byteArray[i+4],byteArray[i+5]))
+			};
+			i+= 6;
+		}
+		# 6 bytes scale
+		if ((contents & 0x08) > 0) {
+			tobj.scale = {
+				x: dtypes_Int16ToNum(dtypes_merge2Bytes(byteArray[i],byteArray[i+1])),
+				y: dtypes_Int16ToNum(dtypes_merge2Bytes(byteArray[i+2],byteArray[i+3])),
+				z: dtypes_Int16ToNum(dtypes_merge2Bytes(byteArray[i+4],byteArray[i+5]))
+			};
+			i+= 6;
+		}
+		# 7 bytes details (2 type, 2 texture, 3 color)
+		if ((contents & 0x04) > 0) {
+			tobj.type = dtypes_merge2Bytes(byteArray[i],byteArray[i+1]);
+            i+=2;
+		}
+        if ((contents & 0x02) > 0) {
+			tobj.aid = dtypes_merge2Bytes(byteArray[i],byteArray[i+1]);
+            i+=2;
+		}
+        if ((contents & 0x01) > 0) {
+			tobj.color = byteArray[i] | (byteArray[i+1] << 8) | (byteArray[i+2] << 16);
+            i+=3;
+		}
+        if ((contents & 0x80) > 0) {
+			tobj.emissive = byteArray[i] | (byteArray[i+1] << 8) | (byteArray[i+2] << 16);
+            i+=3;
+		}
+        
+		addTo objlist tobj;
+		j++;
+	}
+	for (num k = 0; k < totaldelobjs; k++){
+		addTo delList byteArray[i+k];
+		# GAME.log("new delete object with id",byteArray[i+k]);
+		i++;
+		
+	}
+
+
+	return {objlist:objlist,delList:delList};
+}
+
+# ===================================================================
+# Library: \libs\syncobjs\syncobjs_c.krnk
+# Author: blandrice
+#   Description: not ready!
+# ===================================================================
+
+obj[] syncobjs_c_objlist = obj[];
+str syncobjs_c_netdata = "";
+str[] syncobjs_c_delList = str[];
+
+# interpolation
+num syncobjs_c_newTime = 0;
+num syncobjs_c_oldTime = 0;
+num syncobjs_c_dataBuffer = 0;
+num syncobjs_c_interpM = 0;
+
+# update with new object data
+bool action syncobjs_c_updateobjproperties(obj currentObj, obj newObjData) {
+    currentObj.oldpos.x = (num) currentObj.newpos.x;
+    currentObj.oldpos.y = (num) currentObj.newpos.y;
+    currentObj.oldpos.z = (num) currentObj.newpos.z;
+    currentObj.oldrot.x = (num) currentObj.newrot.x;
+    currentObj.oldrot.y = (num) currentObj.newrot.y;
+    currentObj.oldrot.z = (num) currentObj.newrot.z;
+
+    if (notEmpty (obj) newObjData.position){
+        currentObj.newpos.x = (num) newObjData.position.x;
+        currentObj.newpos.y = (num) newObjData.position.y;
+        currentObj.newpos.z = (num) newObjData.position.z;
+    }
+    if (notEmpty (obj) newObjData.scale){
+        currentObj.scale.x = (num) newObjData.scale.x;
+        currentObj.scale.y = (num) newObjData.scale.y;
+        currentObj.scale.z = (num) newObjData.scale.z;
+    }
+    if (!!(num)newObjData.health) {
+        currentObj.health = (num)newObjData.health;
+    }
+    if (!!(num)newObjData.fhealth) {
+        currentObj.fhealth = (num)newObjData.fhealth;
+    }
+    if (notEmpty (obj)newObjData.rotation) {
+        currentObj.newrot.x = (num) newObjData.rotation.x;
+        currentObj.newrot.y = (num) newObjData.rotation.y;
+        currentObj.newrot.z = (num) newObjData.rotation.z;
+    }
+    if ((str)newObjData.emissive !="undefined"){
+        str colr = "#" + dtypes_num2hexstring((num) newObjData.emissive);
+        currentObj.emissive = colr;
+    }
+    return true;
+}
+
+# First creation of object
+obj action syncobjs_c_createObj(obj newObjData) {
+    if ((num) newObjData.type == 0) {
+        # str aid = (str) newObjData.aid;
+        # str aid = "34379"; # temp fix for now
+        str colr = "#" + dtypes_num2hexstring((num) newObjData.color);
+        # obj cube = GAME.SCENE.addCube(toStr (num)newObjData.aid, colr, (num)newObjData.position.x,(num)newObjData.position.y,(num)newObjData.position.z, 0,0,0);
+        obj cube = GAME.SCENE.addCube(toStr (num)newObjData.aid, colr, (num)newObjData.position.x,(num)newObjData.position.y,(num)newObjData.position.z, (num)newObjData.scale.x,(num)newObjData.scale.y,(num)newObjData.scale.z);
+        cube.objid = (num) newObjData.objid;
+        cube.oldpos = {x:(num)newObjData.position.x,y:(num)newObjData.position.y,z:(num)newObjData.position.z};
+        cube.newpos = {x:(num)newObjData.position.x,y:(num)newObjData.position.y,z:(num)newObjData.position.z};
+
+        cube.oldrot = {x:(num)newObjData.rotation.x,y:(num)newObjData.rotation.y,z:(num)newObjData.rotation.z};
+        cube.newrot = {x:(num)newObjData.rotation.x,y:(num)newObjData.rotation.y,z:(num)newObjData.rotation.z};
+
+        cube.health = (num)newObjData.health;
+        cube.fhealth = (num)newObjData.fhealth;
+        cube.hit = (num)newObjData.hit;
+      
+        syncobjs_c_updateobjproperties(cube, newObjData);
+        return cube;
+    }
+    return {};
+}
+
+action syncobjs_c_lerpObj(num delta) {
+    syncobjs_c_interpM = Math.min(1.5, (GAME.TIME.now() - syncobjs_c_newTime) / syncobjs_c_dataBuffer);
+    for (num i = 0; i < lengthOf syncobjs_c_objlist; i++){
+        obj curObj = syncobjs_c_objlist[i];
+        if (!notEmpty (obj) curObj.ogpos){
+            curObj.ogpos = {};
+        }
+        curObj.ogpos = 
+        {
+            x:curObj.position.x,
+            y:curObj.position.y,
+            z:curObj.position.z
+        };
+        (num) curObj.position.x += (Math.lerp((num)curObj.oldpos.x, (num)curObj.newpos.x, syncobjs_c_interpM)-(num)curObj.position.x)*delta/1000*60/4;
+        (num) curObj.position.y += (Math.lerp((num)curObj.oldpos.y, (num)curObj.newpos.y, syncobjs_c_interpM)-(num)curObj.position.y)*delta/1000*60/4;
+        (num) curObj.position.z += (Math.lerp((num)curObj.oldpos.z, (num)curObj.newpos.z, syncobjs_c_interpM)-(num)curObj.position.z)*delta/1000*60/4;
+        if (!notEmpty (obj) curObj.ogrot){
+            curObj.ogrot = {};
+        }
+        curObj.ogrot = 
+        {
+            x:curObj.rotation.x,
+            y:curObj.rotation.y,
+            z:curObj.rotation.z
+        };
+        (num) curObj.rotation.x += (Math.lerp((num)curObj.oldrot.x, (num)curObj.newrot.x, syncobjs_c_interpM)-(num)curObj.rotation.x)*delta/1000*60/4;
+        (num) curObj.rotation.y += (Math.lerp((num)curObj.oldrot.y, (num)curObj.newrot.y, syncobjs_c_interpM)-(num)curObj.rotation.y)*delta/1000*60/4;
+        (num) curObj.rotation.z += (Math.lerp((num)curObj.oldrot.z, (num)curObj.newrot.z, syncobjs_c_interpM)-(num)curObj.rotation.z)*delta/1000*60/4;
+
+        if (!notEmpty (obj) curObj.velocity){
+            curObj.velocity = {};
+        }
+        curObj.velocity.x = ((num) curObj.position.x - (num) curObj.ogpos.x) / delta;
+        curObj.velocity.y = ((num) curObj.position.y - (num) curObj.ogpos.y) / delta;
+        curObj.velocity.z = ((num) curObj.position.z - (num) curObj.ogpos.z) / delta;
+    }
+    
+    
+     
+}
+
+obj action syncobjs_c_findObjbyID(num id) {
+    for (num i = 0; i < lengthOf syncobjs_c_objlist; i++) {
+        if ((num) syncobjs_c_objlist[i].objid == id) {
+            return syncobjs_c_objlist[i];
+        }
+    }
+    return {};
+}
+
+action syncobjs_c_deleteobj(num id) {
+    for (num i = 0; i < lengthOf syncobjs_c_objlist; i++) {
+        if ((num) syncobjs_c_objlist[i].objid == id) {
+            obj cube = syncobjs_c_objlist[i];
+            addTo syncobjs_c_delList (str) cube.objid;
+            remove syncobjs_c_objlist[i];
+            cube.delete();
+        }
+    }
+}
+
+action syncobjs_c_clearAllObjs(){
+    for (num i = lengthOf syncobjs_c_objlist - 1; i >= 0; i--) {
+        syncobjs_c_deleteobj((num)syncobjs_c_objlist[i].objid);
+    }
+    syncobjs_c_objlist = obj[];
+    syncobjs_c_delList = str[];
+}
+
+bool action syncobjs_c_objIDWasDeleted(str id) {
+    for (num i = 0; i < lengthOf syncobjs_c_delList; i++) {
+        if (id == syncobjs_c_delList[i]) {
+            return true;
+        }
+        
+    }
+    return false;
+}
+
+bool action syncobjs_c_updateobjs(obj[] netobjs) {
+    for (num i = 0; i < lengthOf netobjs; i++){
+        obj newObjData = netobjs[i];
+        # add new Object
+        if ((lengthOf syncobjs_c_objlist == 0) || ((num)newObjData.objid > (num) syncobjs_c_objlist[lengthOf syncobjs_c_objlist - 1].objid)) {
+            if (!syncobjs_c_objIDWasDeleted((str)newObjData.objid)) {
+                obj newObj = syncobjs_c_createObj(newObjData);
+                addTo syncobjs_c_objlist newObj;
+            } else {
+                GAME.log("object already deleted! " + (str)newObjData.objid);
+            }
+        } 
+        # Update current object properties
+        else {
+            obj curObj = syncobjs_c_findObjbyID((num)newObjData.objid);
+            bool success = syncobjs_c_updateobjproperties(curObj, newObjData);
+            if (!success) {
+                GAME.log("ERROR: properties not updated for objid: ", toStr newObjData.objid);
+                GAME.log(newObjData);
+                GAME.log(syncobjs_c_objlist);
+            }
+        }
+    }
+    return true;
+}
+
+# reset object lists, time vars, attempted to preload sounds into game engine to avoid the first sound's lag.
+action syncobjs_c_start() {
+    syncobjs_c_clearAllObjs();
+    # syncobjs_c_objlist = obj[];
+    # syncobjs_c_delList = str[];
+    
+    syncobjs_c_oldTime = GAME.TIME.now();
+    syncobjs_c_newTime = GAME.TIME.now();
+}
+
+action syncobjs_c_onNetworkMessage(str id, obj data) {
+    if (id == "sync") {
+        
+        # clear all object / network data if reset given
+        if ((str)data.rst != "undefined" && (num)data.rst == 1){
+            syncobjs_c_clearAllObjs();
+            syncobjs_c_netdata = "";
+        }
+        syncobjs_c_netdata += (str)data.d;
+
+        if ((str)data.pcnt != "undefined" && (num)data.pcnt == 100)
+        {
+            # data sent, perform decode and update objects
+            obj decodeddata = syncobjs_h_byteArrayToObjs(b91_decode(syncobjs_c_netdata));
+            obj[] netobjs = (obj[]) decodeddata.objlist;
+            syncobjs_c_oldTime = syncobjs_c_newTime;
+            syncobjs_c_newTime = GAME.TIME.now();
+            syncobjs_c_dataBuffer = syncobjs_c_newTime - syncobjs_c_oldTime;
+            
+            syncobjs_c_updateobjs(netobjs);
+            num[] newdellist = (num[]) decodeddata.delList;
+            # num[] newdellist = (num[]) data.dellist;
+            for (num i = 0; i < lengthOf newdellist; i++) {
+                syncobjs_c_deleteobj(newdellist[i]);
+            }
+            # clear syncobjs_c_netdata string buffer
+            syncobjs_c_netdata = "";
+        }
+
+        
+    } else if (id == "clear") {
+        syncobjs_c_clearAllObjs();       
+    }
+}
+
+action syncobjs_c_update(num delta){
+    # object position lerping
+    syncobjs_c_lerpObj(delta);
+}
+
+action syncobjs_c_onGameEnd(){
+    syncobjs_c_clearAllObjs();
+}
+
+# ===================================================================
+# Library: \libs\utils\players\plrutil_c.krnk
+# Author: blandrice
+#   Description: workaround to check how many players are spawned in
+# ===================================================================
+
+bool plrutil_c_imspawned = false;
+
+action plrutil_c_start() {
+    plrutil_c_imspawned = false;
+}
+
+action plrutil_c_onPlayerSpawn(str id) {
+    obj tplr = GAME.PLAYERS.findByID(id);
+    if ((bool)tplr.isYou) {
+        GAME.NETWORK.send("spawn", {});
+        plrutil_c_imspawned = true;
+    }
+}
+
+action plrutil_c_onPlayerDeath(str id, str killerID) {
+    obj tplr = GAME.PLAYERS.findByID(id);
+    if ((bool)tplr.isYou) {
+        plrutil_c_imspawned = false;    
+    }
+}
+
+
+
+
+# ================================================================
+# auto-detected public actions from libraries
+# ================================================================
+public action onNetworkMessage (str id, obj data){
+    syncobjs_c_onNetworkMessage(id,  data);
+}
+
+public action update (num delta){
+    syncobjs_c_update(delta);
+}
+
+public action onGameEnd (){
+    syncobjs_c_onGameEnd();
+}
+
+public action start (){
+    syncobjs_c_start();
+    plrutil_c_start();
+}
+
+public action onPlayerDeath (str id, str killerID){
+    plrutil_c_onPlayerDeath(id,  killerID);
+}
+
+public action onPlayerSpawn (str id){
+    plrutil_c_onPlayerSpawn(id);
+}
+
