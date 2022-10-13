@@ -1,7 +1,5 @@
 #include <syncobjs_s.krnk>
 #include <AABB.krnk>
-#include <plrbhvr_s.krnk>
-#include <gamestart_s.krnk>
 #include <ecs_h.krnk>
 
 

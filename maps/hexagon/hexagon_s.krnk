@@ -1,4 +1,5 @@
 #include <plrbhvr_s.krnk>
+#include <gamestart_s.krnk>
 #include <platform.krnk>
 
 #include <ecs_s.krnk>
