@@ -58,7 +58,7 @@ num[] action objsToByteArray(obj[] objlist,bool reset, obj plr, obj[] plrs) {
                     tObj.health_old = {x:tObj.health.h,y:tObj.health.fh};
                 }
                 if (healthchanged || ((!listutil_instrlist((str)plr.id,(str[])tObj.health_old_plrs))) || reset) {
-                    contents |=  0x40;
+                    contents |=  syncobjs_h_eHEALTH;
                     tArray = dtypes_int16toByteArray(dtypes_numToUint16((num)tObj.health.h)); addTo retArray tArray[0]; addTo retArray tArray[1];
                     tArray = dtypes_int16toByteArray(dtypes_numToUint16((num)tObj.health.fh)); addTo retArray tArray[0]; addTo retArray tArray[1];
                     addTo  (str[]) tObj.health_old_plrs (str)plr.id;
@@ -73,7 +73,7 @@ num[] action objsToByteArray(obj[] objlist,bool reset, obj plr, obj[] plrs) {
                 tObj.pos_old = {x:tObj.position.x,y:tObj.position.y,z:tObj.position.z};
             }
             if (poschanged || ((!listutil_instrlist((str)plr.id,(str[])tObj.pos_old_plrs))) || reset){
-                contents |=  0x20;
+                contents |=  syncobjs_h_ePOSITION;
                 tArray = dtypes_int16toByteArray(dtypes_numToInt16((num)tObj.position.x)); addTo retArray tArray[0]; addTo retArray tArray[1];
                 tArray = dtypes_int16toByteArray(dtypes_numToInt16((num)tObj.position.y)); addTo retArray tArray[0]; addTo retArray tArray[1];
                 tArray = dtypes_int16toByteArray(dtypes_numToInt16((num)tObj.position.z)); addTo retArray tArray[0]; addTo retArray tArray[1];
@@ -88,7 +88,7 @@ num[] action objsToByteArray(obj[] objlist,bool reset, obj plr, obj[] plrs) {
                 tObj.rot_old = {x:tObj.rotation.x,y:tObj.rotation.y,z:tObj.rotation.z};
             }
             if (rotchanged || ((!listutil_instrlist((str)plr.id,(str[])tObj.rot_old_plrs))) || reset){
-                contents |=  0x10;
+                contents |=  syncobjs_h_eROTATION;
                 tArray = dtypes_int16toByteArray(dtypes_numToFloat16((num)tObj.rotation.x)); addTo retArray tArray[0]; addTo retArray tArray[1];
                 # GAME.log("x: ",dtypes_numToFloat16((num)tObj.rotation.x), printBinary(dtypes_numToFloat16((num)tObj.rotation.x)));
                 tArray = dtypes_int16toByteArray(dtypes_numToFloat16((num)tObj.rotation.y)); addTo retArray tArray[0]; addTo retArray tArray[1];
@@ -104,7 +104,7 @@ num[] action objsToByteArray(obj[] objlist,bool reset, obj plr, obj[] plrs) {
                 tObj.scale_old = {x:tObj.scale.x,y:tObj.scale.y,z:tObj.scale.z};
             }
             if (scalechanged || ((!listutil_instrlist((str)plr.id,(str[])tObj.scale_old_plrs))) || reset){
-                contents |=  0x08;
+                contents |=  syncobjs_h_eSCALE;
                 tArray = dtypes_int16toByteArray(dtypes_numToInt16((num)tObj.scale.x)); addTo retArray tArray[0]; addTo retArray tArray[1];
                 tArray = dtypes_int16toByteArray(dtypes_numToInt16((num)tObj.scale.y)); addTo retArray tArray[0]; addTo retArray tArray[1];
                 tArray = dtypes_int16toByteArray(dtypes_numToInt16((num)tObj.scale.z)); addTo retArray tArray[0]; addTo retArray tArray[1];
@@ -121,7 +121,7 @@ num[] action objsToByteArray(obj[] objlist,bool reset, obj plr, obj[] plrs) {
                 tObj.type_old = (num)tObj.type;
             }
             if (typechanged || ((!listutil_instrlist((str)plr.id,(str[])tObj.type_old_plrs))) || reset){
-                contents |=  0x04;
+                contents |=  syncobjs_h_eTYPE;
                 tArray = dtypes_int16toByteArray((num)tObj.type); addTo retArray tArray[0]; addTo retArray tArray[1];    
                 addTo  (str[]) tObj.type_old_plrs (str)plr.id;
             }
@@ -134,7 +134,7 @@ num[] action objsToByteArray(obj[] objlist,bool reset, obj plr, obj[] plrs) {
                 tObj.aid_old = (num)tObj.aid;
             }
             if (aid_changed || ((!listutil_instrlist((str)plr.id,(str[])tObj.aid_old_plrs))) || reset){
-                contents |=  0x02;
+                contents |=  syncobjs_h_eTEXTURE;
                 tArray = dtypes_int16toByteArray((num)tObj.aid); addTo retArray tArray[0]; addTo retArray tArray[1];    
                 addTo  (str[]) tObj.aid_old_plrs (str)plr.id;
                 }
@@ -147,7 +147,7 @@ num[] action objsToByteArray(obj[] objlist,bool reset, obj plr, obj[] plrs) {
                 tObj.color_old = (num)tObj.color;
             }
             if (color_changed || ((!listutil_instrlist((str)plr.id,(str[])tObj.color_old_plrs))) || reset){
-                contents |=  0x01;
+                contents |=  syncobjs_h_eCOLOR;
                 tArray = dtypes_ColorToByteArray((num)tObj.color); addTo retArray tArray[0]; addTo retArray tArray[1]; addTo retArray tArray[2];
                 addTo  (str[]) tObj.color_old_plrs (str)plr.id;
             }
@@ -161,7 +161,7 @@ num[] action objsToByteArray(obj[] objlist,bool reset, obj plr, obj[] plrs) {
                 tObj.emissive_old = (num)tObj.emissive;
             }
             if (emissive_changed || ((!listutil_instrlist((str)plr.id,(str[])tObj.emissive_old_plrs))) || reset){
-                contents |=  0x80;
+                contents |=  syncobjs_h_eEMISSIVE;
                 tArray = dtypes_ColorToByteArray((num)tObj.emissive); addTo retArray tArray[0]; addTo retArray tArray[1]; addTo retArray tArray[2];
                 addTo  (str[]) tObj.emissive_old_plrs (str)plr.id;
             }

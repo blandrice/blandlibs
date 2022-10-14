@@ -4,6 +4,17 @@
 #   Description: not ready!
 # ===================================================================
 
+
+num eHEALTH = 0x01;
+num ePOSITION = 0x02;
+num eROTATION = 0x04;
+num eSCALE = 0x08;
+num eTYPE = 0x10;
+num eTEXTURE = 0x20;
+num eCOLOR = 0x40;
+num eEMISSIVE = 0x80;
+
+
 # Binary decoding of an array of bytes to Objects
 obj action byteArrayToObjs(num[] byteArray) {
 	obj[] objlist = obj[];
@@ -32,13 +43,13 @@ obj action byteArrayToObjs(num[] byteArray) {
 		tobj.objid = dtypes_merge2Bytes(byteArray[i],byteArray[i+1]);
 		i+=2;
 		# 4 bytes health / fullhealth
-		if ((contents & 0x40) > 0) {
+		if ((contents & eHEALTH) > 0) {
 			tobj.health = dtypes_merge2Bytes(byteArray[i],byteArray[i+1]);
 			tobj.fhealth = dtypes_merge2Bytes(byteArray[i+2],byteArray[i+3]);
 			i+= 4;
 		}
 		# 6 bytes position
-		if ((contents & 0x20) > 0){
+		if ((contents & ePOSITION) > 0){
 			tobj.position = {
 				x : dtypes_Int16ToNum(dtypes_merge2Bytes(byteArray[i],byteArray[i+1])),
 				y : dtypes_Int16ToNum(dtypes_merge2Bytes(byteArray[i+2],byteArray[i+3])),
@@ -47,7 +58,7 @@ obj action byteArrayToObjs(num[] byteArray) {
 			i+= 6;
 		}
 		# 6 bytes rotation
-		if ((contents & 0x10) > 0) {
+		if ((contents & eROTATION) > 0) {
 			tobj.rotation ={
 				x: dtypes_float16ToNum(dtypes_merge2Bytes(byteArray[i],byteArray[i+1])),
 				y: dtypes_float16ToNum(dtypes_merge2Bytes(byteArray[i+2],byteArray[i+3])),
@@ -56,7 +67,7 @@ obj action byteArrayToObjs(num[] byteArray) {
 			i+= 6;
 		}
 		# 6 bytes scale
-		if ((contents & 0x08) > 0) {
+		if ((contents & eSCALE) > 0) {
 			tobj.scale = {
 				x: dtypes_Int16ToNum(dtypes_merge2Bytes(byteArray[i],byteArray[i+1])),
 				y: dtypes_Int16ToNum(dtypes_merge2Bytes(byteArray[i+2],byteArray[i+3])),
@@ -65,19 +76,19 @@ obj action byteArrayToObjs(num[] byteArray) {
 			i+= 6;
 		}
 		# 7 bytes details (2 type, 2 texture, 3 color)
-		if ((contents & 0x04) > 0) {
+		if ((contents & eTYPE) > 0) {
 			tobj.type = dtypes_merge2Bytes(byteArray[i],byteArray[i+1]);
             i+=2;
 		}
-        if ((contents & 0x02) > 0) {
+        if ((contents & eTEXTURE) > 0) {
 			tobj.aid = dtypes_merge2Bytes(byteArray[i],byteArray[i+1]);
             i+=2;
 		}
-        if ((contents & 0x01) > 0) {
+        if ((contents & eCOLOR) > 0) {
 			tobj.color = byteArray[i] | (byteArray[i+1] << 8) | (byteArray[i+2] << 16);
             i+=3;
 		}
-        if ((contents & 0x80) > 0) {
+        if ((contents & eEMISSIVE) > 0) {
 			tobj.emissive = byteArray[i] | (byteArray[i+1] << 8) | (byteArray[i+2] << 16);
             i+=3;
 		}
