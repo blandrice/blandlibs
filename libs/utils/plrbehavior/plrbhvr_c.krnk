@@ -1,5 +1,7 @@
 #include <plrutil_c.krnk>
 #include <g.krnk>
+#include <AABB.krnk>
+#include <syncobjs_c.krnk>
 # ===================================================================
 # Library: libs\utils\plrbehavior\plrbhvr_c.krnk
 # Author: blandrice
@@ -257,6 +259,7 @@ public action onPlayerUpdate(str id, num delta, obj inputs) {
     cr = (bool)inputs.crouch;
     obj tPlr = GAME.PLAYERS.findByID(id);
     
+    #currently collides with ALL objects
     if (notEmpty tPlr) {
         obj[] res = AABB_resolveplr(tPlr,cr,syncobjs_c_objlist);
         if ((str)tPlr.tOnObjIdle == "undefined"){

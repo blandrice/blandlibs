@@ -1,3 +1,5 @@
+#include <plrbhvr_c.krnk>
+#include <gamestart_c.krnk>
 #include <ecs_c.krnk>
 
 public action onKeyPress(str key, num code) {
