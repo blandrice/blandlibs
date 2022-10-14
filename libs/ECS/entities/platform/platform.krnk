@@ -5,6 +5,7 @@
 #include <ecsgrav.krnk>
 #include <ecsphysics.krnk>
 ##include <color.krnk>
+#include <ecs_h.krnk>
 
 # ===================================================================
 # Library: libs\ECS\entities\platform\platform.krnk
@@ -22,7 +23,7 @@ action create(obj props){
         color:0xFFFFFF,
         emissive:0x000000,
         onGround:false,
-        collide:{type:0x4},
+        collide:{type:ecs_h_COL_PLRS},
         plat:{crumble:3,int_crumble:500,tlastcrumble:0,lifetime:1000},
         shake:{x:0,y:0,z:0,en:0,intensity:{x:1,y:0,z:1},duration:400}
     };
