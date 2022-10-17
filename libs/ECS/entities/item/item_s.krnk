@@ -1,0 +1,70 @@
+#include <g.krnk>
+#include <plrutil_s.krnk>
+#include <syncobjs_s.krnk>
+#include <ecsgrav.krnk>
+#include <ecsphysics.krnk>
+#include <ecs_h.krnk>
+
+# ===================================================================
+# Library: libs\ECS\entities\platform\platform.krnk
+# Author: blandrice
+#   Description: item that can be picked up :D collides with the world and other objects
+#   NOT READY
+# ===================================================================
+
+action create(obj props){
+    obj newObj = {
+        aid: 11676,
+        scale:{x:5,y:5,z:5},
+        position:{x:0,y:20,z:0},
+        velocity:{x:0,y:0,z:0},
+        color:0xFF0000,
+        emissive:0x000000,
+        onGround:false,
+        collide:{type:ecs_h_COL_WORLD|ecs_h_COL_PLRS},
+        # plat:{crumble:3,int_crumble:500,tlastcrumble:0,lifetime:1000},
+        # shake:{x:0,y:0,z:0,en:0,intensity:{x:1,y:0,z:1},duration:400}
+        gravity:{x:0,y:-100,z:0}
+    };
+    if (notEmpty (obj)props.position){
+        newObj.position.x = (num)props.position.x;
+        newObj.position.y = (num)props.position.y;
+        newObj.position.z = (num)props.position.z;
+    }
+    if (notEmpty (obj)props.scale){
+        newObj.scale.x = (num)props.scale.x;
+        newObj.scale.y = (num)props.scale.y;
+        newObj.scale.z = (num)props.scale.z;
+    }
+    if ((str)props.color != "undefined"){
+        newObj.color = (num) props.color;
+    }
+    syncobjs_s_createObject(newObj);
+    # gravity:{x:0,y:-100,z:0}
+}
+
+# num [] colorcrumble = num[0xFF0000,0xFFFF00,0x00FF00];
+private action onCollidePlrs(obj tobj, obj[] plrs){
+    if (notEmpty (obj) tobj.plat){
+        if ((g_tnow - (num)tobj.plat.tlastcrumble) > (num)tobj.plat.int_crumble){
+            if ((num)tobj.plat.crumble > 0){
+                (num)tobj.plat.crumble--;
+                tobj.emissive = colorcrumble[((num)tobj.plat.crumble % 3)];
+                tobj.shake.en = 1;
+                tobj.plat.tlastcrumble = g_tnow;
+            }
+            if ((num)tobj.plat.crumble == 0 && !notEmpty (obj) tobj.gravity){
+                tobj.gravity = {x:0,y:-100,z:0};
+            }
+        }
+    }
+}
+
+private action onECSUpdate(num delta, obj tobj, obj[] objlist){
+    if (notEmpty (obj) tobj.item){
+        if ((num)tobj.plat.crumble == 0 && (g_tnow - (num)tobj.plat.tlastcrumble) > (num)tobj.plat.lifetime){
+            syncobjs_s_deleteObject((str)tobj.objid);
+            
+        }
+    }
+}
