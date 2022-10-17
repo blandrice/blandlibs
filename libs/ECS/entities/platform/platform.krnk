@@ -1,10 +1,10 @@
 #include <g.krnk>
 #include <plrutil_s.krnk>
+#include <plrbhvr_s.krnk>
 #include <shake_s.krnk>
 #include <syncobjs_s.krnk>
 #include <ecsgrav.krnk>
 #include <ecsphysics.krnk>
-##include <color.krnk>
 #include <ecs_h.krnk>
 
 # ===================================================================
