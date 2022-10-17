@@ -5,10 +5,10 @@ num created = 0;
 obj test = {};
 public action update(num delta){
     if (lengthOf plrutil_s_spawnedPlayers > 0 && created == 0) {
-        syncobjs_s_createObject({aid: 34379,position:{x:22,y:22,z:22},color:0xff0000});
+        syncobjs_s_createObject({type:"34529tg",aid: 34379,position:{x:22,y:22,z:22},scale:{x:1,y:1,z:1},color:0xFFFFFF});
         syncobjs_s_createObject({rotation:{x:0,y:0,z:0},position:{x:22,y:22,z:22},color:0x00ff00});
 
-        for (num i = 0; i < 70; i++){
+        for (num i = 0; i < 40; i++){
             syncobjs_s_createObject({rotation:{x:0,y:0,z:0},position:{x:22,y:22,z:22+i*5},color:0x00ff00 + i});
         }
         # syncobjs_s_createObject({position:{x:0,y:0,z:0},color:0x00ff00});

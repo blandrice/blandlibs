@@ -77,8 +77,20 @@ obj action byteArrayToObjs(num[] byteArray) {
 		}
 		# 7 bytes details (2 type, 2 texture, 3 color)
 		if ((contents & eTYPE) > 0) {
-			tobj.type = dtypes_merge2Bytes(byteArray[i],byteArray[i+1]);
-            i+=2;
+			# tobj.type = dtypes_merge2Bytes(byteArray[i],byteArray[i+1]);
+			# i+=2;
+			num len = byteArray[i];
+			i++;
+			num[] byteA = num[];
+			for (num k = 0; k < len; k++)
+			{
+				addTo byteA byteArray[i];
+				i++;
+			}
+			# num[] byteA = num[]; addTo byteA byteArray[i];
+			tobj.type = dtypes_ByteArrayToStr(byteA);
+            # i+=1;
+			GAME.log("type:",tobj.type);
 		}
         if ((contents & eTEXTURE) > 0) {
 			tobj.aid = dtypes_merge2Bytes(byteArray[i],byteArray[i+1]);

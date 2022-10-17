@@ -181,6 +181,40 @@ num[] action ColorToByteArray(num color) {
 	return retArray;
 }
 
+str alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!#$%&()*+,./:;<=>?@[]^_`{|}~-";
+
+# Recursion due to loop limits
+num action getValue(str c, num index) {
+	if(index >= lengthOf alphabet) {
+		return -1;
+	}
+	
+	if(alphabet[index] == c) {
+		return index;
+	}
+	
+	return getValue(c, index + 1);
+}
+
+num[] action strtoByteArray(str s){
+	num[] retArray = num[];
+	for (num i = 0; i < lengthOf s; i++){
+		addTo retArray getValue(s[i],0);
+	}
+	return retArray;
+}
+
+str action ByteArrayToStr(num[] b){
+	str s = "";
+	for (num i = 0; i < lengthOf b; i++){
+		if (b[i] >=0)
+		{
+			s += alphabet[b[i]];	
+		}
+	}
+	return s;
+}
+
 str[] lookup = str["0","1","2","3","4","5","6","7","8","9","A","B","C","D","E","F"];
 
 str action num2hexstring(num n){

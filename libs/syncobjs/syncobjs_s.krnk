@@ -122,7 +122,17 @@ num[] action objsToByteArray(obj[] objlist,bool reset, obj plr, obj[] plrs) {
             }
             if (typechanged || ((!listutil_instrlist((str)plr.id,(str[])tObj.type_old_plrs))) || reset){
                 contents |=  syncobjs_h_eTYPE;
-                tArray = dtypes_int16toByteArray((num)tObj.type); addTo retArray tArray[0]; addTo retArray tArray[1];    
+                # tArray = dtypes_int16toByteArray((num)tObj.type); addTo retArray tArray[0]; addTo retArray tArray[1];    
+                # num len = lengthOf (str)tObj.type;
+                # addTo retArray len;
+                tArray = dtypes_strtoByteArray((str)tObj.type);
+                num len = lengthOf tArray;
+                addTo retArray len;
+                for (num j = 0; j < len; j++)
+                {
+                    addTo retArray tArray[j];
+                }
+                # tArray = dtypes_strtoByteArray((str)tObj.type); addTo retArray tArray[0];
                 addTo  (str[]) tObj.type_old_plrs (str)plr.id;
             }
         }
@@ -189,7 +199,7 @@ obj action createObject(obj d) {
     
     # object template!
     obj tobj = {
-        type: 0, #0 = cube, 1 = sphere, 2 = cylinder, all else = modelID
+        type: "0", #0 = cube, 1 = sphere, 2 = cylinder, all else = modelID
         aid: 34379,
         scale: {x:20,y:80,z:20}, # models only need x:scale which is all 3 dimensions
         position: {x:1,y:1,z:1},

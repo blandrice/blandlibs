@@ -1,0 +1,27 @@
+#include <dtypes.krnk>
+# ===================================================================
+# Test: libs\utils\dtypes\test\test_str2byte.krnk
+# ===================================================================
+
+
+
+# Runs when the game starts
+public action start() {
+    num errors = 0;
+
+    GAME.log(toNum "a");
+    GAME.log(toNum "b");
+    GAME.log(toNum "A");
+    str[] ss = str['test1','t','asdf,','omgasdf'];
+    for (num i = 0; i < lengthOf ss; i++)
+    {
+        num[] n = dtypes_strtoByteArray(ss[i]);
+        str rets = dtypes_ByteArrayToStr(n);
+        GAME.log(ss[i],n, rets);
+
+        errors += (ss[i] == rets) ? 0 : 1;
+    }
+    
+    
+    GAME.log("total errors:",errors);
+}
