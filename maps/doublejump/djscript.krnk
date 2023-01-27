@@ -1,0 +1,95 @@
+# ===================================================================
+# File: libs\doublejump\djregistersync\r_djumpclient.krnk
+# Author: blandrice
+# Instructions: save all this text on both client and server side KrunkScript.
+# the "DJ_template.txt" mapfile will already have this code saved!
+# ===================================================================
+
+# ===================================================================
+# SETTINGS:
+obj DJconfig_c = 
+{
+    MAX_JUMPCOUNT: 2, # 2 is "doublejump", 3 is "triplejump"
+    WALLJUMP_REFRESHS: true,
+    ENABLE_CROUCHJUMP: true, # lower height for crouch jump, also applies "moonjump" mid-air physics
+    SOUND: 31960, # sound ID. set to 0 if no sound desired
+    # HARD-CODED NUMBERS - DON'T TOUCH
+    MS_DURATION_UNCROUCH: 166,
+    VEL_JUMP: 0.0793, # 60FPS, max clearance 17.9 units
+    VEL_CROUCHJUMP: 0.0595, # 60FPS, max clearance 10.2 units
+};
+
+# ===================================================================
+
+# Add this both on the server and client side.
+
+public action onPlayerSpawn(str id){
+
+	obj player = GAME.PLAYERS.findByID(id);
+	# player.doubleJump = false;
+	# player.singleJump = false;
+	# player.hasSingleJumped = false;
+
+	# player.registerSyncValues("singleJump");
+	# player.registerSyncValues("hasSingleJumped");
+	# player.registerSyncValues("doubleJump");
+    player.timeLastCrouched = false;
+    player.jumpCount = false;
+    player.hasJumped = false;
+
+    player.registerSyncValues("timeLastCrouched");
+    player.registerSyncValues("jumpCount");
+    player.registerSyncValues("hasJumped");
+
+}
+
+public action onPlayerUpdate(str id, num delta, obj inputs){
+
+	obj player = GAME.PLAYERS.findByID(id);
+    num timeNow = GAME.TIME.now();
+	
+    # Double-Jump stuff
+
+    # crouch timestamp
+    if ((bool) inputs.crouch) 
+    {
+        player.timeLastCrouched = timeNow;
+    }
+    # reset jumpcount on ground
+    if((bool) player.onGround) 
+    {
+        player.jumpCount = (num) DJconfig_c.MAX_JUMPCOUNT-1;
+    } 
+    #  reset jumpCount after walljump
+    else if ((bool) DJconfig_c.WALLJUMP_REFRESHS && (bool) player.onWall && (bool) inputs.jump) 
+    {
+        player.jumpCount = (num) DJconfig_c.MAX_JUMPCOUNT-1;
+    } 
+    # input jump logic
+    if((bool) inputs.jump) {
+        if(!(bool)player.hasJumped  && (num)player.jumpCount > 0 && !(bool)player.onGround) 
+        {
+            if (!(bool) player.onWall && (bool)DJconfig_c.WALLJUMP_REFRESHS) 
+            {
+                if ((bool) DJconfig_c.ENABLE_CROUCHJUMP && ((timeNow - (num) player.timeLastCrouched) < (num)DJconfig_c.MS_DURATION_UNCROUCH)) 
+                {
+                    player.velocity.y = Math.lerp((num) DJconfig_c.VEL_CROUCHJUMP,(num) DJconfig_c.VEL_JUMP,(timeNow - (num)player.timeLastCrouched)/(num) DJconfig_c.MS_DURATION_UNCROUCH);	# "moonjumping" calculation
+                } else 
+                {
+                    player.velocity.y = (num) DJconfig_c.VEL_JUMP;	
+                }
+                if ((num) DJconfig_c.SOUND > 0) 
+                {
+                    GAME.SOUND.play2D(32576, 1, 0.5, false); # jump DJconfig_c.SOUND
+                }
+
+                (num)player.jumpCount--;
+            }
+        }
+        player.hasJumped = true;
+    }
+    else {
+        player.hasJumped = false;
+    }
+
+}
