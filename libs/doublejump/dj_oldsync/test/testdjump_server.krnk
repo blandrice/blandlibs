@@ -1,11 +1,9 @@
-#include <djump_client.krnk>
-
 # ===================================================================
-# File: maps/test_djump/testdjump_client.krnk
+# File: libs\doublejump\dj_oldsync\test\testdjump_server.krnk
 # Author: blandrice
 # ===================================================================
 
-num map_var = 0;
+#include <old_djump_server.krnk>
 
 public action start()
 {
