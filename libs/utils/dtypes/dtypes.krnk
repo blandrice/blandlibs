@@ -172,6 +172,15 @@ num[] action int16toByteArray(num data){
 	return num[((data >> 0) & 0xff),(data >> 8) & 0xff];
 }
 
+num[] action int32toByteArray(num data){
+	num[] retarr = num[];
+	addTo retarr (data >> 0) & 0xff; 
+	addTo retarr (data >> 8) & 0xff; 
+	addTo retarr (data >> 16) & 0xff; 
+	addTo retarr (data >> 24) & 0xff; 
+	return retarr;
+}
+
 num[] action ColorToByteArray(num color) {
 	num[] retArray = num[];
 	addTo retArray (color >> 0) & 0xff;

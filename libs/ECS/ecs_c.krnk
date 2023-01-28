@@ -1,5 +1,5 @@
 #include <syncobjs_c.krnk>
-##include <AABB.krnk>
+#include <plrutil_c.krnk>
 
 # ===================================================================
 # Library: \libs\ECS\ecs_c.krnk

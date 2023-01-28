@@ -13,9 +13,12 @@ bool gameinit = false;
 
 num PLAYERS_REQUIRED = 2;
 
-private action onGameInit(){
-    # GAME.log("game initialized");
-}
+bool initdone = false;
+
+# private action onGameInit(){
+#     # GAME.log("game initialized");
+# }
+
 public action update(num delta){
     if (!gameinit && (lengthOf plrutil_s_spawnedPlayers >= PLAYERS_REQUIRED) && (g_tnow - plrutil_s_tLastSpawnedPlayer > DURATION_WARMUP)) {
         gameinit = true;

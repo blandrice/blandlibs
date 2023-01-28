@@ -25,7 +25,3 @@ public action update(num delta){
         }
     }
 }
-
-private action onGameInit(){
-    GAME.log("game initialized");
-}

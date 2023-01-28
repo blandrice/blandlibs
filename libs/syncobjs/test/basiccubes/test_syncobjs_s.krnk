@@ -1,10 +1,12 @@
 #include <syncobjs_s.krnk>
 #include <plrutil_s.krnk>
 
-num created = 0;
+num tlastcreated = 0;
 obj test = {};
+num tnow = 0;
 public action update(num delta){
-    if (lengthOf plrutil_s_spawnedPlayers > 0 && created == 0) {
+    tnow = GAME.TIME.now();
+    if (lengthOf plrutil_s_spawnedPlayers > 0 && (tnow - tlastcreated) > 5000) {
         syncobjs_s_createObject({position:{x:22,y:22,z:22},color:0xff0000});
         syncobjs_s_createObject({rotation:{x:0,y:0,z:0},position:{x:22,y:22,z:22},color:0x00ff00});
 
@@ -18,7 +20,15 @@ public action update(num delta){
         # syncobjs_s_createObject({position:{x:40,y:0,z:0},color:0xffffff});
         # syncobjs_s_createObject({position:{x:0,y:0,z:20},color:0x000000});
         # syncobjs_s_createObject({position:{x:0,y:0,z:40},color:0xff00ff});
-        created = 1;
+        tlastcreated = tnow;
+    } 
+    else if ((tnow - tlastcreated) > 2500)
+    {
+        for (num i = 0; i < lengthOf syncobjs_s_objlist; i++)
+        {
+            syncobjs_s_deleteObject((str)syncobjs_s_objlist[i].objid);
+        }
+        tlastcreated = 0;
     }
 
     # if (notEmpty test){

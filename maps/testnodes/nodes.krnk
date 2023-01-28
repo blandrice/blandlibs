@@ -1,0 +1,9 @@
+#include <ecs_s.krnk>
+public action start() {
+	# Fetch list of nodes
+	obj[] nodes = GAME.OBJECTS.getPathNodes();
+
+	for (num i = 0; i < lengthOf nodes; i++) {
+		GAME.log(nodes[i]);
+	}
+}

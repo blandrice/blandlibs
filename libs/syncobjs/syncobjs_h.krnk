@@ -19,8 +19,7 @@ num eEMISSIVE = 0x80;
 obj action byteArrayToObjs(num[] byteArray) {
 	obj[] objlist = obj[];
 	num[] delList = num[];
-	num i = 0;
-	num j = 0;
+	num i = 0; # pc in array
 	num totalobjs = 0;
 	num totaldelobjs = 0;
 	if (lengthOf byteArray >=2)
@@ -31,10 +30,10 @@ obj action byteArrayToObjs(num[] byteArray) {
 		i++;
     } else
 	{
-        return objlist;
+        return {objlist:objlist,delList:delList};
     }
 	
-	while (j < totalobjs){
+	for (num j = 0; j < totalobjs; j++){
 		obj tobj = {};
 		# contents byte
 		num contents = byteArray[i];
@@ -106,13 +105,15 @@ obj action byteArrayToObjs(num[] byteArray) {
 		}
         
 		addTo objlist tobj;
-		j++;
+		# j++;
 	}
-	for (num k = 0; k < totaldelobjs; k++){
-		addTo delList byteArray[i+k];
+	for (num j = 0; j < totaldelobjs; j++){
+		# GAME.log("i",i,"j",j);
+		# GAME.log(byteArray);
 		# GAME.log("new delete object with id",byteArray[i+k]);
-		i++;
-		
+		num objid = dtypes_merge2Bytes(byteArray[i],byteArray[i+1]);
+		addTo delList objid;
+		i+=2;
 	}
 
 

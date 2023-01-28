@@ -20,6 +20,7 @@ num[] action objsToByteArray(obj[] objlist,bool reset, obj plr, obj[] plrs) {
 	num[] retArray = num[];
     num[] delArray = num[];
     num totalobjs = 0;
+    num totaldelobjs = 0;
 
     # 1 byte length of objects
     addTo retArray 0;
@@ -32,7 +33,12 @@ num[] action objsToByteArray(obj[] objlist,bool reset, obj plr, obj[] plrs) {
         if ((str)tObj.del != "undefined" && (bool)tObj.del == true){
             if (!listutil_instrlist((str)plr.id,(str[])tObj.delplrids)){
                 addTo (str[])tObj.delplrids (str)plr.id;
-                addTo delArray toNum (str) tObj.objid;
+                # addTo delArray toNum (str) tObj.objid;
+                num[] tObjID_arr = num[];
+                tObjID_arr = dtypes_int16toByteArray(toNum (str) tObj.objid);
+                # addTo delArray toNum (str) tObj.objid;
+                addTo delArray tObjID_arr[0]; addTo delArray tObjID_arr[1];
+                totaldelobjs++;
                 continue;
             }
         } else{
@@ -183,7 +189,7 @@ num[] action objsToByteArray(obj[] objlist,bool reset, obj plr, obj[] plrs) {
         addTo retArray delArray[i];
     }
     retArray[0] = totalobjs;
-    retArray[1] = lengthOf delArray;
+    retArray[1] = totaldelobjs;
 	return retArray;
 }
 
@@ -191,12 +197,41 @@ num tlastbroadcast = 0;
 obj[] objlist = obj[];
 num[] newdellist = num[];
 num objid = 0;
+bool objidoverflow = false;
 num tnow = 0;
+num BYTEOVERFLOW_LEN = 65535;
+# num BYTEOVERFLOW_LEN = 256;
 
 # WARNING: pass in a fresh object only - not a reference! otherwise you risk modifying the reference
 # for example don't pass in a template object for createObject(templateBall).
+
+obj action findObjbyID(str id){
+    for (num i = lengthOf objlist - 1; i >= 0; i--) {
+        if ((str) objlist[i].objid == id) {
+            return objlist[i];
+        }
+    }
+    return {};
+}
+
 obj action createObject(obj d) {
-    
+    if (lengthOf objlist >= BYTEOVERFLOW_LEN)
+    {
+        GAME.log("ERROR: EXCEEDED MAXIMUM OBJECTS IN OBJLIST ",BYTEOVERFLOW_LEN);
+        return {};
+    } else if (objidoverflow)
+    {
+        obj tobj = findObjbyID(toStr objid);
+        while(notEmpty tobj)
+        {
+            objid++;
+            if (objid>=BYTEOVERFLOW_LEN)
+            {
+                objid=0;
+            }
+        }
+        
+    }
     # object template!
     obj tobj = {
         type: "0", #0 = cube, 1 = sphere, 2 = cylinder, all else = modelID
@@ -244,8 +279,16 @@ obj action createObject(obj d) {
         d.collide = {type:tobj.collide.type,resolve:""};
     }
 
-	d.objid = toNum toStr objid;
-    objid++;
+    d.objid = toNum toStr objid;    
+    if (objid>=BYTEOVERFLOW_LEN)
+    {
+        objid=0;
+        objidoverflow=true;
+    }
+    else
+    {
+        objid++;
+    }
     addTo objlist d;
     return d;
 }
@@ -273,15 +316,6 @@ action deleteAllObjs(){
         objlist[i].delplrids=str[];
         
     }
-}
-
-obj action findObjbyID(str id){
-    for (num i = lengthOf objlist - 1; i >= 0; i--) {
-        if ((str) objlist[i].objid == id) {
-            return objlist[i];
-        }
-    }
-    return {};
 }
 
 str[] action listObjIDs(){
@@ -387,6 +421,7 @@ public action update(num delta) {
 
 # Runs when the round ends
 public action onGameEnd() {
+    deleteAllObjs();
     # delete all objects client side
     GAME.NETWORK.broadcast("clear", {});
 }

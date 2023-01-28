@@ -18,14 +18,8 @@
 # Systems: public + private action hooks!
 
 
-bool initdone = false;
-public action update(num delta){
 
-    if (gamestart_s_gameinit && !initdone){
-        onGameInit();
-        initdone = true;
-    }
-    
+public action update(num delta){
 
     obj[] world = GAME.OBJECTS.list();
     obj[] worldedit = obj[]; # edits to make 
@@ -91,10 +85,6 @@ public action update(num delta){
 public action onNetworkMessage(str id, obj data, str playerID) {
 
 }
-
-# private action onGameInit(){
-#     GAME.log("game has initialized");
-# }
 
 # private action onCollide(obj tobj, obj[] objlist){
 # }

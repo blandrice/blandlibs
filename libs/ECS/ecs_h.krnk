@@ -7,6 +7,7 @@ num COL_WORLD = 0x1; # object can collide with world
 num COL_OBJS = 0x2; # object can collide with other objects
 num COL_PLRS = 0x4; # object can detect collision with player
 num COL_OBJ2PLRS = 0x8; # # player can collide with object (usually resolves collision. currently default this does not matter)
+
 private action onCollideWorld(obj tobj, obj[] collist){
 
 }
@@ -15,5 +16,9 @@ private action onECSUpdate(num delta, obj tobj, obj[] objlist){
 }
 
 private action onCollide(obj tobj, obj[] objlist){
+
+}
+
+private action onCollidePlrs(obj tobj, obj[] plrs){
 
 }

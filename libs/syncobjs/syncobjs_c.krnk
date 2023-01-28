@@ -137,15 +137,17 @@ obj action findObjbyID(num id) {
     return {};
 }
 
-action deleteobj(num id) {
+bool action deleteobj(num id) {
     for (num i = 0; i < lengthOf objlist; i++) {
         if ((num) objlist[i].objid == id) {
             obj cube = objlist[i];
             addTo delList (str) cube.objid;
             remove objlist[i];
             cube.delete();
+            return true;
         }
     }
+    return false;
 }
 
 action clearAllObjs(){
@@ -164,6 +166,15 @@ bool action objIDWasDeleted(str id) {
         
     }
     return false;
+}
+
+num[] action getAllObjIDs() {
+    num[] retobjids = num[];
+    for (num i = 0; i < lengthOf objlist; i++)
+    {
+        addTo retobjids (num)objlist[i].objid;
+    }
+    return retobjids;
 }
 
 bool action updateobjs(obj[] netobjs) {
@@ -224,8 +235,28 @@ public action onNetworkMessage(str id, obj data) {
             updateobjs(netobjs);
             num[] newdellist = (num[]) decodeddata.delList;
             # num[] newdellist = (num[]) data.dellist;
+            num deleted = 0;
+            num[] notdeleted = num[];
             for (num i = 0; i < lengthOf newdellist; i++) {
-                deleteobj(newdellist[i]);
+                bool success = deleteobj(newdellist[i]);
+                if (success)
+				{
+					deleted++;
+				}
+				else
+				{
+					addTo notdeleted newdellist[i];
+				}
+            }
+            if (lengthOf newdellist > 0)
+            {
+                GAME.log("deleted this many: ",deleted);
+            }
+            if (lengthOf notdeleted > 0)
+            {
+                GAME.log("did not delete objects with ids: ", notdeleted);
+                num[] allobjids = getAllObjIDs();
+                GAME.log("current object ids: ",allobjids);
             }
             # clear netdata string buffer
             netdata = "";
