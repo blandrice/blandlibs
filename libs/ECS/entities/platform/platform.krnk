@@ -53,6 +53,7 @@ action create(obj props){
                 amplitude: {x:(num)props.floating.amplitude.x,y:(num)props.floating.amplitude.y,z:(num)props.floating.amplitude.z},
                 t_msinterval: (num)props.floating.t_msinterval,
                 type: {x:(str)props.floating.type.x,y:(str)props.floating.type.y,z:(str)props.floating.type.z},
+                offset: ((str)props.floating.offset != "undefined") ? (num) props.floating.offset: 0,
                 _tstart: g_tnow,
             };
     }

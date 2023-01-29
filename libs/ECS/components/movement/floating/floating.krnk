@@ -11,36 +11,38 @@
 #     return d >= 0 ? 1 : -1;
 # }
 
-num action applysin(obj tobj, str dim,num t)
+num action applysin(obj tobj, str dim, num t)
 {
+    num offset = (num)tobj.floating.offset;
     if (dim=="x")
     {
-        return (num)tobj.floating.ogpos.x + ((num)tobj.floating.amplitude.x* Math.sin(((Math.PI2)*t) / (num)tobj.floating.t_msinterval));
+        return (num)tobj.floating.ogpos.x + ((num)tobj.floating.amplitude.x* Math.sin((((Math.PI2)*t) / (num)tobj.floating.t_msinterval)+(Math.PI2*offset)));
     } 
     else if (dim=="y")
     {
-        return (num)tobj.floating.ogpos.y + ((num)tobj.floating.amplitude.y* Math.sin(((Math.PI2)*t) / (num)tobj.floating.t_msinterval));
+        return (num)tobj.floating.ogpos.y + ((num)tobj.floating.amplitude.y* Math.sin((((Math.PI2)*t) / (num)tobj.floating.t_msinterval)+(Math.PI2*offset)));
     }
     else if (dim=="z")
     {
-        return (num)tobj.floating.ogpos.z + ((num)tobj.floating.amplitude.z* Math.sin(((Math.PI2)*t) / (num)tobj.floating.t_msinterval));
+        return (num)tobj.floating.ogpos.z + ((num)tobj.floating.amplitude.z* Math.sin((((Math.PI2)*t) / (num)tobj.floating.t_msinterval)+(Math.PI2*offset)));
     }
     return 0;
 }
 
-num action applycos(obj tobj,str dim, num t)
+num action applycos(obj tobj, str dim, num t)
 {
+    num offset = (num)tobj.floating.offset;
     if (dim=="x")
     {
-        return (num)tobj.floating.ogpos.x + ((num)tobj.floating.amplitude.x* Math.cos(((Math.PI2)*t) / (num)tobj.floating.t_msinterval));
+        return (num)tobj.floating.ogpos.x + ((num)tobj.floating.amplitude.x* Math.cos((((Math.PI2)*t) / (num)tobj.floating.t_msinterval)+(Math.PI2*offset)));
     } 
     else if (dim=="y")
     {
-        return (num)tobj.floating.ogpos.y + ((num)tobj.floating.amplitude.y* Math.cos(((Math.PI2)*t) / (num)tobj.floating.t_msinterval));
+        return (num)tobj.floating.ogpos.y + ((num)tobj.floating.amplitude.y* Math.cos((((Math.PI2)*t) / (num)tobj.floating.t_msinterval)+(Math.PI2*offset)));
     }
     else if (dim=="z")
     {
-        return (num)tobj.floating.ogpos.z + ((num)tobj.floating.amplitude.z* Math.cos(((Math.PI2)*t) / (num)tobj.floating.t_msinterval));
+        return (num)tobj.floating.ogpos.z + ((num)tobj.floating.amplitude.z* Math.cos((((Math.PI2)*t) / (num)tobj.floating.t_msinterval)+(Math.PI2*offset)));
     }
     return 0;
 }
@@ -76,7 +78,7 @@ if (notEmpty (obj) tobj.floating)
         # GAME.log(tobj);
         if ((num)tobj.floating.amplitude.x !=0)
         {
-            # tobj.position.x = (num)tobj.floating.ogpos.x + ((num)tobj.floating.amplitude.x* Math.sin(((Math.PI2)*t) / (num)tobj.floating.t_msinterval));
+            # tobj.position.x = (num)tobj.floating.ogpos.x + ((num)tobj.floating.amplitude.x* Math.sin((((Math.PI2)*t) / (num)tobj.floating.t_msinterval)+(Math.PI2*offset)));
             if ((str)tobj.floating.type.x=="sine")
             {
                 tobj.position.x = applysin(tobj,"x",t);
@@ -88,7 +90,7 @@ if (notEmpty (obj) tobj.floating)
         }
         if ((num)tobj.floating.amplitude.y !=0)
         {
-            # tobj.position.y = (num)tobj.floating.ogpos.y + ((num)tobj.floating.amplitude.y* Math.sin(((Math.PI2)*t) / (num)tobj.floating.t_msinterval));
+            # tobj.position.y = (num)tobj.floating.ogpos.y + ((num)tobj.floating.amplitude.y* Math.sin((((Math.PI2)*t) / (num)tobj.floating.t_msinterval)+(Math.PI2*offset)));
             # tobj.position.y = applysin(tobj,"y",t);
             if ((str)tobj.floating.type.y=="sine")
             {
@@ -101,7 +103,7 @@ if (notEmpty (obj) tobj.floating)
         }
         if ((num)tobj.floating.amplitude.z !=0)
         {
-            # tobj.position.z = (num)tobj.floating.ogpos.z + ((num)tobj.floating.amplitude.z* Math.sin(((Math.PI2)*t) / (num)tobj.floating.t_msinterval));
+            # tobj.position.z = (num)tobj.floating.ogpos.z + ((num)tobj.floating.amplitude.z* Math.sin((((Math.PI2)*t) / (num)tobj.floating.t_msinterval)+(Math.PI2*offset)));
             # tobj.position.z = applysin(tobj,"z",t);
             if ((str)tobj.floating.type.z=="sine")
             {
