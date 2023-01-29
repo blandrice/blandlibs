@@ -1,7 +1,7 @@
 #include <plrbhvr_s.krnk>
 #include <platform.krnk>
 #include <ecs_s.krnk>
-
+#include <r_djumpclient.krnk>
 
 # dimensions of platforms
 num WIDTH = 30;

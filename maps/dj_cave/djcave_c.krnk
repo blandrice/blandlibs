@@ -1,0 +1,7 @@
+# collision with platforms
+#include <plrbhvr_c.krnk>
+# entity component system
+#include <ecs_c.krnk>
+
+#DOUBLJUMP
+#include <r_djumpclient.krnk>
