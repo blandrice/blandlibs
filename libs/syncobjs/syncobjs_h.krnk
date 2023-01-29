@@ -89,7 +89,7 @@ obj action byteArrayToObjs(num[] byteArray) {
 			# num[] byteA = num[]; addTo byteA byteArray[i];
 			tobj.type = dtypes_ByteArrayToStr(byteA);
             # i+=1;
-			GAME.log("type:",tobj.type);
+			# GAME.log("type:",tobj.type);
 		}
         if ((contents & eTEXTURE) > 0) {
 			tobj.aid = dtypes_merge2Bytes(byteArray[i],byteArray[i+1]);

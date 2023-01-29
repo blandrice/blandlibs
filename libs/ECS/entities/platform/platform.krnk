@@ -3,6 +3,7 @@
 #include <plrbhvr_s.krnk>
 #include <shake_s.krnk>
 #include <syncobjs_s.krnk>
+#include <floating.krnk>
 #include <ecsgrav.krnk>
 #include <ecsphysics.krnk>
 #include <ecs_h.krnk>
@@ -37,10 +38,22 @@ action create(obj props){
     if ((str)props.crumble != "undefined")
     {
         newObj.platcrumbles=
-            {   crumblecnt:(num)props.crumble.crumblecnt,
+            {   
+                crumblecnt:(num)props.crumble.crumblecnt,
                 int_crumble:(num)props.crumble.int_crumble,
                 lifetime:(num)props.crumble.lifetime,
                 _tlastcrumble:0
+            };
+    }
+    if ((str)props.floating != "undefined")
+    {
+        newObj.floating=
+            {
+                ogpos:{x:(num)props.floating.ogpos.x,y:(num)props.floating.ogpos.y,z:(num)props.floating.ogpos.z},
+                amplitude: {x:(num)props.floating.amplitude.x,y:(num)props.floating.amplitude.y,z:(num)props.floating.amplitude.z},
+                t_msinterval: (num)props.floating.t_msinterval,
+                type: {x:(str)props.floating.type.x,y:(str)props.floating.type.y,z:(str)props.floating.type.z},
+                _tstart: g_tnow,
             };
     }
     if (notEmpty (obj)props.position){
@@ -55,6 +68,9 @@ action create(obj props){
     }
     if ((str)props.color != "undefined"){
         newObj.color = (num) props.color;
+    }
+    if ((str)props.color != "undefined"){
+        newObj.aid = (num) props.aid;
     }
     syncobjs_s_createObject(newObj);
     # gravity:{x:0,y:-100,z:0}

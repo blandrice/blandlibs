@@ -10,21 +10,30 @@ num created = 0;
 public action update(num delta){
     if (lengthOf plrutil_s_spawnedPlayers > 0) {
         if (created == 0){
-            for (num i = 0; i < 5; i++){
-                for (num j = 0; j < 5; j++){
-                    for (num k = 0; k < 6; k++){
-                        platform_create(
-                            {
-                                scale:{x:WIDTH,y:HEIGHT,z:WIDTH},
-                                position:{x:i*(WIDTH + SEP),y:k*50,z:j*(WIDTH + SEP)},
-                                shake:1,
-                                crumble:{crumblecnt:3,int_crumble:500,lifetime:1000}
-                            }
-                        );
-                    }
-                    
+            # crumbling platform
+            platform_create(
+                {
+                    scale:{x:WIDTH,y:HEIGHT,z:WIDTH},
+                    position:{x:50,y:10,z:0},
+                    shake:1,
+                    crumble:{crumblecnt:3,int_crumble:500,lifetime:1000}
                 }
-            }
+            );
+            # moving platform up & down
+            platform_create(
+                {
+                    scale:{x:WIDTH,y:HEIGHT,z:WIDTH},
+                    position:{x:100,y:10,z:0},
+                    floating:
+                    {
+                        ogpos:{x:0,y:10,z:-50},
+                        amplitude:{x:0,y:20,z:0},
+                        t_msinterval:3000,
+                        type:"sine"
+                    }
+                }
+            );
+
             created = 1;
         }
     }
