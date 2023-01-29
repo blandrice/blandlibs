@@ -20,10 +20,14 @@ public action start(){
     for (num i = 0; i < dimplat; i++){
         for (num j = 0; j < dimplat; j++){
             for (num k = 0; k < LAYERS; k++){
-                platform_create({
-                scale:{x:WIDTH,y:HEIGHT,z:WIDTH},
-                position:{x:i*(WIDTH + SEP) - offset,y:HEIGHT_START+k*LAYERS_OFFSET,z:j*(WIDTH + SEP) - offset}
-            });
+                platform_create(
+                    {
+                        scale:{x:WIDTH,y:HEIGHT,z:WIDTH},
+                        position:{x:i*(WIDTH + SEP) - offset,y:HEIGHT_START+k*LAYERS_OFFSET,z:j*(WIDTH + SEP) - offset},
+                        shake:1,
+                        crumble:{crumblecnt:3,int_crumble:500,lifetime:1000}
+                    }
+                );
             }
             
         }

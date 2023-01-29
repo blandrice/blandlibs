@@ -13,6 +13,9 @@
 #   Description: first try creating platform
 # ===================================================================
 
+
+# default platform will:
+# 1. shake and fall on stepping 3 times
 action create(obj props){
     obj newObj = {
         aid: 11676,
@@ -24,9 +27,22 @@ action create(obj props){
         emissive:0x000000,
         onGround:false,
         collide:{type:ecs_h_COL_PLRS},
-        plat:{crumble:3,int_crumble:500,tlastcrumble:0,lifetime:1000},
-        shake:{x:0,y:0,z:0,en:0,intensity:{x:1,y:0,z:1},duration:400}
+        # platcrumbles:{crumblecnt:3,int_crumble:500,_tlastcrumble:0,lifetime:1000},
+        # shake:{x:0,y:0,z:0,en:0,intensity:{x:1,y:0,z:1},duration:400}
     };
+    if ((str)props.shake != "undefined")
+    {
+        newObj.shake = {x:0,y:0,z:0,en:0,intensity:{x:1,y:0,z:1},duration:400};
+    }
+    if ((str)props.crumble != "undefined")
+    {
+        newObj.platcrumbles=
+            {   crumblecnt:(num)props.crumble.crumblecnt,
+                int_crumble:(num)props.crumble.int_crumble,
+                lifetime:(num)props.crumble.lifetime,
+                _tlastcrumble:0
+            };
+    }
     if (notEmpty (obj)props.position){
         newObj.position.x = (num)props.position.x;
         newObj.position.y = (num)props.position.y;
@@ -46,15 +62,15 @@ action create(obj props){
 
 num [] colorcrumble = num[0xFF0000,0xFFFF00,0x00FF00];
 private action onCollidePlrs(obj tobj, obj[] plrs){
-    if (notEmpty (obj) tobj.plat){
-        if ((g_tnow - (num)tobj.plat.tlastcrumble) > (num)tobj.plat.int_crumble){
-            if ((num)tobj.plat.crumble > 0){
-                (num)tobj.plat.crumble--;
-                tobj.emissive = colorcrumble[((num)tobj.plat.crumble % 3)];
+    if (notEmpty (obj) tobj.platcrumbles){
+        if ((g_tnow - (num)tobj.platcrumbles._tlastcrumble) > (num)tobj.platcrumbles.int_crumble){
+            if ((num)tobj.platcrumbles.crumblecnt > 0){
+                (num)tobj.platcrumbles.crumblecnt--;
+                tobj.emissive = colorcrumble[((num)tobj.platcrumbles.crumblecnt % 3)];
                 tobj.shake.en = 1;
-                tobj.plat.tlastcrumble = g_tnow;
+                tobj.platcrumbles._tlastcrumble = g_tnow;
             }
-            if ((num)tobj.plat.crumble == 0 && !notEmpty (obj) tobj.gravity){
+            if ((num)tobj.platcrumbles.crumblecnt == 0 && !notEmpty (obj) tobj.gravity){
                 tobj.gravity = {x:0,y:-100,z:0};
             }
         }
@@ -62,8 +78,8 @@ private action onCollidePlrs(obj tobj, obj[] plrs){
 }
 
 private action onECSUpdate(num delta, obj tobj, obj[] objlist){
-    if (notEmpty (obj) tobj.plat){
-        if ((num)tobj.plat.crumble == 0 && (g_tnow - (num)tobj.plat.tlastcrumble) > (num)tobj.plat.lifetime){
+    if (notEmpty (obj) tobj.platcrumbles){
+        if ((num)tobj.platcrumbles.crumblecnt == 0 && (g_tnow - (num)tobj.platcrumbles._tlastcrumble) > (num)tobj.platcrumbles.lifetime){
             syncobjs_s_deleteObject((str)tobj.objid);
             
         }
