@@ -1,6 +1,6 @@
 # ===================================================================
 # File: libs\doublejump\djregistersync\r_djumpclient.krnk
-# Author: DQ_Swat
+# Author: DQ_Swat + blandrice
 # ===================================================================
 
 #include <DJconfig.krnk>
@@ -9,13 +9,6 @@
 
 public action onPlayerSpawn(str id) {
 	obj player = GAME.PLAYERS.findByID(id);
-	# player.doubleJump = false;
-	# player.singleJump = false;
-	# player.hasSingleJumped = false;
-
-	# player.registerSyncValues("singleJump");
-	# player.registerSyncValues("hasSingleJumped");
-	# player.registerSyncValues("doubleJump");
     player.timeLastCrouched = false;
     player.jumpCount = false;
     player.hasJumped = false;

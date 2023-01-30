@@ -1,36 +1,14 @@
 # ===================================================================
 # File: libs\doublejump\djregistersync\r_djumpclient.krnk
-# Author: DQ_Swat
+# Author: DQ_Swat + blandrice
 # ===================================================================
 
-# ===================================================================
-# SETTINGS:
-obj DJconfig_c = 
-{
-    MAX_JUMPCOUNT: 2, # 2 is "doublejump", 3 is "triplejump"
-    WALLJUMP_REFRESHS: true,
-    ENABLE_CROUCHJUMP: true, # lower height for crouch jump, also applies "moonjump" mid-air physics
-    SOUND: 31960, # sound ID. set to 0 if no sound desired
-    # HARD-CODED NUMBERS - DON'T TOUCH
-    MS_DURATION_UNCROUCH: 166,
-    VEL_JUMP: 0.0793, # 60FPS, max clearance 17.9 units
-    VEL_CROUCHJUMP: 0.0595, # 60FPS, max clearance 10.2 units
-};
-
-# ===================================================================
+#include <DJconfig.krnk>
 
 # Add this both on the server and client side.
 
-public action onPlayerSpawn(str id){
-
+public action onPlayerSpawn(str id) {
 	obj player = GAME.PLAYERS.findByID(id);
-	# player.doubleJump = false;
-	# player.singleJump = false;
-	# player.hasSingleJumped = false;
-
-	# player.registerSyncValues("singleJump");
-	# player.registerSyncValues("hasSingleJumped");
-	# player.registerSyncValues("doubleJump");
     player.timeLastCrouched = false;
     player.jumpCount = false;
     player.hasJumped = false;
@@ -39,11 +17,9 @@ public action onPlayerSpawn(str id){
     player.registerSyncValues("timeLastOnGround");
     player.registerSyncValues("jumpCount");
     player.registerSyncValues("hasJumped");
-
 }
 
-public action onPlayerUpdate(str id, num delta, obj inputs){
-
+public action onPlayerUpdate(str id, num delta, obj inputs) {
 	obj player = GAME.PLAYERS.findByID(id);
 	
     # Double-Jump stuff
@@ -98,5 +74,4 @@ public action onPlayerUpdate(str id, num delta, obj inputs){
     else {
         player.hasJumped = false;
     }
-
 }
