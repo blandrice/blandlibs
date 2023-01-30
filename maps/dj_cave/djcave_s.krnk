@@ -56,6 +56,11 @@ num N_HOR_CIRCLE_PLATEND     = 550;
 num N_HOR_CIRCLE_0_5_PLATSTART   = 551;
 num N_HOR_CIRCLE_0_5_PLATEND     = 600;
 
+num N_HOR_CIRCLE_CC_PLATSTART   = 601;
+num N_HOR_CIRCLE_CC_PLATEND     = 650;
+
+num N_HOR_CIRCLE_0_5_CC_PLATSTART   = 651;
+num N_HOR_CIRCLE_0_5_CC_PLATEND     = 600;
 
 public action update(num delta){
     if (lengthOf plrutil_s_spawnedPlayers > 0) {
@@ -283,6 +288,45 @@ public action update(num delta){
                                 amplitude:{x:RANGE,y:0,z:RANGE},
                                 t_msinterval:PERIOD,
                                 offset:0.5,
+                                type:{x:"cos",y:"",z:"sine"}
+                            }
+                        }
+                    );
+                }
+                else if (((num)inode.id >= N_HOR_CIRCLE_CC_PLATSTART) && ((num)inode.id <= N_HOR_CIRCLE_CC_PLATEND))
+                {
+                    platform_create(
+                        {
+                            color: PLATCOLOR,
+                            aid: PLATAID,
+                            scale:{x:WIDTH,y:HEIGHT,z:WIDTH},
+                            position:{x:(num)inode.x,y:(num)inode.y,z:(num)inode.z},
+                            floating:
+                            {
+                                ogpos:{x:(num)inode.x,y:(num)inode.y,z:(num)inode.z},
+                                amplitude:{x:RANGE,y:0,z:RANGE},
+                                t_msinterval:PERIOD,
+                                cc:-1,
+                                type:{x:"cos",y:"",z:"sine"}
+                            }
+                        }
+                    );
+                }
+                else if (((num)inode.id >= N_HOR_CIRCLE_0_5_CC_PLATSTART) && ((num)inode.id <= N_HOR_CIRCLE_0_5_CC_PLATEND))
+                {
+                    platform_create(
+                        {
+                            color: PLATCOLOR,
+                            aid: PLATAID,
+                            scale:{x:WIDTH,y:HEIGHT,z:WIDTH},
+                            position:{x:(num)inode.x,y:(num)inode.y,z:(num)inode.z},
+                            floating:
+                            {
+                                ogpos:{x:(num)inode.x,y:(num)inode.y,z:(num)inode.z},
+                                amplitude:{x:RANGE,y:0,z:RANGE},
+                                t_msinterval:PERIOD,
+                                offset:0.5,
+                                cc:-1,
                                 type:{x:"cos",y:"",z:"sine"}
                             }
                         }

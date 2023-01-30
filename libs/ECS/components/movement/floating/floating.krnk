@@ -34,15 +34,15 @@ num action applycos(obj tobj, str dim, num t)
     num offset = (num)tobj.floating.offset;
     if (dim=="x")
     {
-        return (num)tobj.floating.ogpos.x + ((num)tobj.floating.amplitude.x* Math.cos((((Math.PI2)*t) / (num)tobj.floating.t_msinterval)+(Math.PI2*offset)));
+        return (num)tobj.floating.ogpos.x + ((num)tobj.floating.amplitude.x * (num)tobj.floating.cc * Math.cos((((Math.PI2)*t) / (num)tobj.floating.t_msinterval)+(Math.PI2*offset)));
     } 
     else if (dim=="y")
     {
-        return (num)tobj.floating.ogpos.y + ((num)tobj.floating.amplitude.y* Math.cos((((Math.PI2)*t) / (num)tobj.floating.t_msinterval)+(Math.PI2*offset)));
+        return (num)tobj.floating.ogpos.y + ((num)tobj.floating.amplitude.y * (num)tobj.floating.cc * Math.cos((((Math.PI2)*t) / (num)tobj.floating.t_msinterval)+(Math.PI2*offset)));
     }
     else if (dim=="z")
     {
-        return (num)tobj.floating.ogpos.z + ((num)tobj.floating.amplitude.z* Math.cos((((Math.PI2)*t) / (num)tobj.floating.t_msinterval)+(Math.PI2*offset)));
+        return (num)tobj.floating.ogpos.z + ((num)tobj.floating.amplitude.z * (num)tobj.floating.cc * Math.cos((((Math.PI2)*t) / (num)tobj.floating.t_msinterval)+(Math.PI2*offset)));
     }
     return 0;
 }

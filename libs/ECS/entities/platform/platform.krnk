@@ -54,6 +54,7 @@ action create(obj props){
                 t_msinterval: (num)props.floating.t_msinterval,
                 type: {x:(str)props.floating.type.x,y:(str)props.floating.type.y,z:(str)props.floating.type.z},
                 offset: ((str)props.floating.offset != "undefined") ? (num) props.floating.offset: 0,
+                cc: ((str)props.floating.cc != "undefined") ? -1: 1,
                 _tstart: g_tnow,
             };
     }
