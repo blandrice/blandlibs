@@ -42,11 +42,28 @@ num N_VERT_CIRCLEX_PLATEND   = 350;
 num N_VERT_CIRCLEX_0_5_PLATSTART = 351;
 num N_VERT_CIRCLEX_0_5_PLATEND   = 400;
 
+# 701-800
+num N_VERT_CIRCLEX_CC_PLATSTART = 701;
+num N_VERT_CIRCLEX_CC_PLATEND   = 750;
+
+num N_VERT_CIRCLEX_CC_0_5_PLATSTART = 751;
+num N_VERT_CIRCLEX_CC_0_5_PLATEND   = 800;
+# 701-800
+
 num N_VERT_CIRCLEZ_PLATSTART = 401;
 num N_VERT_CIRCLEZ_PLATEND   = 450;
 
 num N_VERT_CIRCLEZ_0_5_PLATSTART = 451;
 num N_VERT_CIRCLEZ_0_5_PLATEND   = 500;
+
+# 801-900
+num N_VERT_CIRCLEZ_CC_PLATSTART = 801;
+num N_VERT_CIRCLEZ_CC_PLATEND   = 850;
+
+num N_VERT_CIRCLEZ_CC_0_5_PLATSTART = 851;
+num N_VERT_CIRCLEZ_CC_0_5_PLATEND   = 900;
+# 801-900
+
 
 num N_HOR_CIRCLE_PLATSTART   = 501;
 num N_HOR_CIRCLE_PLATEND     = 550;
@@ -217,6 +234,45 @@ public action update(num delta){
                         }
                     );
                 }
+                else if (((num)inode.id >= N_VERT_CIRCLEX_CC_PLATSTART) && ((num)inode.id <= N_VERT_CIRCLEX_CC_PLATEND))
+                {
+                    platform_create(
+                        {
+                            color: PLATCOLOR,
+                            aid: PLATAID,
+                            scale:{x:WIDTH,y:HEIGHT,z:WIDTH},
+                            position:{x:(num)inode.x,y:(num)inode.y,z:(num)inode.z},
+                            floating:
+                            {
+                                ogpos:{x:(num)inode.x,y:(num)inode.y,z:(num)inode.z},
+                                amplitude:{x:RANGE,y:RANGE,z:0},
+                                t_msinterval:PERIOD,
+                                cc:-1,
+                                type:{x:"cos",y:"sine",z:""}
+                            }
+                        }
+                    );
+                }
+                else if (((num)inode.id >= N_VERT_CIRCLEX_CC_0_5_PLATSTART) && ((num)inode.id <= N_VERT_CIRCLEX_CC_0_5_PLATEND))
+                {
+                    platform_create(
+                        {
+                            color: PLATCOLOR,
+                            aid: PLATAID,
+                            scale:{x:WIDTH,y:HEIGHT,z:WIDTH},
+                            position:{x:(num)inode.x,y:(num)inode.y,z:(num)inode.z},
+                            floating:
+                            {
+                                ogpos:{x:(num)inode.x,y:(num)inode.y,z:(num)inode.z},
+                                amplitude:{x:RANGE,y:RANGE,z:0},
+                                t_msinterval:PERIOD,
+                                offset:0.5,
+                                cc:-1,
+                                type:{x:"cos",y:"sine",z:""}
+                            }
+                        }
+                    );
+                }
                 else if (((num)inode.id >= N_VERT_CIRCLEZ_PLATSTART) && ((num)inode.id <= N_VERT_CIRCLEZ_PLATEND))
                 {
                     platform_create(
@@ -249,6 +305,45 @@ public action update(num delta){
                                 amplitude:{x:0,y:RANGE,z:RANGE},
                                 t_msinterval:PERIOD,
                                 offset:0.5,
+                                type:{x:"",y:"sine",z:"cos"}
+                            }
+                        }
+                    );
+                }
+                else if (((num)inode.id >= N_VERT_CIRCLEZ_CC_PLATSTART) && ((num)inode.id <= N_VERT_CIRCLEZ_CC_PLATEND))
+                {
+                    platform_create(
+                        {
+                            color: PLATCOLOR,
+                            aid: PLATAID,
+                            scale:{x:WIDTH,y:HEIGHT,z:WIDTH},
+                            position:{x:(num)inode.x,y:(num)inode.y,z:(num)inode.z},
+                            floating:
+                            {
+                                ogpos:{x:(num)inode.x,y:(num)inode.y,z:(num)inode.z},
+                                amplitude:{x:0,y:RANGE,z:RANGE},
+                                t_msinterval:PERIOD,
+                                cc:-1,
+                                type:{x:"",y:"sine",z:"cos"}
+                            }
+                        }
+                    );
+                }
+                else if (((num)inode.id >= N_VERT_CIRCLEZ_CC_0_5_PLATSTART) && ((num)inode.id <= N_VERT_CIRCLEZ_CC_0_5_PLATEND))
+                {
+                    platform_create(
+                        {
+                            color: PLATCOLOR,
+                            aid: PLATAID,
+                            scale:{x:WIDTH,y:HEIGHT,z:WIDTH},
+                            position:{x:(num)inode.x,y:(num)inode.y,z:(num)inode.z},
+                            floating:
+                            {
+                                ogpos:{x:(num)inode.x,y:(num)inode.y,z:(num)inode.z},
+                                amplitude:{x:0,y:RANGE,z:RANGE},
+                                t_msinterval:PERIOD,
+                                offset:0.5,
+                                cc:-1,
                                 type:{x:"",y:"sine",z:"cos"}
                             }
                         }

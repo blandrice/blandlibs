@@ -16,6 +16,7 @@ obj savestate = {};
 
 num SIZENAME = 20;
 num HALFSNAME = 10;
+num MAXRENDERDIST = 500;
 
 
 # interpolation
@@ -224,7 +225,7 @@ public action render(num delta){
     obj you = GAME.PLAYERS.getSelf();
 	for (num i=0; i < lengthOf plrs; i++) {
 		obj plr = plrs[i];
-        if (100 > UTILS.getDist3D((num)you.position.x,(num)you.position.y,(num)you.position.z,(num)plr.position.x,(num)plr.position.y,(num)plr.position.z)) {
+        if (MAXRENDERDIST > UTILS.getDist3D((num)you.position.x,(num)you.position.y,(num)you.position.z,(num)plr.position.x,(num)plr.position.y,(num)plr.position.z)) {
             obj pos = GAME.SCENE.posToScreen((num) plr.model.position.x, (num)plr.model.position.y+7, (num)plr.model.position.z);
             if ((bool)pos.onScreen){
                 GAME.OVERLAY.drawText((str)plr.username, (num)pos.x-SIZENAME*2, (num)pos.y, 0, SIZENAME, "", "#FFFFFF", 1);
