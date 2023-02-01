@@ -1,15 +1,9 @@
 #include <g.krnk>
 # ===================================================================
-# Library: libs\ECS\bounce\ecsgrav.krnk
+# Library: libs\ECS\components\movement\floating\floating.krnk
 # Author: blandrice
-#   Description: gravity
+#   Description: floating platforms component
 # ===================================================================
-
-# num MAXYVEL = 100;
-
-# num action sign(num d){
-#     return d >= 0 ? 1 : -1;
-# }
 
 num action applysin(obj tobj, str dim, num t)
 {
@@ -50,20 +44,6 @@ num action applycos(obj tobj, str dim, num t)
 private action onECSUpdate(num delta, obj tobj, obj[] objlist){
 if (notEmpty (obj) tobj.floating) 
     {
-        # GAME.log("floating not empty");
-        
-        # (num)tobj.floating.ogpos.x
-        # (num)tobj.floating.ogpos.y
-        # (num)tobj.floating.ogpos.z
-
-        # (num)tobj.floating.amplitude.x
-        # (num)tobj.floating.amplitude.y
-        # (num)tobj.floating.amplitude.z
-
-        # tobj.floating.t_msinterval
-        # tobj.floating._tstart
-
-        # (str)tobj.floating.type #sine,linear
 
         num t = (g_tnow - (num)tobj.floating._tstart);
         if (t > (num)tobj.floating.t_msinterval)
@@ -71,14 +51,8 @@ if (notEmpty (obj) tobj.floating)
             tobj.floating._tstart = g_tnow;
         }
         
-        # else if ((str)tobj.floating.type == "sine")
-        # else if (notEmpty (obj)tobj.floating){
-        # {
-        # GAME.log("floating type is sine");
-        # GAME.log(tobj);
         if ((num)tobj.floating.amplitude.x !=0)
         {
-            # tobj.position.x = (num)tobj.floating.ogpos.x + ((num)tobj.floating.amplitude.x* Math.sin((((Math.PI2)*t) / (num)tobj.floating.t_msinterval)+(Math.PI2*offset)));
             if ((str)tobj.floating.type.x=="sine")
             {
                 tobj.position.x = applysin(tobj,"x",t);
@@ -90,8 +64,6 @@ if (notEmpty (obj) tobj.floating)
         }
         if ((num)tobj.floating.amplitude.y !=0)
         {
-            # tobj.position.y = (num)tobj.floating.ogpos.y + ((num)tobj.floating.amplitude.y* Math.sin((((Math.PI2)*t) / (num)tobj.floating.t_msinterval)+(Math.PI2*offset)));
-            # tobj.position.y = applysin(tobj,"y",t);
             if ((str)tobj.floating.type.y=="sine")
             {
                 tobj.position.y = applysin(tobj,"y",t);
@@ -103,8 +75,6 @@ if (notEmpty (obj) tobj.floating)
         }
         if ((num)tobj.floating.amplitude.z !=0)
         {
-            # tobj.position.z = (num)tobj.floating.ogpos.z + ((num)tobj.floating.amplitude.z* Math.sin((((Math.PI2)*t) / (num)tobj.floating.t_msinterval)+(Math.PI2*offset)));
-            # tobj.position.z = applysin(tobj,"z",t);
             if ((str)tobj.floating.type.z=="sine")
             {
                 tobj.position.z = applysin(tobj,"z",t);
@@ -114,16 +84,9 @@ if (notEmpty (obj) tobj.floating)
                 tobj.position.z = applycos(tobj,"z",t);
             }
         }
-        # } 
         else # default is no movement
         {
-
         }
-        # # (num) tobj.velocity.y += (num) tobj.gravity.y*(delta/1000);
-        # (num) tobj.velocity.y += (num) tobj.gravity.y*(delta/1000);
-        # if (Math.abs((num) tobj.velocity.y) > MAXYVEL){
-        #     tobj.velocity.y = sign((num) tobj.velocity.y) * MAXYVEL;
-        # }
 
     }
 }
