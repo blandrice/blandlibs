@@ -1,0 +1,71 @@
+# ===================================================================
+# Library: libs\customWeapons\customWeapons.krnk
+# Author: DQ Swat
+# Description: custom weapon script.
+# Requirements in editor:
+# 1. Classes >> Runner only
+# 2. disable Server Preset >> Gameplay Logic >> Throwable Melees
+# ===================================================================
+obj client = {
+    weapon_object: {},
+    player: {},
+    is_attached: false
+};
+
+#turn guns invisible to hide original model.
+public action start(){
+    GAME.SETTINGS.set("showWeapon", "false");
+    GAME.SETTINGS.set("showHands", "false");
+    GAME.SETTINGS.set("showWeaponSec", "false");
+    GAME.SETTINGS.set("showWeaponMel", "false");
+}
+
+#attach when weapon model is loaded.
+action summon_weapon_object(){
+    client.weapon_object.attachTo(GAME.CAMERA.getObj(), 0, -10, 0.25, false);
+    client.weapon_object.rotation.y = Math.PI;
+}
+
+#attach/remove model depending if youre ingame.
+public action update(num delta){
+    if (!notEmpty (obj) client.player){
+        client.player = GAME.PLAYERS.getSelf();
+    }
+    
+    if ((bool) client.player.active){
+        if (!(bool) client.is_attached){
+			obj weapon_object = GAME.SCENE.addAsset("27794g", 0, 9.5, 0, 0.1, "#FFF", {animStart: "Base", animSpeed: 1.3, alwaysRender: true}, summon_weapon_object);
+            client.weapon_object = weapon_object;
+            client.is_attached = true;
+        }    
+    }
+    else {
+        if ((bool) client.is_attached){
+            client.weapon_object.detach();
+            client.weapon_object.delete();
+            client.is_attached = false;
+        }
+    }
+}
+
+
+#Check when mouse is clicked.
+public action onMouseClick(num button, num x, num y){
+    if (button == 1){
+        client.weapon_object.playAnim("Shoot", 1);
+    }
+}
+
+#Check for precise input. (prefered)
+public action onPlayerUpdate(str id, num delta, obj inputs){
+    if ((bool) inputs.reload) {
+        client.weapon_object.playAnim("Reload", 1);
+    }
+}
+
+#Check for default key press.
+public action onKeyPress(str key, num code){
+    if (key == "x"){
+        client.weapon_object.playAnim("Inspect", 1);
+    }
+}
