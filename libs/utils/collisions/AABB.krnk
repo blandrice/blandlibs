@@ -15,6 +15,23 @@ num YPOS = 0x8;
 num ZNEG = 0x10;
 num ZPOS = 0x20;
 
+# collide types
+num COL_NONE = 0x0; # no collide
+num COL_WORLD = 0x01; # object can collide with world
+num COL_OBJS = 0x02; # object can collide with other objects
+num COL_PLRS = 0x04; # object can detect collide with player
+num COL_OBJ2PLRS = 0x08; # # player can collide with object (usually resolves collide. currently default this does not matter)
+
+# geometry types
+num GEO_CUBE = 0;
+num GEO_SPHERE = 1;
+num GEO_CYLINDER = 2;
+num GEO_ROTCUBE = 3;
+num GEO_COMPLEXCOL = 4;
+
+# resolve types
+num RES_STOP = 0; # stop movement
+
 bool action isCollision(obj cube1, obj cube2)
 {
     # Adapted from https://tutorialedge.net/gamedev/aabb-collision-detection-tutorial/
@@ -65,6 +82,13 @@ obj[] action resolve(obj cube1,obj[] cubes) {
         num csz = (num) cube1.scale.z/2;
 
         obj tcube = cubes[i];
+        if (notEmpty (obj)tcube.collide)
+        {
+            if (!((num)tcube.collide.type & COL_OBJ2PLRS))
+            {
+                continue; # skip this object if it is not collidable
+            }
+        }
         num cx = (num) tcube.position.x;
         num cy = (num) tcube.position.y;
         num cz = (num) tcube.position.z;

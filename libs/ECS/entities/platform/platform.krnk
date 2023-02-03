@@ -1,3 +1,4 @@
+#include <AABB.krnk>
 #include <g.krnk>
 #include <plrutil_s.krnk>
 #include <plrbhvr_s.krnk>
@@ -27,7 +28,7 @@ action create(obj props){
         color:0xFFFFFF,
         emissive:0x000000,
         onGround:false,
-        collide:{type:ecs_h_COL_PLRS},
+        collide:{type:AABB_COL_PLRS|AABB_COL_OBJ2PLRS},
         # platcrumbles:{crumblecnt:3,int_crumble:500,_tlastcrumble:0,lifetime:1000},
         # shake:{x:0,y:0,z:0,en:0,intensity:{x:1,y:0,z:1},duration:400}
     };

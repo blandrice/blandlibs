@@ -37,10 +37,10 @@ bool action updateobjproperties(obj currentObj, obj newObjData) {
         currentObj.scale.y = (num) newObjData.scale.y;
         currentObj.scale.z = (num) newObjData.scale.z;
     }
-    if (!!(num)newObjData.health) {
+    if ((str)newObjData.health!="undefined") {
         currentObj.health = (num)newObjData.health;
     }
-    if (!!(num)newObjData.fhealth) {
+    if ((str)newObjData.fhealth!="undefined") {
         currentObj.fhealth = (num)newObjData.fhealth;
     }
     if (notEmpty (obj)newObjData.rotation) {
@@ -51,6 +51,11 @@ bool action updateobjproperties(obj currentObj, obj newObjData) {
     if ((str)newObjData.emissive !="undefined"){
         str colr = "#" + dtypes_num2hexstring((num) newObjData.emissive);
         currentObj.emissive = colr;
+    }
+    if (notEmpty (obj)newObjData.collide){
+        currentObj.collide.type = (num) newObjData.collide.type;
+        currentObj.collide.geometry = (num) newObjData.collide.geometry;
+        currentObj.collide.resolve = (num) newObjData.collide.resolve;
     }
     return true;
 }
@@ -66,7 +71,7 @@ obj action createObj(obj newObjData) {
         cube = GAME.SCENE.addCube(toStr (num)newObjData.aid, colr, (num)newObjData.position.x,(num)newObjData.position.y,(num)newObjData.position.z, (num)newObjData.scale.x,(num)newObjData.scale.y,(num)newObjData.scale.z);
         # return cube;
     } else if (UTILS.textContains((str)newObjData.type,"tg")){
-        GAME.log("new type encountered:",(str) newObjData.type);
+        # GAME.log("new type encountered:",(str) newObjData.type);
         str colr = "#" + dtypes_num2hexstring((num) newObjData.color);
         cube = GAME.SCENE.addAsset((str)newObjData.type, (num)newObjData.position.x,(num)newObjData.position.y,(num)newObjData.position.z, 1, colr, {});
 
@@ -78,9 +83,10 @@ obj action createObj(obj newObjData) {
     cube.oldrot = {x:(num)newObjData.rotation.x,y:(num)newObjData.rotation.y,z:(num)newObjData.rotation.z};
     cube.newrot = {x:(num)newObjData.rotation.x,y:(num)newObjData.rotation.y,z:(num)newObjData.rotation.z};
 
-    cube.health = (num)newObjData.health;
-    cube.fhealth = (num)newObjData.fhealth;
-    cube.hit = (num)newObjData.hit;
+    cube.health = (num) newObjData.health;
+    cube.fhealth = (num) newObjData.fhealth;
+    cube.hit = (num) newObjData.hit;
+    cube.collide = {};
     
     updateobjproperties(cube, newObjData);
 

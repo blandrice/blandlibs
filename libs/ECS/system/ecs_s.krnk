@@ -52,14 +52,14 @@ public action update(num delta){
         if (notEmpty (obj) tobj.collide)
         {
             num coltype = (num) tobj.collide.type;
-            if ((coltype & ecs_h_COL_WORLD) > 0)
+            if ((coltype & AABB_COL_WORLD) > 0)
             {
                 # resolve collision. currently default will stop object (vel = 0)
                 obj[] res = AABB_resolve(tobj,worldedit);
                 # CUSTOM ACTION THAT BUNDLES ALL COLLISION EVENTS
                 onCollideWorld(tobj,res);
             }
-            if ((coltype & ecs_h_COL_PLRS) > 0)
+            if ((coltype & AABB_COL_PLRS) > 0)
             {
                 # resolve collision. currently detects face but does NOT stop
                 obj[] plrs = GAME.PLAYERS.list();
