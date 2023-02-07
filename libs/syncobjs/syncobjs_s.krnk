@@ -155,7 +155,7 @@ num[] action objsToByteArray(obj[] objlist,bool reset, obj plr, obj[] plrs) {
                 contents1 |=  syncobjs_h_eTEXTURE;
                 tArray = dtypes_int16toByteArray((num)tObj.aid); addTo retArray tArray[0]; addTo retArray tArray[1];    
                 addTo  (str[]) tObj.aid_old_plrs (str)plr.id;
-                }
+            }
         }
         # color
 		if ((str) tObj.color !="undefined"){
@@ -192,9 +192,9 @@ num[] action objsToByteArray(obj[] objlist,bool reset, obj plr, obj[] plrs) {
             {
                 tObj.collide_old_plrs = str[];
                 tObj.collide_old = {
-                    type:tObj.collide.type, 
-                    geometry:tObj.collide.geometry,
-                    resolve:tObj.collide.resolve 
+                    type:(num)tObj.collide.type, 
+                    geometry:(num)tObj.collide.geometry,
+                    resolve:(num)tObj.collide.resolve 
                 };
             }
             if (collision_changed || ((!listutil_instrlist((str)plr.id,(str[])tObj.collide_old_plrs))) || reset)
@@ -204,6 +204,21 @@ num[] action objsToByteArray(obj[] objlist,bool reset, obj plr, obj[] plrs) {
                 addTo retArray (num)tObj.collide.geometry;
                 addTo retArray (num)tObj.collide.resolve;
             }
+        }
+        if ((str)tObj.opacity != "undefined")
+        {
+            bool opacity_changed = ((num) tObj.opacity != (num) tObj.opacity_old);
+            if (opacity_changed)
+            {
+                tObj.opacity_old = str[];
+                tObj.opacity_old = (num)tObj.opacity;
+            }
+            if (opacity_changed || ((!listutil_instrlist((str)plr.id,(str[])tObj.opacity_old_plrs))) || reset){
+                contents2 |=  syncobjs_h_eOPACITY;
+                tArray = dtypes_int16toByteArray(dtypes_numToFloat16((num)tObj.opacity)); addTo retArray tArray[0]; addTo retArray tArray[1];
+                addTo  (str[]) tObj.opacity_old_plrs (str)plr.id;
+            }
+
         }
 		retArray[contentsidx] = contents1;
 		retArray[contentsidx+1] = contents2;
@@ -271,7 +286,8 @@ obj action createObject(obj d) {
             type:0, # syncobjs_h collision ENUM types 0 = COL_NONE
             geometry:0, # syncobjs_h geometry ENUM types 0 = CUBE
             resolve:0 # currently only resolve is stop movement
-        }
+        },
+        opacity:1
     };
     if ((str) d.type == "undefined") {d.type = tobj.type;}
     d.type_old = (str)d.type + "a";
@@ -306,15 +322,19 @@ obj action createObject(obj d) {
     if (!notEmpty (obj)d.collide) {
         d.collide = 
         {
-            type:tobj.collide.type,
-            geometry:tobj.collide.geometry,
-            resolve:tobj.collide.resolve,
+            type:(num)tobj.collide.type,
+            geometry:(num)tobj.collide.geometry,
+            resolve:(num)tobj.collide.resolve,
         };
     }
     d.collide_old_plrs = str[];
     d.collide_old = {type:0xdeadbeef,geometry:0xdeadbeef,resolve:0xdeadbeef};
+    
+    if ((str) d.opacity == "undefined") {d.opacity = tobj.opacity;}
+    d.opacity_old_plrs = str[];
+    d.opacity_old = 1;
 
-    d.objid = toNum toStr objid;    
+    d.objid = objid;    
     if (objid>=BYTEOVERFLOW_LEN)
     {
         objid=0;
@@ -443,6 +463,17 @@ public action update(num delta) {
             obj tObj = objlist[i];
             if ((str)tObj.del != "undefined" && (bool)tObj.del == true){
                 if (lengthOf (str[])tObj.delplrids >= lengthOf plrs){
+                    # mark subobjects also for deletion
+                    if ((str)tObj.subObjIDs != "undefined")
+                    {
+                        num[] subObjIDs = (num[]) tObj.subObjIDs;
+                        for (num j = 0; j < lengthOf subObjIDs; j++)
+                        {
+                            deleteObject(toStr subObjIDs[j]);
+                        }
+                    }
+
+                    # finally remove the object
                     remove objlist[i];
                 }
             }

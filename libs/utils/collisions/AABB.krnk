@@ -8,6 +8,7 @@ num w = 4.9;# player width
 num c = 8;# crouching height
 num H = 11;# standing height
 
+#colside
 num XNEG = 0x1;
 num XPOS = 0x2;
 num YNEG = 0x4; #hit "ground"
@@ -30,7 +31,8 @@ num GEO_ROTCUBE = 3;
 num GEO_COMPLEXCOL = 4;
 
 # resolve types
-num RES_STOP = 0; # stop movement
+num RES_NONE = 0; # stop movement
+num RES_STOP = 1; # stop movement
 
 bool action isCollision(obj cube1, obj cube2)
 {
@@ -45,6 +47,21 @@ bool action isCollision(obj cube1, obj cube2)
     return false;
         
 }
+
+obj[] action detectCollisions(obj cube1, obj[] cubes)
+{
+    obj[] collisions = obj[];
+    for (num i = 0; i < lengthOf cubes; i++)
+    {
+        if (isCollision(cube1,cubes[i]))
+        {
+            addTo collisions cubes[i];
+        }
+    }
+    return collisions;
+}
+
+
 
 obj action CalculateAabbDistanceTo(obj cube1, obj cube2)
 {

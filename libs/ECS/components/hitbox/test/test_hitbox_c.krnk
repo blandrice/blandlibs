@@ -1,0 +1,2 @@
+# entity component system
+#include <ecs_c.krnk>

@@ -1,6 +1,5 @@
 #include <AABB.krnk>
 #include <g.krnk>
-#include <plrutil_s.krnk>
 #include <plrbhvr_s.krnk>
 #include <shake_s.krnk>
 #include <syncobjs_s.krnk>
@@ -80,7 +79,7 @@ action create(obj props){
 }
 
 num [] colorcrumble = num[0xFF0000,0xFFFF00,0x00FF00];
-private action onCollidePlrs(obj tobj, obj[] plrs){
+private action onCollidePlrs(obj tobj, obj[] res){
     if (notEmpty (obj) tobj.platcrumbles){
         if ((g_tnow - (num)tobj.platcrumbles._tlastcrumble) > (num)tobj.platcrumbles.int_crumble){
             if ((num)tobj.platcrumbles.crumblecnt > 0){

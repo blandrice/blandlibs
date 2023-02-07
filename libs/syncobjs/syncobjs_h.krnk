@@ -15,6 +15,7 @@ num eCOLOR = 0x40;
 num eEMISSIVE = 0x80;
 # contents2
 num eCOLLISION = 0x01;
+num eOPACITY = 0x02;
 
 # Binary decoding of an array of bytes to Objects
 obj action byteArrayToObjs(num[] byteArray) {
@@ -113,6 +114,11 @@ obj action byteArrayToObjs(num[] byteArray) {
 				resolve:byteArray[i+2]
 			};
 			i+=3;
+		}
+		if ((contents2 & eOPACITY) > 0)
+		{
+			tobj.opacity = dtypes_float16ToNum(dtypes_merge2Bytes(byteArray[i],byteArray[i+1]));
+			i+=2;
 		}
 		addTo objlist tobj;
 	}

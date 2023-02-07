@@ -15,6 +15,9 @@ private action onCollide(obj tobj, obj[] objlist){
 
 }
 
-private action onCollidePlrs(obj tobj, obj[] plrs){
+# res: plrs[];
+# colside: AABB_COLLISION SIDES
+# colobj: plr object
+private action onCollidePlrs(obj tobj, obj[] res){
 
 }

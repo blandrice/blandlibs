@@ -12,7 +12,8 @@ public action update(num delta){
             aid: 34379,
             position:{x:22,y:22,z:22},
             scale:{x:1,y:1,z:1},
-            color:0xFFFFFF
+            color:0xFFFFFF,
+            opacity:0.5
         });
         created = 1;
     }

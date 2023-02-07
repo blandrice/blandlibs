@@ -1,0 +1,79 @@
+# ===================================================================
+# Header: \strutils\AIstrutils.krnk
+# Author: blandrice, 
+# Description: ChatGPT test on generating string utilities
+# ===================================================================
+
+str action sliceString(str input, num startIndex, num endIndex) {
+    str result = "";
+    for (num i = startIndex; i < endIndex; i++) {
+        result = result + input[i];
+    }
+    return result;
+}
+
+num action searchString(str input, str subString) {
+    num index = -1;
+    num subStringLength = lengthOf subString;
+    for (num i = 0; i <= lengthOf input - subStringLength; i++) {
+        str currentSubString = "";
+        for (num j = 0; j < subStringLength; j++) {
+            currentSubString = currentSubString + input[i+j];
+        }
+        if (currentSubString == subString) {
+            index = i;
+            break;
+        }
+    }
+    return index;
+}
+
+bool action startsWithString(str input, str prefix) {
+    num inputLength = lengthOf input;
+    num prefixLength = lengthOf prefix;
+    if (prefixLength > inputLength) {
+        return false;
+    }
+    for (num i = 0; i < prefixLength; i++) {
+        if (input[i] != prefix[i]) {
+            return false;
+        }
+    }
+    return true;
+}
+
+bool action endsWithString(str input, str suffix) {
+    num suffixLength = lengthOf suffix;
+    num inputLength = lengthOf input;
+    if (suffixLength > inputLength) {
+        return false;
+    }
+    for (num i = 0; i < suffixLength; i++) {
+        if (input[inputLength - suffixLength + i] != suffix[i]) {
+            return false;
+        }
+    }
+    return true;
+}
+
+public action start() {
+    str input = "Hello, World";
+    str slicedString = sliceString(input, 7, 12);
+    GAME.log(slicedString);
+
+
+    input = "Hello, World";
+    str subString = "Wo";
+    num index = searchString(input, subString);
+    GAME.log("Index of first occurrence of " + subString + " in \'" + input + " is: " + (str) index);
+
+    input = "Hello, World";
+    str prefix = "Hello";
+    bool result = startsWithString(input, prefix);
+    GAME.log(result);
+
+    input = "Hello, World";
+    str suffix = "World";
+    result = endsWithString(input, suffix);
+    GAME.log(result);
+}

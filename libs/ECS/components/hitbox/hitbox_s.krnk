@@ -1,0 +1,136 @@
+#include <AABB.krnk>
+#include <g.krnk>
+#include <plrutil_s.krnk>
+#include <syncobjs_s.krnk>
+
+# ===================================================================
+# Library: libs\ECS\components\hitbox\hitbox_s.krnk
+# Author: blandrice
+# Description: 
+#   - create hitbox that can be assigned to a specific object.
+#   - once hit, can do a callback
+#   - for safety it needs to call syncobjs_s.krnk's delete callback for hitbox to delete itself when other object is deleted
+# ===================================================================
+
+obj action updatePosition(obj tObj, obj linkObj)
+{
+    # guard position
+    if ((notEmpty (obj)tObj.position)&&(notEmpty (obj)linkObj.position)){
+        tObj.position = 
+        {
+            x: ((notEmpty (obj)linkObj.position) ? (num)linkObj.position.x : (num) tObj.position.x),
+            y: ((notEmpty (obj)linkObj.position) ? (num)linkObj.position.y : (num) tObj.position.y),
+            z: ((notEmpty (obj)linkObj.position) ? (num)linkObj.position.z : (num) tObj.position.z)
+        };
+    }
+    else 
+    {
+        GAME.log("Warning: tried to update hitbox position but either hitbox or linkedObject missing position properties");
+        GAME.log("hitbox:",tObj);
+        GAME.log("linkObj:",linkObj);
+    }
+    return tObj;
+}
+
+obj action create(obj linkObj, obj props)
+{
+    obj newObj = 
+    {
+        hitbox:{follow:1,useonce:1,cooldown:0,used:0,tLastUse:0},
+        # hitbox:{follow:1,useonce:0,cooldown:1000,used:0,tLastUse:0},
+        scale:{x:10,y:10,z:10},
+        position:{x:0,y:0,z:0},
+        linkObj:linkObj,
+        opacity:0,
+        collide:{type:AABB_COL_PLRS,geometry:AABB_GEO_CUBE,resolve:AABB_RES_NONE}
+
+    };
+    # assign hitbox scale
+    if (notEmpty (obj) props.scale)
+    {
+        newObj.scale = {x:(num)props.scale.x,y:(num)props.scale.y,z:(num)props.scale.z};
+    }
+    # assign position based on linkObject
+    if (notEmpty (obj)linkObj.position)
+    {
+        newObj = updatePosition(newObj, linkObj);
+    } 
+    # else assign position by position properties
+    else if (notEmpty (obj)props.position)
+    {
+        newObj = updatePosition(newObj, props);
+    }
+    # debug is to show hitbox through opacity
+    if ((str) props.debug != "undefined")
+    {
+        if ((num) props.debug == 1)
+        {
+            newObj.opacity=0.5;
+        }
+    }
+    
+    syncobjs_s_createObject(newObj);
+    # add as child object of linkObj
+    if ((str)linkObj.subObjIDs=="undefined")
+    {
+        linkObj.subObjIDs = num[];
+    }
+    addTo (num[]) linkObj.subObjIDs (num) newObj.objid;
+    return newObj;
+}
+
+private action onECSUpdate(num delta, obj tobj, obj[] objlist){
+    # update hitbox position to follow the original object
+    if ((notEmpty (obj) tobj.hitbox))
+    {
+        # guard follow
+        if (((str)tobj.hitbox.follow != "undefined") && ((num)tobj.hitbox.follow == 1))
+        {
+            # guard linkobj
+            if (!(notEmpty (obj) tobj.linkObj))
+            {
+                GAME.log("warning : tried to update hitbox position but linkObject does not exist");
+                GAME.log("hitbox:",tobj);
+                return;
+            }
+            else
+            {
+                # hitbox follows object
+                tobj = updatePosition(tobj,(obj)tobj.linkObj);
+            }
+        }
+        
+    }
+}
+
+num GIVEPLRSCORE = 0x001;
+num DAMAGEPLR = 0x002;
+num KILLPLR = 0x004;
+num DESTROYLINKOBJ = 0x008;
+num DAMAGELINKOBJ = 0x010;
+
+
+private action onCollidePlrs(obj tobj, obj[] res){
+    if ((notEmpty (obj)tobj.hitbox) && (lengthOf res > 0))
+    {
+        if (((str)tobj.hitbox.useonce!="undefined") && ((num)tobj.hitbox.useonce==1))
+        {
+            if (((str)tobj.hitbox.used!= "undefined")&& ((num)tobj.hitbox.used==0))
+            {
+                obj plr = (obj) res[0];
+                (num) plr.score++;
+                tobj.hitbox.used = 1;
+                GAME.log("increasing score");
+            }
+        }
+        else if ((g_tnow - (num)tobj.hitbox.tLastUse) > (num)tobj.hitbox.cooldown)
+        {
+            obj plr = (obj) res[0];
+            tobj.hitbox.tLastUse = g_tnow;
+            (num) plr.score++;
+            GAME.log("increasing score");
+        }
+    }
+    # deleting the parent object will force all child objects to be deleted beforehand
+    syncobjs_s_deleteObject((str)tobj.linkObj.objid);
+}

@@ -57,23 +57,34 @@ bool action updateobjproperties(obj currentObj, obj newObjData) {
         currentObj.collide.geometry = (num) newObjData.collide.geometry;
         currentObj.collide.resolve = (num) newObjData.collide.resolve;
     }
+    if ((str)newObjData.opacity!="undefined")
+    {
+        currentObj.opacity = (num) newObjData.opacity;
+    }
     return true;
 }
 
 # First creation of object
 obj action createObj(obj newObjData) {
     obj cube = {};
+
+    num opacity = ((str)newObjData.opacity != "undefined" ? (num) newObjData.opacity : 1);
+    obj data = {
+        opacity:opacity
+    };
+    
     if ((str) newObjData.type == "0") {
         # str aid = (str) newObjData.aid;
         # str aid = "34379"; # temp fix for now
         str colr = "#" + dtypes_num2hexstring((num) newObjData.color);
         # obj cube = GAME.SCENE.addCube(toStr (num)newObjData.aid, colr, (num)newObjData.position.x,(num)newObjData.position.y,(num)newObjData.position.z, 0,0,0);
-        cube = GAME.SCENE.addCube(toStr (num)newObjData.aid, colr, (num)newObjData.position.x,(num)newObjData.position.y,(num)newObjData.position.z, (num)newObjData.scale.x,(num)newObjData.scale.y,(num)newObjData.scale.z);
+
+        cube = GAME.SCENE.addCube(toStr (num)newObjData.aid, colr, (num)newObjData.position.x,(num)newObjData.position.y,(num)newObjData.position.z, (num)newObjData.scale.x,(num)newObjData.scale.y,(num)newObjData.scale.z,data);
         # return cube;
     } else if (UTILS.textContains((str)newObjData.type,"tg")){
         # GAME.log("new type encountered:",(str) newObjData.type);
         str colr = "#" + dtypes_num2hexstring((num) newObjData.color);
-        cube = GAME.SCENE.addAsset((str)newObjData.type, (num)newObjData.position.x,(num)newObjData.position.y,(num)newObjData.position.z, 1, colr, {});
+        cube = GAME.SCENE.addAsset((str)newObjData.type, (num)newObjData.position.x,(num)newObjData.position.y,(num)newObjData.position.z, 1, colr, data);
 
     }
     cube.objid = (num) newObjData.objid;
