@@ -3,7 +3,7 @@
 
 This is a shareable script to display popular Krunker Commmunity Clans Ranks in-game. 
 
-## WARNING : the script is currently unshareable until data storages can be public.
+## WARNING : the script is currently **unshareable across maps with different creators** until data storages can be public.
 
 Bug Report: https://discord.com/channels/859947586005368862/859949054393974786/956827631981064223
 
