@@ -21,7 +21,7 @@ Bug Report: https://discord.com/channels/859947586005368862/859949054393974786/9
 
 
 
-## Currently Supported Clan Ranks
+## Currently Supported Clan Ranks from Parkour_Hub MAP (you can use this script into your own map and support your own clans etc)
 
 **27 additional Clan slots available**
 1. PHIL

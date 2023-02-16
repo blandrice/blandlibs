@@ -1,0 +1,497 @@
+# Server Script runs only on Hosted server & not in test mode
+# KrunkScript Copyright (C) Yendis Entertainment Pty Ltd
+# 
+# Add custom actions here
+
+# ========================================
+# ---imports---
+num action findinstrlist(str[] list, str t) {
+    for (num i = 0; i < lengthOf list; i++) {
+        if (t == list[i]) {
+            return i;
+        }
+    }
+    return -1;
+}
+
+str action str_truncate(str text, num ln) {
+    str ret = "";
+    for (num i = 0; i < ln; i++) {
+        ret += text[i];
+    }
+    return ret;}
+bool action str_starts(str text,str value) {
+    if (UTILS.textContains(str_truncate(text, lengthOf value), value)) {return true;} 
+	return false;}
+# ========================================
+# ========================================
+# ---imports--- (rn small helper functions)
+
+# dict
+str[] action dkeys(str[][] dict) {
+    str[] ret = str[];
+    for  (num i = 0; i < lengthOf dict; i++) {
+        addTo ret dict[i][0];
+    }
+    return ret;
+}
+str[] action dvals(str[][] dict) {
+    str[] ret = str[];
+    for  (num i = 0; i < lengthOf dict; i++) {
+        addTo ret dict[i][1];
+    }
+    return ret;
+}
+str action dLookup(str[][] dict, str key) {
+    for  (num i = 0; i < lengthOf dict; i++) {
+        if (dict[i][0] == key) {
+            return dict[i][1];
+        }
+    }
+	return "";}
+action dAdd(str [][] dict, str key, str val) {
+	bool dfound = false;
+    for  (num i = 0; i < lengthOf dict; i++) {
+        if (dict[i][0] == key) {
+            dict[i][1] = val;
+            dfound = true;
+            break;
+        } 
+    if (!dfound) {
+        addTo dict str[toStr key,toStr val];
+    }
+	}}
+action dDel(str[][] dict, str key) {
+	for  (num i = 0; i < lengthOf dict; i++) {
+        if (dict[i][0] == key) {
+            remove dict[i];
+            return;
+        }
+	}}
+str[][] action dCopy(str [][] dict) {
+    str [][] dCopy = str[][];
+    for (num i = 0; i < lengthOf dict; i++) {
+		str[] keyval = str[];
+        addTo keyval dict[i][0]; # key
+        addTo keyval dict[i][1]; # val
+        addTo dCopy keyval;
+	} return dCopy;
+}
+str[][] action dUpdate(str [][] dict, str [][]dictu) {
+    for (num i = 0; i < lengthOf dictu; i++) {
+        bool dfound = false;
+        for  (num j = 0; j < lengthOf dict; j++) {
+            if (dict[j][0] == dictu[i][0]) {
+                dict[j][1] = dictu[i][1];
+                dfound = true; continue;
+            }
+        }
+        if (dfound) {continue;}
+        addTo dict str[dictu[i][0], dictu[i][1]];
+    }
+    return dict;
+}
+str[] action str_split(str s, str delim) {
+	str[] output = str[];
+	num idx_matchstart = 0;
+
+    # iterate over string
+    for(num i = 0; i < lengthOf s; i++) {
+        bool match = false;
+        
+        # match delimiter
+        for (num j = 0; j < lengthOf delim; j++) {
+			match = true;
+            if (s[i+j] != delim[j]) {
+				match = false; break;
+			}
+		}
+
+        # matches, parse out the string previous
+        if (match) { 
+            str word = "";
+            for (num j = idx_matchstart; j < i; j++) {
+                word += s[j];
+            }
+            if (word != "") {addTo output word;}
+
+            # skip delimiter
+            i += lengthOf delim - 1;
+            idx_matchstart = i+1;
+        }
+    } 
+    
+    # also parse last string
+    str word = "";
+    for (num i = idx_matchstart; i < lengthOf s; i++) {
+        word += s[i];
+    }
+    if (word != "") {addTo output word;}
+    
+
+	return output;}
+
+str action str_concat(str[] strlist, str delim) {
+    str retstring = "";
+    for (num i = 0; i < lengthOf strlist; i++) {
+        retstring = (i == 0) ? strlist[i] : retstring + delim + strlist[i];
+    }
+    return retstring;
+}
+
+obj action findPlayerByAccountName(str accountName){
+    obj plr = {};
+    obj[] plrs = GAME.PLAYERS.list();
+    for (num i = 0; i < lengthOf plrs; i++) {
+        if ((str)plrs[i].accountName == accountName) {
+            plr = plrs[i];
+        }
+    }
+    return plr;
+}
+
+str[][] adminlist = str[][
+    # str["blandrice",'super_admin'], # all privilegs
+    # SUPERS
+    str["blandrice",'super_admin'],
+    str["ecirdnalb",'phil_recruiter'],
+    # PHIL
+    str["NoobSpawn",'phil_admin'],
+    str["|W|",'phil_admin'],
+    str["Zaikay",'phil_admin'],
+    str["oAuzi",'phil_admin'],
+    str["samarth6",'phil_recruiter'],
+    # .RUN
+    str["Ammarioo", "run_admin"],
+    str["hoi890", "run_admin"],
+    str["Keybi", "run_admin"],
+    str["AngelicSimp", "run_admin"],
+    str["Run_Girl", "run_admin"],
+    str["lilo_vd", "run_admin"],
+    str["NiceFattyCat", "run_admin"],
+    str["ssskan", "run_admin"],
+    str["tristan323", "run_admin"],
+    # JUMP
+    str["scufu","jump_admin"],
+    str["accountsbroke","jump_admin"],
+    str["beat_aidan","jump_admin"],
+    str["daxtie","jump_recruiter"],
+    str["dadoxeee","jump_recruiter"],
+    str["triggerdonkey","jump_recruiter"]
+];
+str[][] validrank_to_datavalue = str[][
+    ## EDIT HERE TO ADD NEW RANK
+    # phil
+    str["phil_member","member_33649"],
+	str["phil_adept","adept_33654"],
+	str["phil_master","master_33655"],
+	str["phil_elite","elite_33656"],
+	str["phil_heroic","heroic_33657"],
+	str["phil_mythic","mythic_33658"],
+	str["phil_ascended","ascended_33651"],
+	str["phil_ascended+","ascended+_33653"],
+	str["phil_angelic","angelic_33650"],
+	str["phil_angelic+","angelic+_33652"],
+	str["phil_infinity","infinity_33659"],
+    # jump
+	str["jump_member","member_39111"],
+    str["jump_II","II_39112"],
+    str["jump_III","III_39113"],
+    str["jump_IV","IV_39114"],
+    str["jump_V","V_39115"],
+    str["jump_VI","VI_39116"],
+    str["jump_VII","VII_39117"],
+    str["jump_VIII","VIII_39118"],
+	# .run
+    str["run_member","member_33649"],
+    str["run_master","master_39106"],
+    str["run_hero","hero_39107"],
+    str["run_legend","legend_39108"],
+    str["run_god","god_39109"],
+    str["run_infinity","infinity_39110"]
+];
+
+str[] action getclans () {
+    str[] clans = str[];
+    str[] clanranks = dkeys(validrank_to_datavalue);
+    for (num i = 0; i < lengthOf clanranks; i++) {
+        str clan = str_split(clanranks[i],"_")[0];
+        if(findinstrlist(clans, clan) == -1) {
+            addTo clans clan;
+        }
+    }
+    return clans;
+}
+str[][] plrlogos = str[][]; # str[][ str["blandrice","phil_angelic_33650,jump_member_12345"]]
+# str[][] plrlogos = str[][ 
+#     str["blandrice","phil_angelic_33650,jump_member_33650"],
+#     str["ecirdnalb","phil_angelic_33650,jump_member_33650"],
+#     str["Player_1","phil_angelic_33650,jump_member_33650"],
+#     str["Guest_1","phil_angelic_33650,run_member_38642,run_member_38642"],
+#     str["Guest_2","phil_angelic_33650,run_member_38642,run_member_38642"],
+#     str["Guest_3","phil_angelic_33650,run_member_38642,run_member_38642"]
+# ];
+str[][] playerID_to_accountName = str[][];
+
+str action serialize_rankdata() {
+   # end format
+   # "blandrice-phil_angelic_33650,jump_member_33650;ecirdnalb-phil_angelic_33650,jump_member_33650"
+   str retstr = "";
+   str[] name_dash_clans = str[];
+   for (num i = 0; i < lengthOf plrlogos; i++) {
+            addTo name_dash_clans plrlogos[i][0] + '-' + plrlogos[i][1];
+        }
+    retstr = str_concat(name_dash_clans,';');
+    return retstr;
+}
+
+str action serialize_object_torank(obj data) {
+    ## EDIT HERE TO ADD NEW RANK
+    # phil_angelic_33650,jump_member_33650
+    str retstr = "";
+    str[] clan_underscore_rank = str[];
+    if ((str) data.phil != "" && (str) data.phil != "0" && (str) data.phil != "undefined") {
+        addTo clan_underscore_rank "phil_" + (str)data.phil;
+    }
+    if ((str) data.jump != "" && (str) data.jump != "0" && (str) data.jump != "undefined") {
+        addTo clan_underscore_rank "jump_" + (str)data.jump;
+    }
+    if ((str) data.run != "" && (str) data.run != "0" && (str) data.run != "undefined") {
+        addTo clan_underscore_rank "run_" + (str)data.run;
+    }
+    retstr = str_concat(clan_underscore_rank,',');
+    return retstr;
+
+}
+
+action clanDataReady(obj data, bool success, str accountName) { # prepare callback
+
+    if (success) {
+        GAME.log(data); # access data
+        str[] rankList = str[];
+
+        ## EDIT HERE TO ADD NEW RANK
+        str philRank = (str) data.phil;
+        if (toStr philRank != "" && toStr philRank != "0" && toStr philRank != "undefined") {addTo rankList "phil_" + philRank;}
+        str jumpRank = (str) data.jump;
+        if (toStr jumpRank != "" && toStr jumpRank != "0" && toStr jumpRank != "undefined") {addTo rankList "jump_" + jumpRank;}
+        str runRank = (str) data.run;
+        if (toStr runRank != "" && toStr runRank != "0" && toStr runRank != "undefined") {addTo rankList "run_" + runRank;}
+
+        if (lengthOf rankList > 0) {dUpdate( plrlogos, str[][str[accountName,str_concat(rankList,",")]]);}
+        GAME.log(plrlogos);
+
+        # broadcast tplr ranks to rest of players
+        str tplr_ranks = dLookup(plrlogos, accountName);
+        if (tplr_ranks != "") {
+            str newrankstr = accountName + "-" + tplr_ranks;
+            GAME.NETWORK.broadcast("claninfo", {i:newrankstr});
+        }
+    }
+}
+
+action rankDataSetCallback(obj data, bool success, str accountName) {
+    if (success) {
+        GAME.log("successfully saved data for ", accountName);
+    } else {
+        GAME.log("couldnt save data for ", accountName);
+    }
+    GAME.log(data);
+}
+
+action plrlogosLoadClanRanks(str accountName) {
+    GAME.STORAGE.load(accountName, "", clanDataReady);
+}
+
+# Player spawns in
+public action onPlayerSpawn(str id) {
+    obj tplr = GAME.PLAYERS.findByID(id);
+    GAME.log("player rankinit:", (num)tplr.rankinit);
+    if ((num)tplr.rankinit == 0) {
+        if (dLookup(plrlogos, (str) tplr.accountName) == "" && (str)tplr.accountName != "") {
+            GAME.log("intializing player rank: ", (str)tplr.accountName);
+            plrlogosLoadClanRanks((str) tplr.accountName); # load storage of player ranks into server script
+            # if above has data, will broadcast new player rank.
+        }
+        # send claninfo to player
+        GAME.NETWORK.send("claninfo", {i:serialize_rankdata()},id);
+
+        dUpdate(playerID_to_accountName,str[][str[id,(str)tplr.accountName]]); # for onplayerleave data cleanup
+        tplr.rankinit = 1;
+        # GAME.log("finished initialization");
+    }
+}
+
+# When a player leaves the server
+public action onPlayerLeave(str playerID) {
+    str accountName = dLookup(playerID_to_accountName,playerID);
+    if (accountName != "") {
+        dDel(plrlogos,accountName);
+    }
+    dDel(playerID_to_accountName,playerID);
+}
+
+public action onNetworkMessage(str id, obj data, str playerID) {
+    if (id == "giverank") {
+        obj tplr = GAME.PLAYERS.findByID(playerID);
+        str adminstatus = dLookup(adminlist, (str)tplr.accountName);
+        if (adminstatus == "") {
+            GAME.log("ERROR: ILLEGAL REQUEST DETECTED FROM ", (str)tplr.accountName);
+            return;
+        } else {
+            str[] list_modstatus = str_split(adminstatus, "_");
+            str clan = list_modstatus[0];
+            str status = list_modstatus[1];
+
+            # clan admin check
+            if ((clan != (str)data.clan) && (clan != "super")) {
+                GAME.log("ERROR:", (str)tplr.accountName, " HAS STATUS" , status, " FROM CLAN", clan, "WHICH CANNOT CHANGE PERMISSIONS FOR CLAN", (str)data.clan);
+                return;
+            } else if (status != "recruiter" && status != "admin") {
+                GAME.log("ERROR: ", (str)tplr.accountName, " OF STATUS", status, " DOES NOT HAVE SUFFICIENT PERMISSIONS TO GIVE RANKS");
+                return;
+            }
+            # player present check
+            obj reqplr = findPlayerByAccountName((str)data.accountName);
+            if (notEmpty reqplr) {} else {
+                GAME.log("ERROR: PLAYER WITH ACCOUNTNAME IS NOT PRESENT: ", (str)data.accountName);
+                return;
+            }
+            # rank valid check
+            str datavalue = dLookup(validrank_to_datavalue,str_concat(str[(str)data.clan,(str)data.rank], "_"));
+            if ((str)data.rank == "remove") {
+                datavalue = "0";
+                GAME.log("removing rank as requested: ", str_concat(str[(str)data.clan,(str)data.rank], "_"));
+            } else if (datavalue != "") {
+                GAME.log("valid rank found: ", str_concat(str[(str)data.clan,(str)data.rank], "_"), datavalue);
+            } else {
+                GAME.log("ERROR: NO VALID RANK FOR CLAN ", str_concat(str[(str)data.clan,(str)data.rank], "_"));
+                return;
+            }
+            # delete option
+            # all checks passed, set player rank and also store data
+            # set player rank
+            str[] plrranks = str_split(dLookup(plrlogos,(str)data.accountName),",");
+            obj obj_plrranks = {};
+            # existing ranks
+            for (num i = 0; i < lengthOf plrranks; i++) {
+                str[] rankattributes = str_split(plrranks[i],'_');
+                GAME.log(rankattributes);
+                str tclan = rankattributes[0];
+                str trank = str_concat(str[rankattributes[1],rankattributes[2]],'_');
+
+                str validaterank = dLookup(validrank_to_datavalue,str_concat(str[tclan,rankattributes[1]], "_"));
+                if (validaterank != trank) {
+                    GAME.log("ERROR: INVALID CLAN ATTRIBUTE FOUND IN plrlogos FOR ", (str)data.accountName, ": ", tclan, trank);
+                    return;
+                }
+                ## EDIT HERE TO ADD NEW RANK
+                else if (tclan == "phil") {
+                    obj_plrranks.phil = trank;
+                } else if (tclan == "jump") {
+                    obj_plrranks.jump = trank;
+                } else if (tclan == "run") {
+                    obj_plrranks.run = trank;
+                } 
+            }
+            # new rank
+            ## EDIT HERE TO ADD NEW RANK
+            if ((str)data.clan == "phil") {
+                obj_plrranks.phil = datavalue;
+                GAME.log("set phil rank: ", datavalue);
+            } else if ((str)data.clan == "jump") {
+                obj_plrranks.jump = datavalue;
+                GAME.log("set jump rank: ", datavalue);
+            } else if ((str)data.clan == "run") {
+                obj_plrranks.run = datavalue;
+                GAME.log("set run rank: ", datavalue);
+            }
+            # update storage info
+            GAME.STORAGE.set((str)data.accountName,obj_plrranks,true,rankDataSetCallback);
+            # update plrlogos
+            GAME.log(serialize_object_torank(obj_plrranks));
+            dUpdate(plrlogos, str[][str[(str)data.accountName,serialize_object_torank(obj_plrranks)]]);
+            # broadcast new player rank
+            str newrankstr = (str)data.accountName + "-" + dLookup(plrlogos, (str)data.accountName);
+            if ((str)data.rank != "remove") {
+                GAME.CHAT.broadcast((str)data.accountName+" ranked up in " + UTILS.toUpper((str)data.clan) + " clan to " + UTILS.toUpper((str)data.rank) + " :) CONGRATULATIONS", "#FFBF00");
+                GAME.NETWORK.broadcast("dialoguestart_rankup", {plrID:reqplr.id,accountName:reqplr.accountName,rank:UTILS.toUpper((str)data.rank),clan:UTILS.toUpper((str)data.clan),scriptname:"rankup"});
+                GAME.NETWORK.broadcast("rankup", {i:newrankstr,m:38804});
+            } else {
+                GAME.CHAT.broadcast((str)data.accountName+" had its rank removed in clan " + UTILS.toUpper((str)data.clan), "#F00");
+                GAME.NETWORK.broadcast("rankup", {i:newrankstr,m:0});
+            }
+            
+            
+        }
+    } else if (id == "request_claninfo") {
+        # end format
+        # "blandrice-phil_angelic_33650,jump_member_33650;ecirdnalb-phil_angelic_33650,jump_member_33650"
+        # GAME.log("clan info requested:", plrlogos);
+        GAME.NETWORK.broadcast("claninfo", {i:serialize_rankdata()});
+    }
+}
+
+# Runs when the game starts
+public action start() {}
+
+# Runs every game tick
+public action update(num delta) {}
+
+public action onCustomTrigger(str playerID, str customParam, num value) {
+    if (str_starts(customParam,"dialogue_rank")) {
+        str[] clans = getclans();
+        str[] p_clans = str[];
+        str[] ranks = dkeys(validrank_to_datavalue);
+        str[] p_ranks = str[];
+        str[] accountNames = str[];
+        
+        obj[] plrs = GAME.PLAYERS.list();
+        for (num i = 0; i < lengthOf plrs; i++){
+            if ((str)plrs[i].accountName != ""){
+                addTo accountNames (str)plrs[i].accountName;
+            }
+        }
+        
+
+        str scriptname = UTILS.replaceText(customParam, "dialogue_","");
+        obj plr = GAME.PLAYERS.findByID(playerID);
+        str adminstatus = dLookup(adminlist, (str)plr.accountName);
+        # player clans privileges
+        if (adminstatus == "") {
+            # no p_clans privileges
+        } else if (UTILS.textContains(adminstatus, "super")) {
+            p_clans = getclans();
+        } else {
+            str admin_clan = str_split(adminstatus,'_')[0];
+            addTo p_clans admin_clan;
+        }
+        # player ranks privileges
+        if (adminstatus != "") {
+            str admin_privilege = str_split(adminstatus,'_')[1];
+            for (num i = 0; i < lengthOf ranks; i++) {
+                if (findinstrlist(p_clans, str_split(ranks[i], '_')[0]) >= 0) {
+                    if (admin_privilege == "admin") {
+                        addTo p_ranks ranks[i];
+                    } else if (admin_privilege == "recruiter" &&  str_split(ranks[i], '_')[1] == "member") {
+                        addTo p_ranks ranks[i];
+                    }
+                }
+            }
+        }
+        
+        obj dialoguestartobj = {
+            scriptname: scriptname,
+            clans:clans,
+            p_clans:p_clans,
+            ranks:ranks,
+            p_ranks:p_ranks,
+            priv:adminstatus,
+            acc: accountNames
+        };
+        if(!GAME.NETWORK.send("dialoguestart_rank",dialoguestartobj, playerID)) {GAME.log("ERROR sending dialoguestart");}
+    } else if (str_starts(customParam,"tp_")) {
+        str gamename = UTILS.replaceText(customParam, "tp_","");
+		GAME.NETWORK.send("changeGame", {g:gamename}, playerID);
+	}
+}

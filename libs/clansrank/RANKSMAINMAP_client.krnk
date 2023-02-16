@@ -1,0 +1,1103 @@
+# Client Script runs only on the client
+# KrunkScript Copyright (C) Yendis Entertainment Pty Ltd
+# 
+# Add custom actions here
+
+num nowTime = GAME.TIME.now();
+obj you = {};
+
+str current_player = "_";
+str current_clan = "_";
+str current_rank = "_";
+
+str playerIDtoFollow = "";
+num msdelayTxtStart = 0;
+num speedTxtscroll = 0;
+num txtStartTime = nowTime;
+num idxTxtPos = 0;
+str text = "";
+bool doneText = true;
+
+bool doneDialogue = true;
+# ========================================
+# ---imports--- (rn small helper functions)
+num action findinstrlist(str[] list, str t) {
+    for (num i = 0; i < lengthOf list; i++) {
+        if (t == list[i]) {
+            return i;
+        }
+    }
+    return -1;
+}
+# dict
+str action dLookup(str[][] dict, str key) {
+    for  (num i = 0; i < lengthOf dict; i++) {
+        if (dict[i][0] == key) {
+            return dict[i][1];
+        }
+    }
+	return "";}
+action dAdd(str [][] dict, str key, str val) {
+	bool dfound = false;
+    for  (num i = 0; i < lengthOf dict; i++) {
+        if (dict[i][0] == key) {
+            dict[i][1] = val;
+            dfound = true;
+            break;
+        } 
+    if (!dfound) {
+        addTo dict str[toStr key,toStr val];
+    }
+	}}
+# action dDel(str[][] dict, str key) {
+# 	for  (num i = 0; i < lengthOf dict; i++) {
+#         if (dict[i][0] == key) {
+#             remove dict[i];
+#             return;
+#         }
+# 	}}
+str[][] action dCopy(str [][] dict) {
+    str [][] dCopy = str[][];
+    for (num i = 0; i < lengthOf dict; i++) {
+		str[] keyval = str[];
+        addTo keyval dict[i][0]; # key
+        addTo keyval dict[i][1]; # val
+        addTo dCopy keyval;
+	} return dCopy;
+}
+str[][] action dUpdate(str [][] dict, str [][]dictu) {
+    for (num i = 0; i < lengthOf dictu; i++) {
+        bool dfound = false;
+        for  (num j = 0; j < lengthOf dict; j++) {
+            if (dict[j][0] == dictu[i][0]) {
+                dict[j][1] = dictu[i][1];
+                dfound = true; continue;
+            }
+        }
+        if (dfound) {continue;}
+        addTo dict str[dictu[i][0], dictu[i][1]];
+    }
+    return dict;
+}
+# str manipulation
+str action str_truncate(str text, num ln) {
+    str ret = "";
+    if (ln > lengthOf text - 1) {
+        return text;
+    }
+    for (num i = 0; i < ln; i++) {
+        ret += text[i];
+    }
+    return ret;
+}
+bool action str_starts(str text,str value) {
+    # if (UTILS.textContains(UTILS.truncateTxt(text, lengthOf value), value)) {return true;} 
+    if (UTILS.textContains(str_truncate(text, lengthOf value), value)) {return true;} 
+    # if (UTILS.textContains(text, value)) {return true;} 
+	return false;}
+str[] action str_split(str s, str delim) {
+	str[] output = str[];
+	num idx_matchstart = 0;
+
+    # iterate over string
+    for(num i = 0; i < lengthOf s; i++) {
+        bool match = false;
+        
+        # match delimiter
+        for (num j = 0; j < lengthOf delim; j++) {
+			match = true;
+            if (s[i+j] != delim[j]) {
+				match = false; break;
+			}
+		}
+
+        # matches, parse out the string previous
+        if (match) { 
+            str word = "";
+            for (num j = idx_matchstart; j < i; j++) {
+                word += s[j];
+            }
+            addTo output word;
+
+            # skip delimiter
+            i += lengthOf delim - 1;
+            idx_matchstart = i+1;
+        }
+    } 
+    
+    # also parse last string
+    str word = "";
+    for (num i = idx_matchstart; i < lengthOf s; i++) {
+        word += s[i];
+    }
+    addTo output word;
+
+	return output;}
+# disable player inputs
+action disablePlayerInputs() {
+	GAME.UI.updateDIV('divDisableInputs', 'display', 'block');
+	GAME.INPUTS.unlockMouse();}
+action enablePlayerInputs() {
+	GAME.UI.updateDIV('divDisableInputs', 'display', 'none');
+	GAME.CAMERA.attach();
+    GAME.INPUTS.lockMouse();
+    GAME.log("reenabling player inputs");}
+# angle manipulation
+num action radNorm(num radangle) {
+    # turn negative number into positive
+    if (radangle < 0) {
+        radangle += Math.ceil(Math.abs(radangle) / (2*Math.PI)) * (2* Math.PI); 
+    }
+    # turn turn >360deg into 0-360deg
+    else if (radangle > (2*Math.PI)){
+        radangle = radangle % (2 * Math.PI);
+    }
+    return radangle;
+}
+
+str[][] plrlogos = str[][]; # str[][ str["blandrice","phil_angelic_33650,jump_member_12345"]]
+
+
+num[] action get_rank_assets(str accountName) {
+    # GAME.log(accountName);
+    num[] rank_assets = num[];
+    str logos = dLookup(plrlogos, accountName);
+    if (logos != "") {
+         str[] clans = str_split(logos, ",");
+         for (num i = 0; i < lengthOf clans; i++) {
+             num asset = toNum str_split(clans[i],"_")[2];
+             addTo rank_assets asset;
+         }
+    }
+    return rank_assets;
+}
+
+action renderPhilLogos() {
+    obj[] plrs = GAME.PLAYERS.list();
+	for (num i=0; i < lengthOf plrs; i++) {
+		obj plr = plrs[i];
+		if (!plr.isYou) {
+            if (100 > UTILS.getDist3D((num)you.position.x,(num)you.position.y,(num)you.position.z,(num)plr.position.x,(num)plr.position.y,(num)plr.position.z)) {
+                # num logo = philclanlogo(plr);
+                num[] rank_assets = get_rank_assets((str)plr.username);
+                # GAME.log(rank_assets);
+                if (lengthOf rank_assets > 0) {
+                    obj pos = GAME.SCENE.posToScreen((num) plr.position.x, (num)plr.position.y+17, (num)plr.position.z);
+                    if ((bool)pos.onScreen){
+                        for (num i = 0; i < lengthOf rank_assets; i++) {
+                            GAME.OVERLAY.drawImage(rank_assets[i], (num) pos.x - ((lengthOf rank_assets-1) * 50 / 2) + i*50, (num)pos.y, 50, 50, 0, 1);
+                        }
+                    }
+                }
+            }	
+		}
+	}
+}
+
+# ===================================================================
+# DIALOGUE!!
+# ===================================================================
+
+str[][] script_template = str[][ 
+    str["scriptname","template"],
+    str["name","name"],
+    str["text","This is an example text. Don\'t forget escape characters."],
+    str["txt_idxstart","0"],
+    str["txt_msdelaystart",""],
+    str["txt_speedscroll","0.05"],
+
+    str["cam_subject",""], # AI_Keybi, coords_0_10_0
+    str["startcamerapos",""], # 0_0_0
+    str["cam_anim",""], # smoothpan, linearpan
+    str["cam_rotDeg","-30"], #-30
+    str["cam_distToSub","10"],  #10
+    str["cam_yheight","14"], #14
+    str["ms_durationpan","3000"],
+
+    str["trans_in",""],
+    str["trans_in_msduration",""],
+
+    str["trans_out",""],
+    str["trans_out_msduration",""],
+
+    str["AI_name",""], #Keybi
+    str["AI_anim",""], # Jump, Melee, Move, Shoot, Idle
+    str["AI_msdelayanim","0"]
+    # str["AI_animloopCnt","1"] # playAnim only works with 1 for now
+
+    # str["aud_ID","false"],
+    # str["aud_msdelay","0"],
+    # str["aud_loop","0"]
+];
+
+str[][][][] scripts = str[][][][
+    str[][][
+        str[][ 
+            str["scriptname","rank"],
+            str["divtype","text"],str["name","Notice"], str["text","This is a test to set ranks for Krunker players."], str["txt_msdelaystart","500"],
+            str["cam_anim","smoothpan"],str["cam_subject","coords_62_10_0"]
+        ],
+        str[][ 
+            str["divtype","text"],str["name","Notice"],str["text","Use the next page to navigate through the ranks. DISCLAIMER - do not set ranks for a single player too quickly (wait at least 10 seconds)"],
+            str["cam_anim",""],str["cam_subject","coords_0_0_0"]
+        ],
+        str[][ 
+            str["divtype","rankselect"]
+        ]
+    ],
+    str[][][
+        str[][ 
+            str["scriptname","rankup"],
+            str["divtype","text"],str["name","Congratulations!"], str["text","Congrats to this player for the rank up!"], str["txt_msdelaystart","500"],
+            str["cam_anim","smoothpan"],str["cam_subject","player"] 
+        ]
+    ],
+    str[][][
+        str[][ 
+            str["scriptname","phil_pan"],
+            # str["divtype","text"],str["name","Congratulations!"], str["text","Congrats to this player for the rank up!"], str["txt_msdelaystart","500"],
+            str["cam_anim","smoothpan"],str["cam_subject","coords_91_22_0"],str["cam_rotDeg","0"],str["cam_distToSub","20"]
+        ]
+    ],
+    str[][][
+        str[][ 
+            str["scriptname","jump_pan"],
+            # str["divtype","text"],str["name","Congratulations!"], str["text","Congrats to this player for the rank up!"], str["txt_msdelaystart","500"],
+            str["cam_anim","smoothpan"],str["cam_subject","coords_-2_22_-105"],str["cam_rotDeg","0"],str["cam_distToSub","20"]
+        ]
+    ],
+    str[][][
+        str[][ 
+            str["scriptname","run_pan"],
+            # str["divtype","text"],str["name","Congratulations!"], str["text","Congrats to this player for the rank up!"], str["txt_msdelaystart","500"],
+            str["cam_anim","smoothpan"],str["cam_subject","coords_0_22_107"],str["cam_rotDeg","0"],str["cam_distToSub","20"]
+        ]
+    ]
+];
+
+bool scriptsEnabled = true;
+
+
+str[][][] action scriptLookup(str scriptname) {
+    for (num i = 0; i < lengthOf scripts; i++){
+        if (scriptname == dLookup(scripts[i][0],"scriptname")) {
+            return scripts[i];
+        }
+    }
+    GAME.log("scriptname not found:" + scriptname);    
+    return str[][][str[][str[]]];
+
+}
+
+# ========================================
+# AI lookup
+# ========================================
+action requestAIcoords(str name) {
+	GAME.NETWORK.send("requestAIcoords", {name: name});
+}
+
+num animstartTime = nowTime;
+str cam_anim = "";
+num ms_durationpan = 3000;
+num cam_yheight = 14;
+bool doneCam = true;
+bool doneCoordsCam = false;
+bool doneCalcCamPos = false;
+obj startcamerapos = {x: 0, y: 0, z: 0};
+obj endcamerapos = {x: 15, y: 15, z: 15};
+# num endcamerapos.x = 0; num endcamerapos.y = 0; num endcamerapos.z = 0;
+num rotDeg = 0;
+num distToSub = 0;
+# num endcamerapos.x = 15; num endcamerapos.y = 15; num endcamerapos.z = 15;
+obj endcamerarot = {x: 0, y: -30, z: 0};
+# num endcamerarot.x = 0; num endcamerarot.y = 0; num endcamerarot.z = 0;
+# Description: Calculate camera shift between 1st person to 3rd person staring at a subject
+# Param "num rotationDeg": desired rotation away from facing subject head on
+# Param "num distanceToSubject": this value shifts camera from looking directly at subject to x units in front of it
+# Param "obj endsubjectpos": coords w/ (num) obj.x, (num) obj.y, (num) obj.z values
+# Output: endcamerapos, endcamerarot, based on subject of Camera location
+action calcCamEndPos(num rotationDeg, num distanceToSubject, obj subjectpos) {
+    # get player position
+    num x = GAME.CAMERA.position.x;
+    num z = GAME.CAMERA.position.z;
+
+    
+    num nowPhaseRad = UTILS.getDir2D(x, z,(num) subjectpos.x, (num) subjectpos.z); 
+    num nowPhaseDeg = Math.toDeg(nowPhaseRad); 
+    num endPhaseDeg = nowPhaseDeg - rotationDeg;
+
+    # end subject posisition
+    obj endsubjectpos = {x: 0, y: 0, z: 0};
+    endsubjectpos.x = (num) subjectpos.x + (distToSub * Math.cos(nowPhaseRad));
+    endsubjectpos.z = (num) subjectpos.z + (distToSub * Math.sin(nowPhaseRad));
+    # GAME.log("(num) endsubjectpos.x: " + (str) endsubjectpos.x);
+    # GAME.log("(num) endsubjectpos.z: " + (str) endsubjectpos.z);
+
+    # calc camera position factoring in rotationDeg/distanceToSubject desired
+    num endPhaseRad = Math.toRad(endPhaseDeg);
+    endcamerapos.x = (num) endsubjectpos.x + (distanceToSubject * Math.cos(endPhaseRad));
+    endcamerapos.z = (num) endsubjectpos.z + (distanceToSubject * Math.sin(endPhaseRad));
+    endcamerapos.y = (num) subjectpos.y + cam_yheight;
+
+    # endcamerarot.y = (num) dirs.x - Math.PI/2; # y direction
+    
+    endcamerarot.y  = -1*(UTILS.getDir2D( (num) endcamerapos.x, (num) endcamerapos.z,(num) endsubjectpos.x, (num) endsubjectpos.z) - (Math.PI/2));
+    endcamerarot.y = radNorm((num) endcamerarot.y);
+    
+    # turn y rotation into 0 - 360 degrees
+    GAME.CAMERA.rotation.y = radNorm(GAME.CAMERA.rotation.y);
+
+    # num camopposite = radNorm(GAME.CAMERA.rotation.y - Math.PI);
+    
+    num traveldir = 1;
+    if (radNorm(GAME.CAMERA.rotation.y - ((num) endcamerarot.y - Math.PI)) > Math.PI) {
+        traveldir = -1;
+    }
+    if ((traveldir < 0) && ((num) endcamerarot.y > GAME.CAMERA.rotation.y))  {
+        GAME.CAMERA.rotation.y += 2*Math.PI;
+    } else if ((traveldir > 0) && ((num) endcamerarot.y < GAME.CAMERA.rotation.y)){
+        GAME.CAMERA.rotation.y -=  2*Math.PI;
+    }
+    doneCalcCamPos = true;
+}   
+
+action setupCamera(str[][] dDialogue) {
+
+    animstartTime = nowTime;
+    doneCam = false;
+    doneCoordsCam = false;
+    doneCalcCamPos = false;
+
+    # str subject, str typeCut, str anim, str rotDeg, str distToSub, 
+    str subject = dLookup(dDialogue,"cam_subject");
+    rotDeg = toNum dLookup(dDialogue,"cam_rotDeg");
+    distToSub = toNum dLookup(dDialogue,"cam_distToSub");
+    str strcamstartpos = dLookup(dDialogue,"startcamerapos");
+    
+    if (!!strcamstartpos) {
+        str[] coords = str_split(strcamstartpos,"_");
+        GAME.CAMERA.position.x = toNum coords[0];
+        GAME.CAMERA.position.y = toNum coords[1];
+        GAME.CAMERA.position.z = toNum coords[2];
+    } else {
+        startcamerapos.x = GAME.CAMERA.position.x;
+        startcamerapos.y = GAME.CAMERA.position.y;
+        startcamerapos.z = GAME.CAMERA.position.z;
+    }
+    if (!!toNum dLookup(dDialogue,"cam_yheight")) {
+        cam_yheight = toNum dLookup(dDialogue,"cam_yheight");
+    }
+    if (!!toNum dLookup(dDialogue,"ms_durationpan")) {
+        ms_durationpan = toNum dLookup(dDialogue,"ms_durationpan");
+    }
+    cam_anim = dLookup(dDialogue,"cam_anim");
+    # obj end_coords = {x: 0, y: 0, z: 0};
+    # endPos coords & parsing
+    if (str_starts(subject, "AI_")) {
+        str ainame = UTILS.replaceText(subject,"AI_","");
+        requestAIcoords(ainame);
+    } else if (str_starts(subject, "coords_")) {
+        str[] coords = str_split(subject, "_");
+        endcamerapos = {x: toNum coords[1], y: toNum coords[2], z: toNum coords[3]};
+        calcCamEndPos(rotDeg, distToSub, endcamerapos);
+        doneCoordsCam = true;
+    } else if (subject == "player") {
+        endcamerapos = GAME.PLAYERS.findByID(playerIDtoFollow);
+        calcCamEndPos(rotDeg, distToSub, endcamerapos);
+        doneCoordsCam = true;
+    }
+    }
+    # moved calcCamEndPos to updateCamera after we may have recieved NetworkMessage to get new coords
+    # calcCamEndPos(rotDeg, distToSub, end_coords);}
+
+action updateCamera(num delta, str[][] dDialogue) {
+    # animation selection / should this be in updateCamPos?
+    # GAME.log("cam_anim: " + cam_anim);
+    str subject = dLookup(dDialogue,"cam_subject");
+    if (subject == "player") {
+        endcamerapos = (obj) GAME.PLAYERS.findByID(playerIDtoFollow).position;
+        calcCamEndPos(0, 14, endcamerapos);
+        doneCoordsCam = true;
+    }
+    if (!doneCoordsCam) {
+        # GAME.log("COORDS NOT RECIEVED YET");
+        return;
+    } else if (doneCalcCamPos) {
+        if (cam_anim == "cut") {
+            GAME.CAMERA.position.x = (num) endcamerapos.x;
+            GAME.CAMERA.position.y = (num) endcamerapos.y;
+            GAME.CAMERA.position.z = (num) endcamerapos.z;
+            GAME.CAMERA.rotation.y = (num) endcamerarot.y;
+            doneCam=true;
+        } else if (cam_anim == "smoothpan") {
+            # slow start pan (t^2)
+            num startpan = Math.pow((nowTime-animstartTime)/ms_durationpan*2,2); 
+
+            # Position change
+            GAME.CAMERA.position.x += (((num) endcamerapos.x - GAME.CAMERA.position.x) /200 *delta*startpan); #
+            GAME.CAMERA.position.y += (((num) endcamerapos.y - GAME.CAMERA.position.y) /200 *delta*startpan); #
+            GAME.CAMERA.position.z += (((num) endcamerapos.z - GAME.CAMERA.position.z) /200 *delta*startpan); #
+
+            # Rotation change
+            GAME.CAMERA.rotation.y = GAME.CAMERA.rotation.y + (((num) endcamerarot.y - GAME.CAMERA.rotation.y) /200 *delta*startpan); #
+            # don't know how (num) rotation.x or z works yet
+            # GAME.CAMERA.rotation.x = GAME.CAMERA.rotation.x + (((num) endcamerarot.x - GAME.CAMERA.rotation.x) /200 *delta*startpan); 
+            # GAME.CAMERA.rotation.z = GAME.CAMERA.rotation.z + (((num) endcamerarot.x - GAME.CAMERA.rotation.z) /200 *delta*startpan); #
+        }
+        else if (cam_anim == "linearpan") {
+            GAME.CAMERA.position.x = GAME.CAMERA.position.x + ((num) endcamerapos.x - (num) startcamerapos.x)*delta/ms_durationpan;
+            GAME.CAMERA.position.y = GAME.CAMERA.position.y + ((num) endcamerapos.y - (num) startcamerapos.y)*delta/ms_durationpan;
+            GAME.CAMERA.position.z = GAME.CAMERA.position.z + ((num) endcamerapos.z - (num) startcamerapos.z)*delta/ms_durationpan;
+        } #TODO linearpan calculation
+        # Exit condition
+
+        if (nowTime - animstartTime > ms_durationpan) {
+            GAME.log("(num) endcamerapos.y: " + (str) endcamerapos.y);
+            doneCam = true;
+        }
+    }
+}
+
+str[] dialogueDIVIDs = str[]; # All div's to be added / deleted between states
+str nexTextDivID = ""; # next button 
+action txtClearDIVs() {
+    for (num i = 0; i < lengthOf dialogueDIVIDs; i++) {
+        GAME.UI.removeDIV(dialogueDIVIDs[i]);
+    }
+    dialogueDIVIDs = str[];}
+action setupTxtCSS(str name, str text) {
+    doneText = false;
+    # name DIV
+    str nameCSS = 'color:#f1f1f1;position:absolute;top:7%;left:49%;' +
+        'transform: translate(-50%,-50%);font-size: 1.2vw;' +
+        'width:30%; height:5%;' +
+        'text-align: left;';
+    str nameText = name; 
+    str nameDivID = GAME.UI.addDIV("name",true, nameCSS);
+    GAME.UI.updateDIVText(nameDivID, nameText);
+    addTo dialogueDIVIDs nameDivID;
+    # Dialogue DIV
+    str dialogueCSS = 'color:#f1f1f1;position:absolute;top:17%;left:50%;' +
+        'transform: translate(-50%,-50%);font-size: 1vw;' +
+        'border:solid 2px #fff;border-radius:4px;' +
+        'width:30%; height:12%;' +
+        'overflow-y:scroll;' +
+        'background-color: rgba(0,0,0,0.2);' +
+        'text-align: left;' + 
+        'padding: 0.5% 2% 2% 2%;';
+    str dialogueText = text; 
+    str dialogueDivID = GAME.UI.addDIV("dialogueText",true, dialogueCSS);
+    GAME.UI.updateDIVText(dialogueDivID, dialogueText);
+    addTo dialogueDIVIDs dialogueDivID;
+    # next DIV
+    str nextCSS = 'color:#f1f1f1;position:absolute;top:28%;left:63%;' +
+        'transform: translate(-50%,-50%);font-size: 1vw;' +
+        'border:solid 2px #fff;border-radius:4px;' +
+        'width:8%; height:3%;' +
+        'background-color: rgba(0,0,0,0.2);' + 
+        'text-align: center;';
+    str nextText = "Next";
+    nexTextDivID = GAME.UI.addDIV("next",true, nextCSS);
+    GAME.UI.updateDIVText(nexTextDivID, nextText);
+    addTo dialogueDIVIDs nexTextDivID;
+}
+
+str[] clanoptions = str[];
+str[] rankoptions = str[];
+str[] playerAccountNames = str[];
+str privilege = "";
+
+str[] p_clanoptions = str[];
+str[] p_rankoptions = str[];
+
+action rankSelectDivs() {
+    current_clan = "_";
+    current_player = "_";
+    current_rank = "_";
+    str pageIDCSS = 'color:#f1f1f1;position:absolute;top:10%;left:50%;' +
+        'transform: translate(-50%,0%);' +
+        # 'font-size: 40px;' +
+        # 'border:solid 2px #fff;border-radius:4px;' +
+        'width:50%; height:80%;' +
+        # 'overflow-y:scroll;' +
+        'background-color: rgba(0,0,0,0);';
+        # 'text-align: left;' + 
+        # 'padding: 0.5% 2% 2% 2%;';
+    str pageDivID = GAME.UI.addDIV("pageID",true, pageIDCSS);
+    addTo dialogueDIVIDs pageDivID;
+    str dialogueCSS = 'color:#f1f1f1;position:relative;' +
+        # 'transform: translate(-50%,0%);' +
+		'font-size: 40px;' +
+        'border:solid 2px #fff;border-radius:4px;' +
+        'width:100%; height:90%;' +
+        'overflow-y:scroll;' +
+        'background-color: rgba(0,0,0,0.7);' +
+        'text-align: left;' + 
+        'padding: 0.5% 2% 2% 2%;';
+#     str dialogueText = "random_text"; 
+    str rankpageDivID = GAME.UI.addDIV("rankPage",true, dialogueCSS,pageDivID);
+    addTo dialogueDIVIDs rankpageDivID;
+	
+    str privilegeCSS = 'color:#FF0;position:relative;top:0%;left:50%;' +
+        'transform: translate(-50%,0%);' +
+		'font-size: 30px;' +
+		'float:left;' +
+#         'border:solid 2px #fff;border-radius:4px;' +
+        'width:100%; height:5%;' +
+        'background-color: rgba(0,0,0,0.7);' +
+        'text-align: center;' + 
+        'padding: 0.5% 2% 2% 2%;';
+    GAME.UI.addDIV("privilegetitlediv",true,privilegeCSS,rankpageDivID);
+    addTo dialogueDIVIDs "privilegetitlediv";
+
+    if (privilege == "" || privilege == "undefined"){
+        GAME.UI.updateDIVText("privilegetitlediv", "You have no privileges. But you can view ranks");
+    } else {
+        GAME.UI.updateDIVText("privilegetitlediv", "Your admin privilege is " + privilege);
+    }
+    str titleCSS = 'color:#f1f1f1;position:relative;top:0%;left:50%;' +
+        'transform: translate(-50%,0%);' +
+		'font-size: 40px;' +
+		'float:left;' +
+#         'border:solid 2px #fff;border-radius:4px;' +
+        'width:100%; height:5%;' +
+        'background-color: rgba(0,0,0,0.7);' +
+        'text-align: center;' + 
+        'padding: 0.5% 2% 2% 2%;';
+	
+# 	GAME.UI.updateDIVText(rankpageDivID, dialogueText);
+    GAME.UI.addDIV("playertitlediv",true,titleCSS,rankpageDivID);
+    addTo dialogueDIVIDs "playertitlediv";
+    GAME.UI.updateDIVText("playertitlediv", "Select Player");
+    str plroptionCSS = 'color:#FFF;position:relative;' +
+# 		'top:15%;left:50%;' +
+#         'transform: translate(-50%,0%);' +
+		'float:left;' +
+		'font-size: 20px;' +
+        'border:solid 2px #fff;border-radius:4px;' +
+        'width:10%; height:5%;' +
+#         'overflow-y:scroll;' +
+        'background-color: rgba(255,255,0,0.3);' +
+        'text-align: center;' + 
+        'padding: 2% 2% 2% 2%;';
+    for (num i = 0; i < lengthOf playerAccountNames; i++) {
+        if (playerAccountNames[i] != "") {
+            str playerdiv = GAME.UI.addDIV(playerAccountNames[i] + "_plrdiv", true, plroptionCSS, rankpageDivID);
+            addTo dialogueDIVIDs playerdiv;
+            GAME.UI.updateDIVText(playerdiv,playerAccountNames[i]);
+        }
+        
+    }
+	str titlestr = "Select Clan ";
+    GAME.UI.addDIV("clantitlediv",true,titleCSS,rankpageDivID);
+    addTo dialogueDIVIDs "clantitlediv";
+	GAME.UI.updateDIVText("clantitlediv", titlestr);
+	str clanoptionCSS = 'color:#FFF;position:relative;' +
+# 		'top:15%;left:50%;' +
+#         'transform: translate(-50%,0%);' +
+		'float:left;' +
+		'font-size: 20px;' +
+        'border:solid 2px #fff;border-radius:4px;' +
+        'width:10%; height:5%;' +
+#         'overflow-y:scroll;' +
+        'background-color: rgba(255,255,255,0.2);' +
+        'text-align: center;' + 
+        'padding: 2% 2% 2% 2%;';
+    str en_clanoptionCSS = 'color:#FFF;position:relative;' +
+# 		'top:15%;left:50%;' +
+#         'transform: translate(-50%,0%);' +
+		'float:left;' +
+		'font-size: 20px;' +
+        'border:solid 2px #fff;border-radius:4px;' +
+        'width:10%; height:5%;' +
+#         'overflow-y:scroll;' +
+        'background-color: rgba(255,255,0,0.5);' +
+        'text-align: center;' + 
+        'padding: 2% 2% 2% 2%;';
+	for (num i=0;i<lengthOf clanoptions; i++){
+        str clandiv = "";
+        if (findinstrlist(p_clanoptions, clanoptions[i]) >= 0) {
+            clandiv = GAME.UI.addDIV(clanoptions[i] + "_en_clandiv", true, en_clanoptionCSS, rankpageDivID);
+        } else {
+            clandiv = GAME.UI.addDIV(clanoptions[i] + "_clandiv", true, clanoptionCSS, rankpageDivID);
+        }
+        addTo dialogueDIVIDs clandiv;
+        GAME.UI.updateDIVText(clandiv,clanoptions[i]);
+	}
+	str rankstr = "Select Rank";
+# 	GAME.UI.updateDIVText(rankpageDivID, dialogueText);
+	GAME.UI.addDIV("ranktitlediv",true,titleCSS,rankpageDivID);
+    addTo dialogueDIVIDs "ranktitlediv";
+	GAME.UI.updateDIVText("ranktitlediv", rankstr);
+    str ErrorWindowCSS = 'color:#FF0000;position:relative;' +
+		'font-size: 20;' +
+		'float:left;' +
+#         'border:solid 2px #fff;border-radius:4px;' +
+        'width:100%; height:5%;' +
+        'background-color: rgba(0,0,0,0.7);' +
+        'text-align: center;';
+        # 'padding: 0.5% 2% 2% 2%;';
+    GAME.UI.addDIV("error_div", true, ErrorWindowCSS,pageDivID);
+    addTo dialogueDIVIDs "error_div";
+    # GAME.UI.udpateDivText("error_div","");
+    str currentSelectionCSS = 'color:#FFF;position:relative;' +
+		# 'top:85%;left:35%;' +
+        # 'transform: translate(-50%,-50%);' +
+        # 'transform: translateY(50vh);' +
+        # 'transform: translateX(50vw);' +
+		'font-size: 20px;' +
+        'border:solid 2px #000;border-radius:3px;' +
+        'width:75%; height:5%;' +
+        'float:left;' +
+#         'overflow-y:scroll;' +
+        'background-color: rgba(0,0,0,0.5);' +
+        'text-align: center;';
+        # 'padding: 2% 2% 2% 2%;';
+    GAME.UI.addDIV("currentselect_div", true, currentSelectionCSS, pageDivID);
+    addTo dialogueDIVIDs "currentselect_div";
+    GAME.UI.updateDIVText("currentselect_div",current_player + " will become a " + current_clan + " member with rank: " + current_rank);
+    str confirmCSS = 'color:#0F0;position:relative;' +
+		# 'top:90%;left:72%;' +
+        # 'transform: translate(-50%,-50%);' +
+        # 'transform: translateY(50vh);' +
+        # 'transform: translateX(50vw);' +
+		'font-size: 20px;' +
+        'border:solid 2px #000;border-radius:3px;' +
+        'width:10%; height:5%;' +
+        'float:left;' +
+#         'overflow-y:scroll;' +
+        'background-color: rgba(255,255,255,0.5);' +
+        'text-align: center;';
+        # 'padding: 2% 2% 2% 2%;';
+    GAME.UI.addDIV("confirm_div", true, confirmCSS,pageDivID);
+    addTo dialogueDIVIDs "confirm_div";
+    GAME.UI.updateDIVText("confirm_div", "Confirm");
+    str cancelCSS = 'color:#F00;position:relative;' +
+		# 'top:90%;left:72%;' +
+        # 'transform: translate(-50%,-50%);' +
+        # 'transform: translateY(50vh);' +
+        # 'transform: translateX(50vw);' +
+		'font-size: 20px;' +
+        'border:solid 2px #000;border-radius:3px;' +
+        'width:10%; height:5%;' +
+        'float:left;' +
+#         'overflow-y:scroll;' +
+        'background-color: rgba(255,255,255,0.5);' +
+        'text-align: center;';
+        # 'padding: 2% 2% 2% 2%;';
+    GAME.UI.addDIV("cancel_div", true, cancelCSS,pageDivID);
+    addTo dialogueDIVIDs "cancel_div";
+    GAME.UI.updateDIVText("cancel_div", "Cancel");
+
+}
+
+action setupDivs(str[][] dDialogue) {
+    str divtype = dLookup(dDialogue, "divtype");
+
+    if (divtype == "text" || divtype == "") {
+        txtClearDIVs();
+        txtStartTime = nowTime;
+        str name = dLookup(dDialogue,"name");
+        text = dLookup(dDialogue,"text");
+        idxTxtPos = toNum dLookup(dDialogue,"txt_idxstart"); 
+        msdelayTxtStart = toNum dLookup(dDialogue,"txt_msdelaystart"); 
+        speedTxtscroll = toNum dLookup(dDialogue,"txt_speedscroll"); 
+
+        # setup div
+        if (speedTxtscroll == 0) {idxTxtPos = lengthOf text;} # show all text if speed = 0
+        setupTxtCSS(name,str_truncate(text,idxTxtPos));
+    } else if (divtype == "rankselect") {
+        txtClearDIVs();
+        rankSelectDivs();
+    } else if (divtype == "none") {
+
+    } else if (divtype == "cleardivs") {
+        txtClearDIVs();
+    }
+    
+
+}
+num delta_txtPos = 0;
+action updateText(num delta) {
+    # requires div to be on screen - done
+    if (!!msdelayTxtStart && ((nowTime - txtStartTime) < msdelayTxtStart)) {
+    } else {
+        if (idxTxtPos < lengthOf text) {
+            num idx_shifttxtPos = speedTxtscroll * (delta + delta_txtPos);
+            if (idx_shifttxtPos > 0) {
+                idxTxtPos += idx_shifttxtPos;
+            } else {
+                delta_txtPos += delta;
+            }
+            str newTxt = str_truncate(text,idxTxtPos);
+            GAME.UI.updateDIVText("dialogueText", newTxt);
+            # GAME.log("updating divtext");
+        } else {
+            GAME.UI.updateDIVText("dialogueText", text);
+            doneText = true;
+        }
+    }
+}
+
+num msdelayanimStart = 0;
+num animStartTime = nowTime;
+bool doneAIupdate = true;
+bool doneAIanim = true;
+bool doneAIrot = true;
+num loopCntAnim = 1;
+str AI_name = "";
+str AI_anim = "";
+action setupAIanim(str[][] dDialogue) {
+    doneAIupdate = false;
+    doneAIanim = false;
+    doneAIrot = false;
+
+    msdelayanimStart = toNum dLookup(dDialogue,"AI_msdelayanim");
+    loopCntAnim = toNum dLookup(dDialogue,"AI_animloopCnt");
+    
+    animStartTime = nowTime;
+    if (!dLookup(dDialogue,"AI_anim")) {
+        doneAIanim = true;
+    } else {
+        AI_name = dLookup(dDialogue,"AI_name");
+        AI_anim = dLookup(dDialogue,"AI_anim");
+    }
+}
+action updateAIanim(num delta) {
+    if (!doneAIanim) {
+        if (!!msdelayanimStart && ((nowTime - animStartTime) < msdelayanimStart)) {}
+        else {
+            # GAME.log("AI_name: " + AI_name);
+            # GAME.log("AI_anim: " + AI_anim);
+            GAME.log("loopcnt: " + toStr loopCntAnim);
+            GAME.NETWORK.send("playAIanim",{name: AI_name, anim: AI_anim, loop: loopCntAnim});
+            doneAIanim = true;
+        }
+    }
+    if (!doneAIrot) {
+        GAME.NETWORK.send("AIlookatPlayer",{name: AI_name});
+        GAME.log("AIlookatPlayer");
+        doneAIrot = true;
+    }
+    if (doneAIanim && doneAIrot) {
+        doneAIupdate = true;
+    }
+
+
+}
+# TODO Dialogue FSM
+str[][][] DialogueScript = str[][][str[][str[""]]];
+num idxScript = 0;
+action clearDialogue() {
+	for (num i = 0; i < lengthOf DialogueScript; i++) {
+		remove DialogueScript[i];
+	}}
+action loadDialogue(str scriptname) {
+    str [][][] dialogue = scriptLookup(scriptname);
+	for (num i = 0; i < lengthOf dialogue; i++) {
+		# copy dict
+        str[][] dict = dCopy(script_template);
+        dict = dUpdate(dict, dialogue[i]);
+        # update template with dict
+        addTo DialogueScript dict;
+	}}
+str[][] action getDialogue(str scriptname,num idx) {
+    str[][] dDialogue = dCopy(script_template);
+    dDialogue = dUpdate(dDialogue, scriptLookup(scriptname)[idx]);
+    return dDialogue;
+}
+action FSMDialogue(str state) {
+    if (state == "init") {
+        doneDialogue = false;
+        disablePlayerInputs();
+        GAME.CAMERA.detach();
+        idxScript=0;
+        state = "next";   
+    }
+    if (state == "next") {
+        if (idxScript >= lengthOf DialogueScript) {state = "end";}
+        else {
+            str[][] dDialogue = DialogueScript[idxScript];
+
+            # setup transition (fade in/out)
+            if (dLookup(dDialogue,"cam_anim") != "") {setupCamera(dDialogue);}
+            if (dLookup(dDialogue,"divtype") != "") {setupDivs(dDialogue);}
+            if (dLookup(dDialogue,"AI_anim") != "") {setupAIanim(dDialogue);}
+            # setup audio
+            # Future: setup onscreen stuff (widemode black borders etc)
+            idxScript++;
+        }
+        
+    }
+    if (state == "end") {
+        txtClearDIVs();
+        enablePlayerInputs();
+        clearDialogue();
+        doneCam = true;
+        doneText = true;
+        doneDialogue = true;
+
+    }
+}
+action startDialogue(str scriptname) {
+    if (!doneDialogue) {return;} # don't start new dialogue until current one is finished
+    clearDialogue();
+    clearDialogue();
+    
+    loadDialogue(scriptname);
+    FSMDialogue("init");}
+
+
+# Runs when the game starts
+public action start() {
+	str divDisableInputs = GAME.UI.addDIV(
+		'divDisableInputs',
+		true,
+		'width: 100%;' +
+		'height: 100%;' +
+		'position: fixed;' +
+		'top: 0;' +
+		'left: 0;' +
+		'background-color:rgba(0,0,0,0.00);' +
+		'padding: 0;' +
+		'margin: 0;' +
+		'color:#f1f1f1;'
+	);
+    clearDialogue();
+}
+    
+# Runs every game tick
+public action update(num delta) {
+    if (scriptsEnabled) {
+        you = GAME.PLAYERS.getSelf();
+        nowTime = GAME.TIME.now();
+        if (!doneCam) {updateCamera(delta,DialogueScript[idxScript-1]);}
+        if (!doneText) {updateText(delta);}
+        if (!doneAIupdate) {updateAIanim(delta);}
+    }
+}
+
+# Add rendering logic in here
+public action render(num delta) {
+    if (scriptsEnabled) {
+        renderPhilLogos();
+    }
+}
+
+# Player spawns in
+public action onPlayerSpawn(str id) {
+    obj plr = GAME.PLAYERS.findByID(id);
+    if ((bool) plr.isYou) {
+        # disablePlayerInputs();
+        enablePlayerInputs();
+    }
+}
+
+# Player update
+public action onPlayerUpdate(str id, num delta, obj inputs) {}
+
+# # User pressed a key
+# public action onKeyPress(str key, num code) {
+#     # if (key == "r") {
+#     #     scriptsEnabled = scriptsEnabled ? false : true;
+#     #     GAME.log("scripts: " + toStr scriptsEnabled);
+#     # }
+# }
+
+# # User released a key
+# public action onKeyUp(str key, num code) {}
+
+# User held a key
+public action onKeyHeld(str key, num code) {}
+
+# User clicked on screen
+public action onMouseClick(num button, num x, num y) {}
+
+# User released clicked on screen
+public action onMouseUp(num button, num x, num y) {}
+
+# User scrolled on screen
+public action onMouseScroll(num dir) {}
+
+# User clicked a DIV (ID)
+public action onDIVClicked(str id) {
+    GAME.log("div clicked" + toStr id);
+    GAME.UI.updateDIVText("error_div","");
+
+    if (id == nexTextDivID || id == "divDisableInputs") {
+        if (idxTxtPos < lengthOf text) {
+            idxTxtPos = lengthOf text;
+        } else {FSMDialogue("next");}
+        
+    } else if (UTILS.textContains(id, "_plrdiv")) {
+        current_player = UTILS.replaceText(id, "_plrdiv", "");
+        GAME.UI.updateDIVText("currentselect_div", current_player + " will become a " + current_clan + " member with rank: " + current_rank);
+    } else if (UTILS.textContains(id, "_clandiv")) {
+        current_clan = str_split(id, "_")[0];
+        setupCamera(getDialogue(current_clan+"_pan",0));
+        # current_clan = UTILS.replaceText(id, "_clandiv", "");
+        current_rank = "_";
+        GAME.UI.updateDIVText("currentselect_div", current_player + " will become a " + current_clan + " member with rank: " + current_rank);
+        str rankoptionCSS = 'color:#FFF;position:relative;' +
+			'float:left;' +
+			'font-size: 20px;' +
+			'border:solid 2px #fff;border-radius:4px;' +
+			'width:10%; height:5%;' +
+			'background-color: rgba(255,255,255,0.2);' +
+			'text-align: center;' + 
+			'padding: 2% 2% 2% 2%;';
+        str en_rankoptionCSS = 'color:#FFF;position:relative;' +
+			'float:left;' +
+			'font-size: 20px;' +
+			'border:solid 2px #fff;border-radius:4px;' +
+			'width:10%; height:5%;' +
+			'background-color: rgba(255,255,0,0.5);' +
+			'text-align: center;' + 
+			'padding: 2% 2% 2% 2%;';
+        str deloptionCSS = 'color:#F00;position:relative;' +
+			'float:left;' +
+			'font-size: 20px;' +
+			'border:solid 2px #fff;border-radius:4px;' +
+			'width:10%; height:5%;' +
+			'background-color: rgba(255,255,255,0.5);' +
+			'text-align: center;' + 
+			'padding: 2% 2% 2% 2%;';
+        # delete current rank divs
+        for (num i = 0; i < lengthOf dialogueDIVIDs; i++) {
+            if (UTILS.textContains(dialogueDIVIDs[i], "_rankdiv")){
+                GAME.UI.removeDIV(dialogueDIVIDs[i]);
+            }
+        }
+        str[] clan_rankoptions = str[];
+        if (current_clan != "_") {
+            for (num i = 0; i < lengthOf rankoptions; i++) {
+                if (str_starts(rankoptions[i],current_clan)) {
+                    addTo clan_rankoptions rankoptions[i];
+                }
+            }
+        }
+        for (num i=0;i<lengthOf clan_rankoptions; i++){
+            str rankname = str_split(clan_rankoptions[i], "_")[1];
+            if (findinstrlist(p_rankoptions, clan_rankoptions[i]) >= 0) {
+                str rankdiv = GAME.UI.addDIV(clan_rankoptions[i] + "_en_rankdiv", true, en_rankoptionCSS, "rankPage");
+                addTo dialogueDIVIDs rankdiv;
+                GAME.UI.updateDIVText(rankdiv,rankname);
+            } else {
+                str rankdiv = GAME.UI.addDIV(clan_rankoptions[i] + "_rankdiv", true, rankoptionCSS, "rankPage");
+                addTo dialogueDIVIDs rankdiv;
+                GAME.UI.updateDIVText(rankdiv,rankname);
+            }
+        }
+        str deldiv = GAME.UI.addDIV("remove_en_rankdiv", true, deloptionCSS, "rankPage");
+        addTo dialogueDIVIDs deldiv;
+        GAME.UI.updateDIVText(deldiv,"remove");
+        
+    } else if (UTILS.textContains(id, "_en_rankdiv")) {
+        
+        if (UTILS.replaceText(id, "_en_rankdiv", "") == "remove") {
+            if (privilege == "super" || findinstrlist(p_clanoptions, current_clan) >=0) {
+                current_rank = "remove";
+            } else {
+                GAME.UI.updateDIVText("error_div","Error: you do not have permissions to delete rank for " + current_clan);
+            }
+        } else {
+            current_rank = str_split(id, "_")[1];
+        }
+        GAME.UI.updateDIVText("currentselect_div", current_player + " will become a " + current_clan + " member with rank: " + current_rank);
+    }
+    else if (UTILS.textContains(id, "_rankdiv")) {
+        GAME.UI.updateDIVText("error_div","Error: You don\'t have permission to set this rank.");
+        current_rank="_";
+        GAME.UI.updateDIVText("currentselect_div", current_player + " will become a " + current_clan + " member with rank: " + current_rank);
+    } else if (id == "confirm_div") {
+        if (current_player == "_" || current_clan == "_" || current_rank == "_") {
+            GAME.UI.updateDIVText("error_div","Error: make sure to select all player, clan, and rank");
+        } else {
+            FSMDialogue("end");
+            # GAME.log(current_clan);
+            # GAME.log(current_player);
+            # GAME.log(current_rank);
+            GAME.NETWORK.send("giverank",{accountName:current_player,clan:current_clan,rank:current_rank});
+            # if (current_rank == "remove_rankdiv") {                
+            #     GAME.NETWORK.send("giverank",{accountName:current_player,clan:current_clan,rank:"remove"});
+            # } else {
+                
+            # }
+            
+        }
+    } else if (id == "cancel_div") {
+        FSMDialogue("end");
+    } else {
+        if (!doneDialogue) {
+            idxTxtPos = lengthOf text;
+        }
+    }
+}
+
+# Client receives network message
+public action onNetworkMessage(str id, obj data) {
+    GAME.log(data);
+    if (id == "dialoguestart_rank") {
+        clanoptions = (str[]) data.clans;
+        p_clanoptions = (str[]) data.p_clans;
+        rankoptions = (str[]) data.ranks;
+        privilege = (str) data.priv;
+        playerAccountNames = (str[]) data.acc;
+        # GAME.log("clanoptions ",  clanoptions);
+        p_rankoptions = (str[]) data.p_ranks;
+        # GAME.log("p_clanoptions ",  p_clanoptions);
+    }
+    if (id == "dialoguestart_rankup") {
+        playerIDtoFollow = (str) data.plrID;
+        if ((str) GAME.PLAYERS.getSelf().id != playerIDtoFollow) {
+            startDialogue(toStr data.scriptname);
+            
+            text = "Congrats to " + (str)data.accountName+" who ranked up in " + (str)data.clan + " clan to " + UTILS.toUpper((str)data.rank) + "!!!";
+        }
+    } else if (UTILS.textContains(id, "dialoguestart")) {
+        # GAME.log("starting dialogue ", toStr data.scriptname);
+        startDialogue(toStr data.scriptname);
+    }
+    
+    # } else if (id == "AIcoords") {
+    #     obj subjectpos = {x: (num) data.x, y: (num) data.y, z: (num) data.z};
+    #     doneCoordsCam = true;
+    #     GAME.log("Recieved!! " + (str) data.x + " " + (str) data.y + " " + (str) data.z);
+        
+    #     calcCamEndPos(rotDeg, distToSub, subjectpos);
+        
+    #     # GAME.log((str) data.x);
+    #     # GAME.log((str) data.y);
+    #     # GAME.log((str) data.z);
+    # } 
+    # clan info update
+    if (id == "claninfo" || id == "rankup") {
+        # GAME.log("claninfo found: ", data);
+        str info =(str)data.i; # "blandrice-phil_angelic_33650,jump_member_33650;ecirdnalb-phil_angelic_33650,jump_member_33650"
+        str[] info_users = str_split(info, ';');
+        for (num i = 0; i < lengthOf info_users;i++) {
+            str[] key_val = str_split(info_users[i],"-");
+            if (key_val[0] != "")  {
+                str[][] dkeyval = str[][str[key_val[0],key_val[1]]];
+                dUpdate(plrlogos, dkeyval);
+            }
+        }
+        GAME.log("final plrlogos: ",plrlogos);
+    }
+    # play rankup sounds etc
+    if (id == "rankup") {
+        num musicid = (num)data.m;
+        if (musicid != 0) {
+            GAME.SOUND.play2D(musicid, 1, 1, false);
+        }
+    }
+    if (id == "changeGame") {
+		GAME.changeGame((str)data.g);
+	}
+
+}
+
+
+# User pressed a key
+public action onKeyPress(str key, num code) {
+}
