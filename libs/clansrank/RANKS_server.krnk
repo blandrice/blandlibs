@@ -1,0 +1,120 @@
+# Server Script runs only on Hosted server & not in test mode
+# KrunkScript Copyright (C) Yendis Entertainment Pty Ltd
+# 
+# Add custom actions here
+# ========================================
+# ---imports--- (rn small helper functions)
+str action str_concat(str[] strlist, str delim) {
+    str retstring = "";
+    for (num i = 0; i < lengthOf strlist; i++) {
+        retstring = (i == 0) ? strlist[i] : retstring + delim + strlist[i];
+    }
+    return retstring;
+}
+# dict
+str action dLookup(str[][] dict, str key) {
+    for  (num i = 0; i < lengthOf dict; i++) {
+        if (dict[i][0] == key) {
+            return dict[i][1];
+        }
+    }
+	return "";}
+action dDel(str[][] dict, str key) {
+	for  (num i = 0; i < lengthOf dict; i++) {
+        if (dict[i][0] == key) {
+            remove dict[i];
+            return;
+        }
+	}}
+str[][] action dUpdate(str [][] dict, str [][]dictu) {
+    for (num i = 0; i < lengthOf dictu; i++) {
+        bool dfound = false;
+        for  (num j = 0; j < lengthOf dict; j++) {
+            if (dict[j][0] == dictu[i][0]) {
+                dict[j][1] = dictu[i][1];
+                dfound = true; continue;
+            }
+        }
+        if (dfound) {continue;}
+        addTo dict str[dictu[i][0], dictu[i][1]];
+    }
+    return dict;
+}
+
+str[][] plrlogos = str[][]; # str[][ str["blandrice","phil_angelic_33650,jump_member_12345"]]
+str[][] playerID_to_accountName = str[][];
+
+str action serialize_rankdata() {
+   # end format
+   # "blandrice-phil_angelic_33650,jump_member_33650;ecirdnalb-phil_angelic_33650,jump_member_33650"
+   str retstr = "";
+   str[] name_dash_clans = str[];
+   for (num i = 0; i < lengthOf plrlogos; i++) {
+            addTo name_dash_clans plrlogos[i][0] + '-' + plrlogos[i][1];
+        }
+    retstr = str_concat(name_dash_clans,';');
+    return retstr;
+}
+
+action clanDataReady(obj data, bool success, str accountName) { # prepare callback
+
+    if (success) {
+        GAME.log(data); # access data
+        
+        str[] rankList = str[];
+        for (obj d in data) {
+            str clan = (str) d.key;
+            str rankstr = (str) d.value;
+            if (rankstr != "" && rankstr != "0" && rankstr != "undefined") {addTo rankList clan + "_" + rankstr;}
+        }
+        if (lengthOf rankList > 0) {dUpdate( plrlogos, str[][str[accountName,str_concat(rankList,",")]]);}
+        
+        # broadcast tplr ranks to rest of players
+        str tplr_ranks = dLookup(plrlogos, accountName);
+        if (tplr_ranks != "") {
+            str newrankstr = accountName + "-" + tplr_ranks;
+            GAME.NETWORK.broadcast("claninfo", {i:newrankstr});
+        }
+    }
+}
+
+
+
+action plrlogosLoadClanRanks(str accountName) {
+    GAME.STORAGE.load(accountName, "PARKOUR_HUB", clanDataReady);
+}
+
+# Player spawns in
+public action onPlayerSpawn(str id) {
+    obj tplr = GAME.PLAYERS.findByID(id);
+    if ((num)tplr.rankinit == 0) {
+        if (dLookup(plrlogos, (str) tplr.accountName) == "" && (str)tplr.accountName != "") {
+            GAME.log("intializing player rank: ", (str)tplr.accountName);
+            plrlogosLoadClanRanks((str) tplr.accountName); # load storage of player ranks into server script
+            # if above has data, will broadcast new player rank.
+        }
+        # send claninfo to player
+        GAME.NETWORK.send("claninfo", {i:serialize_rankdata()},id);
+
+        dUpdate(playerID_to_accountName,str[][str[id,(str)tplr.accountName]]); # for onplayerleave data cleanup
+        tplr.rankinit = 1;
+    }
+}
+
+# When a player leaves the server
+public action onPlayerLeave(str playerID) {
+    str accountName = dLookup(playerID_to_accountName,playerID);
+    if (accountName != "") {
+        dDel(plrlogos,accountName);
+    }
+    dDel(playerID_to_accountName,playerID);
+}
+
+public action onNetworkMessage(str id, obj data, str playerID) {}
+
+public action onCustomTrigger(str playerID, str customParam, num value) {
+    if (GAME.UTILS.textContains(customParam,"tp_")) {
+        str gamename = UTILS.replaceText(customParam, "tp_","");
+		GAME.NETWORK.send("changeGame", {g:gamename}, playerID);
+	}
+}

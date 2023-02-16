@@ -1,0 +1,142 @@
+# Client Script runs only on the client
+# KrunkScript Copyright (C) Yendis Entertainment Pty Ltd
+# 
+# Add custom actions here
+
+# ========================================
+# ---imports--- (rn small helper functions)
+
+# dict
+str action dLookup(str[][] dict, str key) {
+    for  (num i = 0; i < lengthOf dict; i++) {
+        if (dict[i][0] == key) {
+            return dict[i][1];
+        }
+    }
+	return "";}
+str[][] action dCopy(str [][] dict) {
+    str [][] dCopy = str[][];
+    for (num i = 0; i < lengthOf dict; i++) {
+		str[] keyval = str[];
+        addTo keyval dict[i][0]; # key
+        addTo keyval dict[i][1]; # val
+        addTo dCopy keyval;
+	} return dCopy;}
+str[][] action dUpdate(str [][] dict, str [][]dictu) {
+    for (num i = 0; i < lengthOf dictu; i++) {
+        bool dfound = false;
+        for  (num j = 0; j < lengthOf dict; j++) {
+            if (dict[j][0] == dictu[i][0]) {
+                dict[j][1] = dictu[i][1];
+                dfound = true; continue;
+            }
+        }
+        if (dfound) {continue;}
+        addTo dict str[dictu[i][0], dictu[i][1]];
+    }
+    return dict;}
+str[] action str_split(str s, str delim) {
+	str[] output = str[];
+	num idx_matchstart = 0;
+
+    # iterate over string
+    for(num i = 0; i < lengthOf s; i++) {
+        bool match = false;
+        
+        # match delimiter
+        for (num j = 0; j < lengthOf delim; j++) {
+			match = true;
+            if (s[i+j] != delim[j]) {
+				match = false; break;
+			}
+		}
+
+        # matches, parse out the string previous
+        if (match) { 
+            str word = "";
+            for (num j = idx_matchstart; j < i; j++) {
+                word += s[j];
+            }
+            addTo output word;
+
+            # skip delimiter
+            i += lengthOf delim - 1;
+            idx_matchstart = i+1;
+        }
+    } 
+    
+    # also parse last string
+    str word = "";
+    for (num i = idx_matchstart; i < lengthOf s; i++) {
+        word += s[i];
+    }
+    addTo output word;
+
+	return output;}
+
+
+str[][] plrlogos = str[][]; # str[][ str["blandrice","phil_angelic_33650,jump_member_12345"]]
+
+
+num[] action get_rank_assets(str accountName) {
+    # GAME.log(accountName);
+    num[] rank_assets = num[];
+    str logos = dLookup(plrlogos, accountName);
+    if (logos != "") {
+         str[] clans = str_split(logos, ",");
+         for (num i = 0; i < lengthOf clans; i++) {
+             num asset = toNum str_split(clans[i],"_")[2];
+             addTo rank_assets asset;
+         }
+    }
+    return rank_assets;
+}
+
+action renderPhilLogos() {
+    obj[] plrs = GAME.PLAYERS.list();
+    obj you = GAME.PLAYERS.getSelf();
+	for (num i=0; i < lengthOf plrs; i++) {
+		obj plr = plrs[i];
+		if (!plr.isYou) {
+            if (100 > UTILS.getDist3D((num)you.position.x,(num)you.position.y,(num)you.position.z,(num)plr.position.x,(num)plr.position.y,(num)plr.position.z)) {
+                # num logo = philclanlogo(plr);
+                num[] rank_assets = get_rank_assets((str)plr.username);
+                # GAME.log(rank_assets);
+                if (lengthOf rank_assets > 0) {
+                    obj pos = GAME.SCENE.posToScreen((num) plr.position.x, (num)plr.position.y+17, (num)plr.position.z);
+                    if ((bool)pos.onScreen){
+                        for (num i = 0; i < lengthOf rank_assets; i++) {
+                            GAME.OVERLAY.drawImage(rank_assets[i], (num) pos.x - ((lengthOf rank_assets-1) * 50 / 2) + i*50, (num)pos.y, 50, 50, 0, 1);
+                        }
+                    }
+                }
+            }	
+		}
+	}
+}
+
+# Add rendering logic in here
+public action render(num delta) {
+    renderPhilLogos();
+}
+
+# Client receives network message
+public action onNetworkMessage(str id, obj data) {
+    # clan info update
+    if (id == "claninfo" || id == "rankup") {
+        # GAME.log("claninfo found: ", data);
+        str info =(str)data.i; # "blandrice-phil_angelic_33650,jump_member_33650;ecirdnalb-phil_angelic_33650,jump_member_33650"
+        str[] info_users = str_split(info, ';');
+        for (num i = 0; i < lengthOf info_users;i++) {
+            str[] key_val = str_split(info_users[i],"-");
+            if (key_val[0] != "")  {
+                str[][] dkeyval = str[][str[key_val[0],key_val[1]]];
+                dUpdate(plrlogos, dkeyval);
+            }
+        }
+    }
+    if (id == "changeGame") {
+		GAME.changeGame((str)data.g);
+	}
+
+}
