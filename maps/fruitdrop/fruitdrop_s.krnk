@@ -1,0 +1,203 @@
+#include <hitbox_s.krnk>
+#include <g.krnk>
+#include <ecsphysics.krnk>
+#include <lifetime.krnk>
+#include <ecs_s.krnk>
+#include <gamestart_s.krnk>
+
+# ===================================================================
+# map: maps\fruitdrop\fruitdrop_s.krnk
+# Author: blandrice
+# Description: 
+#   - collect dropped fruit. most dropped fruit collected wins
+# ===================================================================
+
+# orange, banana, watermelon, grape, cherry, blueberry,
+# blueberry, cherry, grape, banana, orange, watermelon,
+str gold = "48488g";
+num DEBUG = 0;
+# str[] fruits = str["48470g","48471g","48469g","48472g","48473g","48474g"];
+str[] fruits = str["48474g","48473g","48472g","48471g","48470g","48469g"];
+# num[] fruits_scale = num[10,5,10,5,5,5];
+num[] fruits_scale = num[5,5,5,5,10,10];
+num[] probability = num[20,15,10,5,3,2];
+num[] fruitpoints = num[10,12,15,20,30,50];
+num goldpoints = 2000;
+num TFRUITDROPLOW=200;
+num TFRUITDROPHIGH=1000;
+
+num TSTONEDROPLOW=500;
+num TSTONEDROPHIGH=5000;
+
+#bounds of fruit drop
+num XBOUNDNEG = -250;
+num XBOUNDPOS = 250;
+
+num ZBOUNDNEG = -250;
+num ZBOUNDPOS = 250;
+
+num YBOUNDNEG = 80;
+num YBOUNDPOS = 100;
+
+num totalprob = 0;
+
+
+action create_gold(obj coords)
+{
+    
+    obj linkObj = syncobjs_s_createObject(
+    {
+        type:gold,
+        aid: 34379,
+        position:{x:(num)coords.x,y:(num)coords.y,z:(num)coords.z},
+        velocity:{x:0,y:-30,z:0},
+        scale:{x:1,y:1,z:1},
+        color:0xFFFFFF,
+        collide:{type:(num)(AABB_COL_PLRS|AABB_COL_WORLD),geometry:AABB_GEO_CUBE,resolve:AABB_RES_NONE}
+    });
+    lifetime_addComponent(linkObj,180000);
+                
+    # moving platform up & down
+    # resolve: str["increaseplrscore20","destroyself"]
+    obj hitbox = hitbox_s_create(
+        linkObj,
+        {
+            scale:{x:10,y:10,z:10},
+            debug:DEBUG,
+            resolve: str["increaseplrscore"+(toStr 1000),"destroyself"]
+        }
+    );
+}
+
+action create_fruit()
+{
+    num fruitid = 0;
+
+    # find fruit based on probability
+    num prob = UTILS.randInt(0, totalprob);
+    for (num i = 0; i < lengthOf probability; i++)
+    {
+        prob -= probability[i];
+        if (prob <= 0)
+        {
+            fruitid = i; 
+            break;
+        }
+    }
+    
+    
+    num fruitscale = fruits_scale[fruitid];
+    num xpos = UTILS.randInt(XBOUNDNEG, XBOUNDPOS);
+    num ypos = UTILS.randInt(YBOUNDNEG, YBOUNDPOS);
+    num zpos = UTILS.randInt(ZBOUNDNEG, ZBOUNDPOS);
+    obj linkObj = syncobjs_s_createObject(
+    {
+        type:fruits[fruitid],
+        aid: 34379,
+        position:{x:xpos,y:ypos,z:zpos},
+        velocity:{x:0,y:-30,z:0},
+        scale:{x:1,y:1,z:1},
+        color:0xFFFFFF,
+        collide:{type:(num)(AABB_COL_PLRS|AABB_COL_WORLD),geometry:AABB_GEO_CUBE,resolve:AABB_RES_NONE}
+    });
+    lifetime_addComponent(linkObj,10000);
+                
+    # moving platform up & down
+    # resolve: str["increaseplrscore20","destroyself"]
+    obj hitbox = hitbox_s_create(
+        linkObj,
+        {
+            scale:{x:fruitscale,y:fruitscale,z:fruitscale},
+            debug:DEBUG,
+            resolve: str["increaseplrscore"+(toStr fruitpoints[fruitid]),"destroyself"]
+        }
+    );
+}
+
+action create_stone()
+{
+    num xpos = UTILS.randInt(XBOUNDNEG, XBOUNDPOS);
+    num ypos = UTILS.randInt(YBOUNDNEG, YBOUNDPOS);
+    num zpos = UTILS.randInt(ZBOUNDNEG, ZBOUNDPOS);
+    obj linkObj = syncobjs_s_createObject(
+    {
+        type:"34528tg",
+        aid: 34379,
+        position:{x:xpos,y:ypos,z:zpos},
+        velocity:{x:0,y:-80,z:0},
+        scale:{x:10,y:10,z:10},
+        color:0xFFFFFF,
+        collide:{type:(num)(AABB_COL_PLRS|AABB_COL_WORLD),geometry:AABB_GEO_CUBE,resolve:AABB_RES_NONE}
+    });
+    lifetime_addComponent(linkObj,30000);
+                
+    # moving platform up & down
+    # resolve: str["increaseplrscore20","destroyself"]
+    obj hitbox = hitbox_s_create(
+        linkObj,
+        {
+            scale:{x:30,y:30,z:30},
+            debug:DEBUG,
+            resolve: str["damageplr90","destroyself"],
+        }
+    );
+    # obj floating_prop = {
+    #     ogpos:{x:0,y:0,z:0},
+    #     amplitude:{x:50,y:0,z:0},
+    #     t_msinterval:5000,
+    #     offset:0.25,
+    #     type:{x:"sine",y:"",z:""}
+    # };
+    # floating_addComponent(linkObj,floating_prop);
+}
+bool gameEnded=false;
+bool goldcreated=false;
+num tLastFruit = 0;
+num tcurrentFruitInterval = 0;
+
+num tLastStone = 0;
+num tcurrentStoneInterval = 0;
+
+public action start()
+{
+    gameEnded = false;
+    tLastFruit = 0;
+    goldcreated=false;
+    for (num i =0; i < lengthOf probability; i++)
+    {
+        totalprob+= probability[i];
+    }
+}
+
+public action update(num delta){
+    num numplrs = lengthOf GAME.PLAYERS.list();
+    if ((gamestart_s_gameinit == true) && (gameEnded==false))
+    {
+        if (!goldcreated)
+        {
+            create_gold({x:-103,y:80,z:503});
+            # create_gold({x:-620,y:103,z:49});
+            # create_gold({x:0,y:80,z:0});
+            goldcreated=true;
+        }
+        if ((g_tnow - tLastFruit) > tcurrentFruitInterval)
+        {
+            tLastFruit = g_tnow;
+            create_fruit();
+            # tcurrentFruitInterval = UTILS.randInt(TFRUITDROPLOW, TFRUITDROPHIGH) / (numplrs);
+            tcurrentFruitInterval = UTILS.randInt(TFRUITDROPLOW, TFRUITDROPHIGH) / (1+(Math.log(5*(numplrs > 0 ? numplrs : 1))));
+            
+        }
+
+        if ((g_tnow - tLastStone) > tcurrentStoneInterval)
+        {
+            create_stone();
+            tcurrentStoneInterval = UTILS.randInt(TSTONEDROPLOW, TSTONEDROPHIGH);
+            tLastStone = g_tnow;
+        }
+    }
+}
+
+public action onGameEnd(){
+    gameEnded=true;
+}

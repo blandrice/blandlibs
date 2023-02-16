@@ -1,0 +1,64 @@
+#include <g.krnk>
+# ===================================================================
+# Library: libs\customgamescoreUI\gamescore_c.krnk
+# Author: blandrice
+# Description: show points incrementing UI through krunkscript 
+# This is needed when using krunkscript to increase 
+# player score on server side
+# ===================================================================
+
+num tlastScore = 0;
+num savedgamescore = 0;
+num deltagamescore = 0;
+num alphagamescore = 0;
+num sizegamescore = 0;
+num currentscorereq = 1;
+
+public action start(){
+    tlastScore = 0;
+    savedgamescore = 0;
+    deltagamescore = 0;
+    alphagamescore = 0;
+    sizegamescore = 0;
+    currentscorereq = 1;
+}
+
+public action render(num delta) {
+    obj size = GAME.OVERLAY.getSize();
+    obj plr = GAME.PLAYERS.getSelf();
+    # new points
+    if ((num)plr.score - savedgamescore >= 1) {
+        tlastScore = g_tnow;
+        deltagamescore += (num)plr.score - savedgamescore;
+        savedgamescore = (num)plr.score;
+        sizegamescore = 20*((1+Math.log(deltagamescore)));
+        alphagamescore = 1;
+        # play score sound
+        if (deltagamescore < 100)
+        {
+            GAME.SOUND.play2D(48477, 1, 1, false);
+        } else if (deltagamescore < 900)
+        {
+            GAME.SOUND.play2D(48489, 1, 1, false);
+        } else 
+        {
+            GAME.SOUND.play2D(48486, 1, 1, false);
+        }
+        
+        
+    } else if ((num)plr.score < savedgamescore)
+    {
+        savedgamescore = (num)plr.score;
+    }
+    if (g_tnow - tlastScore < 100) {
+        sizegamescore -=delta*10/100;
+    } else if (g_tnow - tlastScore < 500 && g_tnow - tlastScore >= 100) {
+    } else if (g_tnow - tlastScore < 2000 && g_tnow - tlastScore >= 500) { # do nothing
+        alphagamescore -= delta/500;
+        if (alphagamescore < 0) {alphagamescore = 0;}
+    } else {
+        deltagamescore = 0;
+    }
+    GAME.OVERLAY.drawText("+"+toStr deltagamescore, (num)size.width/2, (num)size.height*3/16, 0, sizegamescore, "center", "#FF0", alphagamescore);
+    # GAME.OVERLAY.drawText("Camera Script and GUI Created by creepycats | creepycats#6942", (num)size.width / 2, (num)size.height - 24, 0, 24, "center", "#666", 1);
+}

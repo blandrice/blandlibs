@@ -1,0 +1,25 @@
+#include <g.krnk>
+#include <syncobjs_s.krnk>
+# ===================================================================
+# Library: libs\ECS\components\lifetime\lifetime_s.krnk
+# Author: blandrice
+#   Description: lifetime of component
+# ===================================================================
+
+action addComponent(obj tobj, num lifetime)
+{
+    tobj.lifetime=
+    {
+        time:lifetime,
+        _tstart:g_tnow
+    };
+}
+
+private action onECSUpdate(num delta, obj tobj, obj[] objlist){
+    if (notEmpty (obj) tobj.lifetime) {
+        if ((g_tnow - (num)tobj.lifetime._tstart) > (num)tobj.lifetime.time)
+        {
+            syncobjs_s_deleteObject((str)tobj.objid);
+        }
+    }
+}

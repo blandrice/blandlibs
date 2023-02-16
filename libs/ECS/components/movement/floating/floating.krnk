@@ -41,6 +41,20 @@ num action applycos(obj tobj, str dim, num t)
     return 0;
 }
 
+action addComponent(obj tobj, obj props)
+{
+    tobj.floating=
+    {
+        ogpos:{x:(num)props.ogpos.x,y:(num)props.ogpos.y,z:(num)props.ogpos.z},
+        amplitude: {x:(num)props.amplitude.x,y:(num)props.amplitude.y,z:(num)props.amplitude.z},
+        t_msinterval: (num)props.t_msinterval,
+        type: {x:(str)props.type.x,y:(str)props.type.y,z:(str)props.type.z},
+        offset: ((str)props.offset != "undefined") ? (num) props.offset: 0,
+        cc: ((str)props.cc != "undefined") ? -1: 1,
+        _tstart: g_tnow
+    };
+}
+
 private action onECSUpdate(num delta, obj tobj, obj[] objlist){
 if (notEmpty (obj) tobj.floating) 
     {

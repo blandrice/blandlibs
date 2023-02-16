@@ -2,6 +2,7 @@
 #include <g.krnk>
 #include <plrutil_s.krnk>
 #include <syncobjs_s.krnk>
+#include <strutils.krnk>
 
 # ===================================================================
 # Library: libs\ECS\components\hitbox\hitbox_s.krnk
@@ -11,6 +12,58 @@
 #   - once hit, can do a callback
 #   - for safety it needs to call syncobjs_s.krnk's delete callback for hitbox to delete itself when other object is deleted
 # ===================================================================
+
+action hitboxresolve(obj plr, obj tobj, str[] reslist)
+{
+    # GAME.log(reslist);
+    for (num i = 0; i < lengthOf reslist; i++)
+    {
+        str res = reslist[i];
+        # GAME.log(res);
+        
+        if (UTILS.textContains(res, "increaseplrscore"))
+        {
+            num add = toNum UTILS.replaceText(res, "increaseplrscore", "");
+            (num) plr.score+= add;
+        } 
+        else if (res=="killplr")
+        {
+            plr.health = 0;
+        }
+        if (UTILS.textContains(res, "damageplr"))
+        {
+            num dmg = toNum UTILS.replaceText(res, "damageplr", "");
+            (num) plr.health -= dmg;
+        }
+        else if (res=="destroyself")
+        {
+            if (notEmpty (obj)tobj.linkObj)
+            {
+                # deleting the parent object will force all child objects to be deleted beforehand
+                syncobjs_s_deleteObject((str)tobj.linkObj.objid);
+            }
+            else if ((str)tobj.objid!="undefined")
+            {
+                syncobjs_s_deleteObject((str)tobj.objid);
+            }
+            else
+            {
+                # throw error if objid not found
+                GAME.log("warn: could not delete object. no objid found ",tobj);
+            }
+        }
+        if (UTILS.textContains(res, "damageself"))
+        {
+            if ((str)tobj.health!="undefined")
+            {
+                num dmg = toNum UTILS.replaceText(res, "damageself", "");
+                (num) tobj.health -= dmg;
+            }
+        }
+    }
+    
+
+}
 
 obj action updatePosition(obj tObj, obj linkObj)
 {
@@ -45,6 +98,10 @@ obj action create(obj linkObj, obj props)
         collide:{type:AABB_COL_PLRS,geometry:AABB_GEO_CUBE,resolve:AABB_RES_NONE}
 
     };
+    if (notEmpty (obj)props.collide)
+    {
+        newObj.collide = {type:(num)props.collide.type,geometry:(num)props.collide.geometry,resolve:(num)props.collide.resolve};
+    }
     # assign hitbox scale
     if (notEmpty (obj) props.scale)
     {
@@ -67,6 +124,9 @@ obj action create(obj linkObj, obj props)
         {
             newObj.opacity=0.5;
         }
+    } if ((str)props.resolve!="undefined")
+    {
+        newObj.hitbox.resolve = (str[])props.resolve;
     }
     
     syncobjs_s_createObject(newObj);
@@ -113,24 +173,29 @@ num DAMAGELINKOBJ = 0x010;
 private action onCollidePlrs(obj tobj, obj[] res){
     if ((notEmpty (obj)tobj.hitbox) && (lengthOf res > 0))
     {
+        # use once logic
         if (((str)tobj.hitbox.useonce!="undefined") && ((num)tobj.hitbox.useonce==1))
         {
             if (((str)tobj.hitbox.used!= "undefined")&& ((num)tobj.hitbox.used==0))
             {
-                obj plr = (obj) res[0];
-                (num) plr.score++;
                 tobj.hitbox.used = 1;
-                GAME.log("increasing score");
+                obj plr = (obj) res[0];
+                if ((str) tobj.hitbox.resolve != "undefined")
+                {
+                    hitboxresolve(plr,tobj, (str[])tobj.hitbox.resolve);
+                }
+                
             }
         }
+        # multiple use logic
         else if ((g_tnow - (num)tobj.hitbox.tLastUse) > (num)tobj.hitbox.cooldown)
         {
-            obj plr = (obj) res[0];
             tobj.hitbox.tLastUse = g_tnow;
-            (num) plr.score++;
-            GAME.log("increasing score");
+            obj plr = (obj) res[0];
+            if ((str) tobj.hitbox.resolve != "undefined")
+            {
+                hitboxresolve(plr,tobj, (str[])tobj.hitbox.resolve);
+            }
         }
     }
-    # deleting the parent object will force all child objects to be deleted beforehand
-    syncobjs_s_deleteObject((str)tobj.linkObj.objid);
 }

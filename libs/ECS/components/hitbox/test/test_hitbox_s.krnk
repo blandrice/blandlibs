@@ -1,5 +1,7 @@
 #include <hitbox_s.krnk>
+#include <floating.krnk>
 #include <ecs_s.krnk>
+
 
 num created = 0;
 public action update(num delta){
@@ -16,13 +18,23 @@ public action update(num delta){
             });
                         
             # moving platform up & down
+            # resolve: str["increaseplrscore20","destroyself"]
             obj hitbox = hitbox_s_create(
                 linkObj,
                 {
                     scale:{x:10,y:10,z:10},
-                    debug:1
+                    debug:1,
+                    resolve: str["damageplr90","destroyself"]
                 }
             );
+            obj floating_prop = {
+                ogpos:{x:0,y:0,z:0},
+                amplitude:{x:50,y:0,z:0},
+                t_msinterval:5000,
+                offset:0.25,
+                type:{x:"sine",y:"",z:""}
+            };
+            floating_addComponent(linkObj,floating_prop);
 
             created = 1;
         }

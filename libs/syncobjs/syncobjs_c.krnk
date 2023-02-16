@@ -81,7 +81,7 @@ obj action createObj(obj newObjData) {
 
         cube = GAME.SCENE.addCube(toStr (num)newObjData.aid, colr, (num)newObjData.position.x,(num)newObjData.position.y,(num)newObjData.position.z, (num)newObjData.scale.x,(num)newObjData.scale.y,(num)newObjData.scale.z,data);
         # return cube;
-    } else if (UTILS.textContains((str)newObjData.type,"tg")){
+    } else if (UTILS.textContains((str)newObjData.type,"g")){
         # GAME.log("new type encountered:",(str) newObjData.type);
         str colr = "#" + dtypes_num2hexstring((num) newObjData.color);
         cube = GAME.SCENE.addAsset((str)newObjData.type, (num)newObjData.position.x,(num)newObjData.position.y,(num)newObjData.position.z, 1, colr, data);
@@ -267,7 +267,7 @@ public action onNetworkMessage(str id, obj data) {
             }
             if (lengthOf newdellist > 0)
             {
-                GAME.log("deleted this many: ",deleted);
+                # GAME.log("deleted this many: ",deleted);
             }
             if (lengthOf notdeleted > 0)
             {

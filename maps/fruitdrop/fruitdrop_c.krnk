@@ -1,0 +1,11 @@
+#include <ecs_c.krnk>
+#include <gamestart_c.krnk>
+#include <gamescore_c.krnk>
+
+# ===================================================================
+# map: maps\fruitdrop\fruitdrop_s.krnk
+# Author: blandrice
+# Description: 
+#   - collect dropped fruit. most dropped fruit collected wins
+# ===================================================================
+
