@@ -7,12 +7,22 @@
 # player score on server side
 # ===================================================================
 
+# knobs
+num enable_sound = 1;
+str POINT_COLOR = "#FF0";
+num POINT_SOUND1 = 48477;
+num POINT_SOUND2 = 48489;
+num POINT_SOUND3 = 48486;
+
+
+
 num tlastScore = 0;
 num savedgamescore = 0;
 num deltagamescore = 0;
 num alphagamescore = 0;
 num sizegamescore = 0;
 num currentscorereq = 1;
+num enabled = 1;
 
 public action start(){
     tlastScore = 0;
@@ -24,7 +34,9 @@ public action start(){
 }
 
 public action render(num delta) {
-    obj size = GAME.OVERLAY.getSize();
+    if (enabled > 0)
+    {
+        obj size = GAME.OVERLAY.getSize();
     obj plr = GAME.PLAYERS.getSelf();
     # new points
     if ((num)plr.score - savedgamescore >= 1) {
@@ -33,17 +45,21 @@ public action render(num delta) {
         savedgamescore = (num)plr.score;
         sizegamescore = 20*((1+Math.log(deltagamescore)));
         alphagamescore = 1;
-        # play score sound
-        if (deltagamescore < 100)
+        if (enable_sound > 0)
         {
-            GAME.SOUND.play2D(48477, 1, 1, false);
-        } else if (deltagamescore < 900)
-        {
-            GAME.SOUND.play2D(48489, 1, 1, false);
-        } else 
-        {
-            GAME.SOUND.play2D(48486, 1, 1, false);
+            # play score sound
+            if (deltagamescore < 100)
+            {
+                GAME.SOUND.play2D(POINT_SOUND1, 1, 1, false);
+            } else if (deltagamescore < 900)
+            {
+                GAME.SOUND.play2D(POINT_SOUND2, 1, 1, false);
+            } else 
+            {
+                GAME.SOUND.play2D(POINT_SOUND3, 1, 1, false);
+            }
         }
+        
         
         
     } else if ((num)plr.score < savedgamescore)
@@ -59,6 +75,7 @@ public action render(num delta) {
     } else {
         deltagamescore = 0;
     }
-    GAME.OVERLAY.drawText("+"+toStr deltagamescore, (num)size.width/2, (num)size.height*3/16, 0, sizegamescore, "center", "#FF0", alphagamescore);
+    GAME.OVERLAY.drawText("+"+toStr deltagamescore, (num)size.width/2, (num)size.height*3/16, 0, sizegamescore, "center", POINT_COLOR , alphagamescore);
     # GAME.OVERLAY.drawText("Camera Script and GUI Created by creepycats | creepycats#6942", (num)size.width / 2, (num)size.height - 24, 0, 24, "center", "#666", 1);
+    }
 }

@@ -1,0 +1,179 @@
+#include <hitbox_s.krnk>
+#include <g.krnk>
+#include <ecsphysics.krnk>
+#include <lifetime.krnk>
+#include <ecs_s.krnk>
+#include <gamestart_s.krnk>
+
+# ===================================================================
+# map: maps\bellopoooooo\meteor_s.krnk
+# Author: blandrice
+# Description: 
+#   - meteor game script for bellopoooooooooo
+# ===================================================================
+
+# KNOBS
+
+# game time
+num DELAYSTART_METEORGAME = 0; # 2 second delay start game
+num DELAYUFOCREATE = 105000; # delay when UFO starts falling
+num DURATION_METEORGAME = 120000; # total time of game
+
+# meteor speed
+num TSTONEDROPLOW=1000; # min 1 second new meteor drop
+num TSTONEDROPHIGH=5000; # max 1 second new meteor drop
+num RATE_STONE_START=1; # 1 timess meteors at the start of game
+num RATE_STONE_END=5; # 5 times more meteors at the end of game
+num VEL_METEOR=30; # HOW FAST is a meteor
+
+
+# bounds of game
+num XBOUNDNEG = 1485;
+num XBOUNDPOS = 1649;
+num ZBOUNDNEG = -2462;
+num ZBOUNDPOS = -2462;
+num YBOUNDNEG = 806;
+num YBOUNDPOS = 806;
+
+
+# DEBUG will show the hitbox of objects
+num DEBUG = 0;
+
+action create_UFO()
+{
+    num xpos = (XBOUNDPOS + XBOUNDNEG)/2 ;
+    num ypos = UTILS.randInt(YBOUNDNEG, YBOUNDPOS);
+    num zpos = UTILS.randInt(ZBOUNDNEG, ZBOUNDPOS);
+    obj linkObj = syncobjs_s_createObject(
+    {
+        type:"48946g",
+        aid: 34379,
+        position:{x:xpos,y:ypos,z:zpos},
+        velocity:{x:0,y:0,z:15},
+        scale:{x:1,y:1,z:1},
+        color:0xFFFFFF,
+        collide:{type:(num)(AABB_COL_WORLD),geometry:AABB_GEO_CUBE,resolve:AABB_RES_NONE}
+    });
+    lifetime_addComponent(linkObj,15000);
+                
+    # obj hitbox = hitbox_s_create(
+    #     linkObj,
+    #     {
+    #         scale:{x:15,y:15,z:15},
+    #         debug:DEBUG,
+    #         resolve: str["increaseplrscore0","destroyself"]
+    #     }
+    #     # resolve: str["damageplr90","destroyself"],
+    # );
+}
+
+action create_stone()
+{
+    num xpos = UTILS.randInt(XBOUNDNEG, XBOUNDPOS);
+    num ypos = UTILS.randInt(YBOUNDNEG, YBOUNDPOS);
+    num zpos = UTILS.randInt(ZBOUNDNEG, ZBOUNDPOS);
+    obj linkObj = syncobjs_s_createObject(
+    {
+        type:"34528tg",
+        aid: 34379,
+        position:{x:xpos,y:ypos,z:zpos},
+        velocity:{x:0,y:0,z:VEL_METEOR},
+        scale:{x:5,y:5,z:5},
+        color:0xFFFFFF,
+        collide:{type:(num)(AABB_COL_PLRS),geometry:AABB_GEO_CUBE,resolve:AABB_RES_NONE}
+    });
+    lifetime_addComponent(linkObj,15000);
+                
+    obj hitbox = hitbox_s_create(
+        linkObj,
+        {
+            scale:{x:15,y:15,z:15},
+            debug:DEBUG,
+            resolve: str["increaseplrscore1","destroyself"]
+        }
+        # resolve: str["damageplr90","destroyself"],
+    );
+}
+
+
+num tLastStone = 0;
+num tcurrentStoneInterval = 0;
+num tGameStart = 0;
+num UFOcreated = 0;
+
+action meteorGameInit(){
+    tGameStart = g_tnow;
+    GAME.NETWORK.broadcast("gamescore enabled", {});
+}
+
+action meteorGameCleanup(){
+    # end game
+    tGameStart = 0;
+
+    # delete all objects
+    syncobjs_s_deleteAllObjs();
+
+    # disable custom gamescore
+    GAME.NETWORK.broadcast("gamescore disabled", {});
+}
+public action start() {
+    tLastStone = 0;
+    tcurrentStoneInterval = 0;
+    tGameStart = 0;
+    UFOcreated = 0;
+}
+public action update(num delta){
+    if ((tGameStart > 0) && ((g_tnow - tGameStart) > DELAYSTART_METEORGAME))
+    {
+        if ((g_tnow - tLastStone) > tcurrentStoneInterval)
+        {
+            create_stone();
+            num speedincrease = Math.lerp(RATE_STONE_START, RATE_STONE_END, ((g_tnow - tGameStart)/DURATION_METEORGAME));
+            tcurrentStoneInterval = UTILS.randInt(TSTONEDROPLOW, TSTONEDROPHIGH) / speedincrease;
+            tLastStone = g_tnow;
+        }
+        if ((UFOcreated == 0) &&((g_tnow - tGameStart) > DELAYUFOCREATE))
+        {
+            create_UFO();
+            UFOcreated = 1;
+        }
+        
+        # check for game end
+        if ((g_tnow - tGameStart) > DURATION_METEORGAME)
+        {
+            # teleport players away to nodeid 3
+            obj[] nodes = GAME.OBJECTS.getPathNodes();
+            for (num i = 0; i < lengthOf nodes; i++) {
+                obj inode = nodes[i];
+                if (((num)inode.id == 3))
+                {
+                    obj[] plrs = GAME.PLAYERS.list();
+                    for (num j = 0; j < lengthOf plrs; j++)
+                    {
+                        obj plr = plrs[j];
+                        plr.position.x = (num)inode.x;
+                        plr.position.y = (num)inode.y;
+                        plr.position.z = (num)inode.z;
+                    }
+                    
+                }
+            }
+            # cleanup meteor game
+            meteorGameCleanup();
+        }
+    }
+}
+
+# Called from Custom Trigger Action
+public action onCustomTrigger(str playerID, str customParam, num value) {
+    if (customParam == "level1")
+    {
+        if (tGameStart == 0)
+        {
+            meteorGameInit();
+        }
+    } else if (customParam == "resetMeteorGame")
+    {
+        meteorGameCleanup();
+    }
+}

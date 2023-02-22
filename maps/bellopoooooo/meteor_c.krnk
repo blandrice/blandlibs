@@ -1,0 +1,33 @@
+#include <ecs_c.krnk>
+#include <gamestart_c.krnk>
+#include <gamescore_c.krnk>
+
+
+# ===================================================================
+# map: maps\bellopoooooo\meteor_c.krnk
+# Author: blandrice
+# Description: 
+#   - meteor stuff
+# ===================================================================
+
+public action start() {
+    gamescore_c_enable_sound = 1;
+    gamescore_c_enabled = 0;
+    gamescore_c_POINT_COLOR = "#F00";
+    gamescore_c_POINT_SOUND1 = 48939;
+    gamescore_c_POINT_SOUND2 = 48939;
+    gamescore_c_POINT_SOUND3 = 48939;
+}
+
+# Client receives network message
+public action onNetworkMessage(str id, obj data) {
+    if (id == "gamescore enabled")
+    {
+        gamescore_c_enabled = 1;
+    }
+    if (id == "gamescore disabled")
+    {
+        gamescore_c_enabled = 0;
+    }
+    
+}

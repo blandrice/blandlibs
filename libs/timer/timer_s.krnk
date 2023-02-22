@@ -19,7 +19,7 @@ public action update(num delta) {
 }
 
 public action onCustomTrigger(str playerID, str customParam, num value) {
-    if (strutils_starts(customParam,"t")){
+    if (strutils_starts(customParam,"timer")){
         str[] params = strutils_split(customParam,"_");
         t = toNum params[1];
         bool success = GAME.NETWORK.send("sync", {t:t}, playerID);    
