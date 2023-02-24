@@ -1,0 +1,140 @@
+# Define the vector object
+obj vector = { data: obj[], size: 0 };
+
+# Add an element to the end of the vector
+action push_back(obj vec, obj element) {
+    addTo (obj[]) vec.data element;
+    (num) vec.size++;
+}
+
+# Remove the last element from the vector
+action pop_back(obj vec) {
+    if ((num) vec.size > 0) {
+        remove ((obj[]) vec.data)[(num) vec.size - 1];
+        (num) vec.size--;
+    }
+}
+
+# Return the number of elements in the vector
+num action size(obj vec) {
+    return (num) vec.size;
+}
+
+# Return true if the vector is empty, false otherwise
+bool action empty(obj vec) {
+    return ((num) vec.size == 0);
+}
+
+# Return a reference to the element at a specified position
+obj action at(obj vec, num index) {
+    if (index >= 0 && index < (num) vec.size) {
+        return ((obj[]) vec.data)[index];
+    }
+    GAME.log("Error: index out of range");
+    return {};
+}
+
+# Remove an element from the vector at a specified position or range
+action erase(obj vec, num index) {
+    if (index >= 0 && index < (num) vec.size) {
+        for (num i = index; i < (num) vec.size - 1; i++) {
+            ((obj[]) vec.data)[i] = ((obj[]) vec.data)[i + 1];
+        }
+        pop_back(vec);
+    } else {
+        GAME.log("Error: index out of range");
+    }
+}
+
+# Insert an element into the vector at a specified position
+action insert(obj vec, num index, obj element) {
+    if (index >= 0 && index < (num) vec.size) {
+        push_back(vec, {});
+        for (num i = (num) vec.size - 1; i > index; i--) {
+            ((obj[]) vec.data)[i] = ((obj[]) vec.data)[i - 1];
+        }
+        ((obj[]) vec.data)[index] = element;
+    } else {
+        GAME.log("Error: index out of range");
+    }
+}
+# Define a helper action to create an empty vector
+obj action createVector() {
+  return { data: obj[], size: 0 };
+}
+
+# Test the push_back() action
+action testPushBack() {
+  obj vec = createVector();
+  push_back(vec, { key: "value1" });
+  push_back(vec, { key: "value2" });
+  push_back(vec, { key: "value3" });
+  GAME.log(vec.data[0].key, vec.data[1].key, vec.data[2].key);
+}
+
+# Test the pop_back() action
+action testPopBack() {
+  obj vec = createVector();
+  push_back(vec, { key: "value1" });
+  push_back(vec, { key: "value2" });
+  push_back(vec, { key: "value3" });
+  pop_back(vec);
+  GAME.log(vec.data[0].key, vec.data[1].key);
+}
+
+# Test the size() action
+action testSize() {
+  obj vec = createVector();
+  push_back(vec, { key: "value1" });
+  push_back(vec, { key: "value2" });
+  push_back(vec, { key: "value3" });
+  GAME.log(size(vec));
+}
+
+# Test the empty() action
+action testEmpty() {
+  obj vec = createVector();
+  GAME.log(empty(vec));
+  push_back(vec, { key: "value1" });
+  GAME.log(empty(vec));
+}
+
+# Test the at() action
+action testAt() {
+  obj vec = createVector();
+  push_back(vec, { key: "value1" });
+  push_back(vec, { key: "value2" });
+  push_back(vec, { key: "value3" });
+  GAME.log(at(vec, 1).key);
+}
+
+# Test the erase() action
+action testErase() {
+  obj vec = createVector();
+  push_back(vec, { key: "value1" });
+  push_back(vec, { key: "value2" });
+  push_back(vec, { key: "value3" });
+  erase(vec, 1);
+  GAME.log(vec.data[0].key, vec.data[1].key);
+}
+
+# Test the insert() action
+action testInsert() {
+  obj vec = createVector();
+  push_back(vec, { key: "value1" });
+  push_back(vec, { key: "value2" });
+  push_back(vec, { key: "value3" });
+  insert(vec, 1, { key: "value4" });
+  GAME.log(vec.data[0].key, vec.data[1].key, vec.data[2].key, vec.data[3].key);
+}
+
+# Define the start action to run the tests
+public action start() {
+  testPushBack();
+  testPopBack();
+  testSize();
+  testEmpty();
+  testAt();
+  testErase();
+  testInsert();
+}
