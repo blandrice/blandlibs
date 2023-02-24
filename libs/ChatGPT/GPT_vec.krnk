@@ -1,3 +1,8 @@
+# ===================================================================
+# Header: \libs\ChatGPT\GPT_vec.krnk
+# Author: blandrice (with ChatGPT)
+# Description: ChatGPT test on generating vector functions
+# ===================================================================
 # Define the vector object
 obj vector = { data: obj[], size: 0 };
 

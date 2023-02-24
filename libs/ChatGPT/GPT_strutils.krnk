@@ -1,6 +1,6 @@
 # ===================================================================
-# Header: \strutils\AIstrutils.krnk
-# Author: blandrice, 
+# Header: libs\ChatGPT\GPT_strutils.krnk
+# Author: blandrice (with ChatGPT)
 # Description: ChatGPT test on generating string utilities
 # ===================================================================
 
