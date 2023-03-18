@@ -10,6 +10,8 @@
 num COOLDOWN = 2000;
 num W = 0.3;
 str COLOR_JUMP = "#E2FF00";
+num ACQUIREJUMPSOUND = 49683;
+num DJUMPSOUND = 32576;
 
 num djalpha = 0;
 
@@ -71,8 +73,8 @@ public action onPlayerUpdate(str id, num delta, obj inputs) {
                 # increase tCooldown to refresh rate
                 colobj.tCooldown = COOLDOWN;
                 # acquire jump sound
-                if ((num) DJcfg_nodes_c.SOUND > 0) {
-                    GAME.SOUND.play2D(49683, 1, 1, false); 
+                if ((num) DJcfg_nodes_c.ACQUIREJUMPSOUND > 0) {
+                    GAME.SOUND.play2D((num) DJcfg_nodes_c.ACQUIREJUMPSOUND, 1, 1, false); 
                 }
             }
         }
@@ -126,9 +128,9 @@ public action onPlayerUpdate(str id, num delta, obj inputs) {
                 {
                     player.velocity.y = (num) DJcfg_nodes_c.VEL_JUMP;	
                 }
-                if ((num) DJcfg_nodes_c.SOUND > 0) 
+                if ((num) DJcfg_nodes_c.DJUMPSOUND > 0) 
                 {
-                    GAME.SOUND.play2D(32576, 1, 0.5, false); # jump DJcfg_nodes_c.SOUND
+                    GAME.SOUND.play2D((num) DJcfg_nodes_c.DJUMPSOUND, 1, 0.5, false); # jump DJcfg_nodes_c.SOUND
                 }
 
                 (num)player.jumpCount--;
