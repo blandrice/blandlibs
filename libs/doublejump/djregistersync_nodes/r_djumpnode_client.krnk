@@ -1,0 +1,61 @@
+# ===================================================================
+# File: libs\doublejump\djregistersync\r_djumpclient.krnk
+# Author: DQ_Swat + blandrice
+# ===================================================================
+
+#include <r_djumpnode.krnk>
+
+num COOLDOWN = 2000;
+num W = 0.3;
+str COLOR_JUMP = "#E2FF00";
+
+obj[] nodeslist = obj[];
+
+action dummy_Callback(){
+}
+
+public action start() {
+    # add nodes to obj list
+    obj[] tnodes = GAME.OBJECTS.getPathNodes();
+    for (num i = 0; i < lengthOf tnodes; i++) 
+    {
+        obj node = tnodes[i];
+        # obj nodeobj = GAME.SCENE.addCube("32616g", "0xfff", (num)node.x, (num)node.y, (num)node.z, W, W, W, {});
+        obj nodeobj = GAME.SCENE.addAsset("32616g", (num)node.x, (num)node.y, (num)node.z, W, "0xfff", {opacity:1}, dummy_Callback);
+        addTo nodeslist nodeobj;
+    }
+}
+
+num djalpha = 0;
+# Green indicator you have a doublejump stored
+public action render(num delta) {
+    obj size = GAME.OVERLAY.getSize(); 
+    obj plr = GAME.PLAYERS.getSelf();
+
+    # alpha of dj
+    num finalalpha = (num)plr.jumpCount > 0 ? 0.1 : 0;
+    if (Math.abs(djalpha- finalalpha) > 0.01) {
+        djalpha +=((finalalpha-djalpha) * 0.006 * delta);
+    }
+
+    GAME.OVERLAY.drawRect(0,0,(num)size.width,(num)size.height,0,COLOR_JUMP,djalpha,false);
+    # GAME.OVERLAY.drawRect(x, y, w, h, r, color, opac, center)
+}
+
+
+public action onPlayerUpdate(str id, num delta, obj inputs) {
+    obj player = GAME.PLAYERS.findByID(id);
+    # decrement nodes cooldown and color
+    for (num i = 0; i < lengthOf (obj[]) player.nodes; i++) {
+        obj inode = ((obj[]) player.nodes)[i];
+        # color
+        if ((num) inode.tCooldown > 0)
+        {
+            nodeslist[i].opacity = 0.1;
+        } 
+        else
+        {
+            nodeslist[i].opacity = 1;
+        }
+    }
+}

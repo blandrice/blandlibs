@@ -1,0 +1,6 @@
+# ===================================================================
+# File: libs\doublejump\djregistersync_nodes\r_djumpnode_testserver.krnk
+# Author: blandrice
+# ===================================================================
+
+#include <r_djumpnode.krnk>
