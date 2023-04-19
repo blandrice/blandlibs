@@ -1,0 +1,82 @@
+# ===================================================================
+# Library: libs\UI\scene\fade_client.krnk
+# Author: Andrii
+# ===================================================================
+
+num t_alpha = 0;
+num ALPHA_BLACK = 1;
+num ALPHA_CLEAR = 0;
+
+num BLACK = 0;
+num CLEAR = 1;
+num INOUT = 2;
+
+num state_screen = CLEAR;
+
+num t_inoutstart = 0;
+num t_duration_inout = 5000;
+num t_duration_fade_black = 2500;
+num t_duration_fade_clear = 2500;
+
+# Client receives network message
+public action onNetworkMessage(str id, obj data) {
+    # GAME.log(id);
+    if (id == "fadeblack")
+    {
+        state_screen = BLACK;
+    }
+    else if (id == "fadeclear")
+    {
+        state_screen = CLEAR;
+    }
+    else if (id == "fadeinout")
+    {
+        state_screen = INOUT;
+        t_inoutstart = GAME.TIME.now();
+    }
+}
+
+public action render(num delta) {
+    obj size = GAME.OVERLAY.getSize();
+    
+    # fade to black
+    if (state_screen == BLACK)
+    {
+        t_alpha += (delta/t_duration_fade_black);
+        if (t_alpha > 1 ) {t_alpha = 1;}
+    }
+    # fade to clear
+    else if (state_screen == CLEAR)
+    {
+        t_alpha -= (delta/t_duration_fade_clear);
+        if (t_alpha < 0 ) {t_alpha = 0;}
+    } 
+    # fade in and out
+    else if (state_screen == INOUT)
+    {
+        if ((GAME.TIME.now() - t_inoutstart) < t_duration_inout)
+        {
+            # fade in to black 
+            if ((GAME.TIME.now() - t_inoutstart) < (t_duration_inout/2))
+            {
+                t_alpha += (delta/(t_duration_inout/2));
+                if (t_alpha > 1 ) {t_alpha = 1;}
+            }
+            # fade out to clear
+            else
+            {
+                t_alpha -= (delta/(t_duration_inout/2));
+                if (t_alpha < 0 ) {t_alpha = 0;}
+            }
+        }
+        # force alpha to zero
+        else
+        {
+            t_alpha = 0;
+        }
+    }
+    # Create a red triangle
+    # x,y, w,h, r, colr, alpha, center
+    GAME.OVERLAY.drawRect((num)size.width/2, (num)size.height/2, (num)size.width, (num)size.height, 0, "#000000", t_alpha, 1);
+    # GAME.log("t_alpha",t_alpha);
+}

@@ -1,0 +1,19 @@
+# ===================================================================
+# Library: libs\UI\scene\fade_server.krnk
+# Author: Andrii
+# ===================================================================
+
+public action onCustomTrigger(str playerID, str customParam, num value) {
+    if (customParam == "fadeblack")
+    {
+        GAME.NETWORK.send("fadeblack", {}, playerID);
+    }
+    else if (customParam == "fadeclear")
+    {
+        GAME.NETWORK.send("fadeclear", {}, playerID);
+    }
+    else if (customParam == "fadeinout")
+    {
+        GAME.NETWORK.send("fadeinout", {}, playerID);
+    }
+}
