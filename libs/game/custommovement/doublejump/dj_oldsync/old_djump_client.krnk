@@ -3,6 +3,7 @@
 # ===================================================================
 # Library: doublejump\dj_oldsync\old_djump_client.krnk
 # Author: blandrice
+# Description: old doublejump by blandrice before registersync was introduced.
 # ===================================================================
 
 obj updateState = { updateId: 0, playerUpdateId: 0, lastUpdate: 0 };

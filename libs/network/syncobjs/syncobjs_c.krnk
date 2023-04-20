@@ -5,7 +5,7 @@
 # ===================================================================
 # Library: \libs\syncobjs\syncobjs_c.krnk
 # Author: blandrice
-#   Description: not ready!
+# Description: Custom Server object syncing.
 # ===================================================================
 
 obj[] objlist = obj[];

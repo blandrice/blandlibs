@@ -1,7 +1,7 @@
 # ===================================================================
 # Library: \libs\utils\players\plrutil_c.krnk
 # Author: blandrice
-#   Description: workaround to check how many players are spawned in
+# Description: workaround to check how many players are spawned in
 # ===================================================================
 
 bool imspawned = false;

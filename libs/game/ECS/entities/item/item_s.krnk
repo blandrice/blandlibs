@@ -8,8 +8,7 @@
 # ===================================================================
 # Library: libs\ECS\entities\platform\platform.krnk
 # Author: blandrice
-#   Description: item that can be picked up :D collides with the world and other objects
-#   NOT READY
+# Description: ECS item that can be picked up :D collides with the world and other objects 
 # ===================================================================
 
 action create(obj props){

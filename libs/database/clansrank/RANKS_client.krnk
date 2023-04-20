@@ -1,3 +1,11 @@
+# ===================================================================
+# Library: libs\database\clansrank\ranks_client.krnk
+# Author: blandrice
+# Link: https://github.com/blandrice/krunkerClansPlus
+# Description: Create a map in Krunker and copy the client & server scripts from this github to your new map.
+# ===================================================================
+
+
 # Client Script runs only on the client
 # KrunkScript Copyright (C) Yendis Entertainment Pty Ltd
 # 

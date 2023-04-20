@@ -3,8 +3,7 @@
 # Library: \libs\gameutil\admin\admin_c.krnk
 # Author: KG07
 # Discord: https://discord.com/channels/484192043833491487/575245801744498689/907320771288907846
-# Description: 
-# Admin system code: for map makers who doesn’t know or know a bit of scripting to hire some moderators into your map
+# Description: Admin system code: for map makers who doesn’t know or know a bit of scripting to hire some moderators into your map
 # setup guide: copy 2 files to both 2 sides and edit admins array on both sides to the usernames you want to add as your map moderator. You can extend the array as much as you want.
 # admin using guide:
 # press 0 to open menu, press 9 to move the box to the right, press 8 to move the box to move to the left, scroll to move the box up and down, press 7 to do the action to the player. note that you cannot do actions to person if person is a moderator.

@@ -7,8 +7,7 @@
 # ===================================================================
 # Library: libs\ECS\components\hitbox\hitbox_s.krnk
 # Author: blandrice
-# Description: 
-#   - create hitbox that can be assigned to a specific object.
+# Description: ECS hitbox that can be assigned to a specific object.
 #   - once hit, can do a callback
 #   - for safety it needs to call syncobjs_s.krnk's delete callback for hitbox to delete itself when other object is deleted
 # ===================================================================

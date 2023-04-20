@@ -1,6 +1,7 @@
 # ===================================================================
 # File: libs\doublejump\djregistersync\r_djumpclient.krnk
-# Author: DQ_Swat + blandrice
+# Author: blandrice
+# Description: double-jump using registersync feature
 # ===================================================================
 
 #include <DJconfig.krnk>

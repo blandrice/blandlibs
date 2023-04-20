@@ -5,7 +5,7 @@
 # ===================================================================
 # Library: libs\utils\plrbehavior\plrbhvr_c.krnk
 # Author: blandrice
-#   Description: disable server sync + behavior for custom movement
+# Description: disable server sync + behavior for custom movement
 #   send plr position/vel to server manually
 # ===================================================================
 num tlastsync = 0;

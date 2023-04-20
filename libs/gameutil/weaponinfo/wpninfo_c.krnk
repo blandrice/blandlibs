@@ -3,7 +3,7 @@
 # ===================================================================
 # Library: weaponinfo\wpninfo_c.krnk (client)
 # Author: blandrice
-#   Description: adds additional CLASS's PRIMARY weapon info to player object.
+# Description: adds additional CLASS's PRIMARY weapon info to player object.
 #   Note: Weapon info will ONLY update if player class changes. 
 #       trigger "change Primary Weaopn"  will NOT update
 #       Weapon Pickup Zone will NOT update 

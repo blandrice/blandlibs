@@ -1,6 +1,7 @@
 # ===================================================================
 # Library: libs\radar\radar_c.krnk
 # Author: Andrii
+# Description: Player radar overlay feature
 # ===================================================================
 
 num radS = 200; #Radar size

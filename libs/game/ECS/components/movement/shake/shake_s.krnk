@@ -1,7 +1,7 @@
 # ===================================================================
 # Library: libs\ECS\components\shake\shake_s.krnk
 # Author: blandrice
-#   Description: time to shake that!
+# Description: ECS shake feature
 # ===================================================================
 
 private action onECSUpdate(num delta, obj tobj, obj[] objlist){

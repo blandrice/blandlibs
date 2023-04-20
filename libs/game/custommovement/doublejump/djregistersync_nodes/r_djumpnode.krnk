@@ -3,7 +3,7 @@
 # Author: DQ_Swat + blandrice
 # ===================================================================
 
-#include <DJcfg_nodes.krnk>
+#include <DJcfg_nodes_h.krnk>
 #include <AABB.krnk>
 
 
@@ -73,8 +73,8 @@ public action onPlayerUpdate(str id, num delta, obj inputs) {
                 # increase tCooldown to refresh rate
                 colobj.tCooldown = COOLDOWN;
                 # acquire jump sound
-                if ((num) DJcfg_nodes_c.ACQUIREJUMPSOUND > 0) {
-                    GAME.SOUND.play2D((num) DJcfg_nodes_c.ACQUIREJUMPSOUND, 1, 1, false); 
+                if ((num) DJcfg_nodes_h_c.ACQUIREJUMPSOUND > 0) {
+                    GAME.SOUND.play2D((num) DJcfg_nodes_h_c.ACQUIREJUMPSOUND, 1, 1, false); 
                 }
             }
         }
@@ -103,7 +103,7 @@ public action onPlayerUpdate(str id, num delta, obj inputs) {
     # reset jumpcount on ground
     if((bool) player.onGround) 
     {
-        player.jumpCount = (num) DJcfg_nodes_c.MAX_JUMPCOUNT-1;
+        player.jumpCount = (num) DJcfg_nodes_h_c.MAX_JUMPCOUNT-1;
         player.timeLastOnGround = 0;
     } 
     else
@@ -111,26 +111,26 @@ public action onPlayerUpdate(str id, num delta, obj inputs) {
         (num) player.timeLastOnGround += delta;
     } 
     #  reset jumpCount after walljump
-     if ((bool) DJcfg_nodes_c.WALLJUMP_REFRESHS && (bool) player.onWall && (bool) inputs.jump) 
+     if ((bool) DJcfg_nodes_h_c.WALLJUMP_REFRESHS && (bool) player.onWall && (bool) inputs.jump) 
     {
-        player.jumpCount = (num) DJcfg_nodes_c.MAX_JUMPCOUNT-1;
+        player.jumpCount = (num) DJcfg_nodes_h_c.MAX_JUMPCOUNT-1;
     } 
     # input jump logic
     if((bool) inputs.jump) {
         if(!(bool)player.hasJumped  && (num)player.jumpCount > 0 && !(bool)player.onGround && ((num)player.timeLastOnGround > 150)) 
         {
-            if (!(bool) player.onWall && (bool)DJcfg_nodes_c.WALLJUMP_REFRESHS) 
+            if (!(bool) player.onWall && (bool)DJcfg_nodes_h_c.WALLJUMP_REFRESHS) 
             {
-                if ((bool) DJcfg_nodes_c.ENABLE_CROUCHJUMP && ((num)player.timeLastCrouched < (num)DJcfg_nodes_c.MS_DURATION_UNCROUCH)) 
+                if ((bool) DJcfg_nodes_h_c.ENABLE_CROUCHJUMP && ((num)player.timeLastCrouched < (num)DJcfg_nodes_h_c.MS_DURATION_UNCROUCH)) 
                 {
-                    player.velocity.y = Math.lerp((num) DJcfg_nodes_c.VEL_CROUCHJUMP,(num) DJcfg_nodes_c.VEL_JUMP,(num)player.timeLastCrouched/(num) DJcfg_nodes_c.MS_DURATION_UNCROUCH);	# "moonjumping" calculation
+                    player.velocity.y = Math.lerp((num) DJcfg_nodes_h_c.VEL_CROUCHJUMP,(num) DJcfg_nodes_h_c.VEL_JUMP,(num)player.timeLastCrouched/(num) DJcfg_nodes_h_c.MS_DURATION_UNCROUCH);	# "moonjumping" calculation
                 } else 
                 {
-                    player.velocity.y = (num) DJcfg_nodes_c.VEL_JUMP;	
+                    player.velocity.y = (num) DJcfg_nodes_h_c.VEL_JUMP;	
                 }
-                if ((num) DJcfg_nodes_c.DJUMPSOUND > 0) 
+                if ((num) DJcfg_nodes_h_c.DJUMPSOUND > 0) 
                 {
-                    GAME.SOUND.play2D((num) DJcfg_nodes_c.DJUMPSOUND, 1, 0.5, false); # jump DJcfg_nodes_c.SOUND
+                    GAME.SOUND.play2D((num) DJcfg_nodes_h_c.DJUMPSOUND, 1, 0.5, false); # jump DJcfg_nodes_h_c.SOUND
                 }
 
                 (num)player.jumpCount--;

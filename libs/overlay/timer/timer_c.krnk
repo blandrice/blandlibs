@@ -1,7 +1,7 @@
 # ===================================================================
 # Library: libs\timer\timer_c.krnk
 # Author: blandrice
-#   Description: Timer utility (syncs to Server)
+# Description: display a timer (total time given by server)
 # ===================================================================
 
 str networkmsg = "sync";
