@@ -49,4 +49,5 @@
 47,listutil,blandrice,,,,yes,Additional string utilities,"['util', 'lists']",util,https://github.com/blandrice/blandlibs/tree/master/libs/util/lists
 48,prng,Sakurasou,https://discord.com/channels/859947586005368862/862113777946984459/988841369529376839,,,yes,Custom Seed PRNG (Pseudorandom Number Generator) using SFC32 (Simple Fast Counter) and MurmurHash3,"['util', 'PRNG']",util,https://github.com/blandrice/blandlibs/tree/master/libs/util/PRNG
 49,strutils,ProfNoob,https://discord.com/channels/859947586005368862/862113777946984459/957710191590268929,,,yes,Additional String utilities,"['util', 'strutil']",util,https://github.com/blandrice/blandlibs/tree/master/libs/util/strutil
-50,vec,blandrice,,,,yes,vector math,"['util', 'vectors']",util,https://github.com/blandrice/blandlibs/tree/master/libs/util/vectors
+50,vec,blandrice,,,,yes,blandrice's object-based vector math,"['util', 'vectors']",util,https://github.com/blandrice/blandlibs/tree/master/libs/util/vectors
+51,vec_prof,ProfNoob,,,,yes,Prof's array-based vector library,"['util', 'vectors']",util,https://github.com/blandrice/blandlibs/tree/master/libs/util/vectors

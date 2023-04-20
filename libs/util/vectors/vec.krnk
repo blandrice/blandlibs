@@ -1,7 +1,7 @@
 # ===================================================================
 # Header: libs\utils\vectors\vec.krnk
 # Author: blandrice
-# Description: vector math
+# Description: blandrice's object-based vector math 
 # ===================================================================
 
 obj action subtract3d(obj Pa, obj Pb) {

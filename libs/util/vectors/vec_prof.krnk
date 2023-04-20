@@ -1,0 +1,91 @@
+# ===================================================================
+# Header: \libs\util\vectors\vec_prof.krnk
+# Author: ProfNoob
+# Description: Prof's array-based vector library
+# ===================================================================
+
+num action vec3_dot(num[] a, num[] b){
+    return (a[0] * b[0]) + (a[1] * b[1]) + (a[2] * b[2]);
+}
+
+num[] action vec3_add(num[] a, num[] b){
+    return num[
+        a[0] + b[0],
+        a[1] + b[1],
+        a[2] + b[2]
+    ];
+}
+
+num[] action vec3_sub(num[] a, num[] b){
+    return num[
+        a[0] - b[0],
+        a[1] - b[1],
+        a[2] - b[2]
+    ];
+}
+
+num[] action vec3_mult(num[] a, num[] b){
+    return num[
+        a[0] * b[0],
+        a[1] * b[1],
+        a[2] * b[2]
+    ];
+}
+
+num[] action vec3_scale(num[] a, num scale){
+    return num[
+        a[0] * scale,
+        a[1] * scale,
+        a[2] * scale
+    ];
+}
+
+num action vec3_length(num[] a){
+    return Math.sqrt(Math.pow(a[0], 2) + Math.pow(a[1], 2) + Math.pow(a[2], 2));
+}
+
+num[] action vec3_normalize(num[] a){
+    return vec3_scale(a, 1/vec3_length(a));
+}
+
+
+
+num action vec2_dot(num[] a, num[] b){
+    return (a[0] * b[0]) + (a[1] * b[1]);
+}
+
+num[] action vec2_add(num[] a, num[] b){
+    return num[
+        a[0] + b[0],
+        a[1] + b[1]
+    ];
+}
+
+num[] action vec2_sub(num[] a, num[] b){
+    return num[
+        a[0] - b[0],
+        a[1] - b[1]
+    ];
+}
+
+num[] action vec2_mult(num[] a, num[] b){
+    return num[
+        a[0] * b[0],
+        a[1] * b[1]
+    ];
+}
+
+num[] action vec2_scale(num[] a, num scale){
+    return num[
+        a[0] * scale,
+        a[1] * scale
+    ];
+}
+
+num action vec2_length(num[] a){
+    return Math.sqrt(Math.pow(a[0], 2) + Math.pow(a[1], 2));
+}
+
+num[] action vec2_normalize(num[] a){
+    return vec2_scale(a, 1/vec2_length(a));
+}
