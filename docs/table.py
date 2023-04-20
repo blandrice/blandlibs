@@ -41,9 +41,9 @@ for root, dirs, files in os.walk(r"C:\Users\Justi\Documents\GitHub\blandlibs\lib
                 description="",
                 tags=[]
             )
-            if ("_c" in name) or (("_client") in name):
+            if ("_c." in name) or (("_client.") in name):
                 newdict["client"] = "yes"
-            elif ("_s" in name) or (("_server") in name):
+            elif ("_s." in name) or (("_server.") in name):
                 newdict["server"] = "yes"
             else: 
                 newdict["other"] = "yes"

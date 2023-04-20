@@ -24,7 +24,7 @@
 22,platform,blandrice,,,,yes,,"['game', 'ECS', 'entities', 'platform']",game,https://github.com/blandrice/blandlibs/tree/master/libs/game/ECS/entities/platform
 23,ecs,blandrice,,yes,,,Entity Component System,"['game', 'ECS', 'system']",game,https://github.com/blandrice/blandlibs/tree/master/libs/game/ECS/system
 24,ecs,blandrice,,,yes,,,"['game', 'ECS', 'system']",game,https://github.com/blandrice/blandlibs/tree/master/libs/game/ECS/system
-25,admin,KG07,https://github.com/KG07/admin_system_version1,yes,,,Admin system code: for map makers who doesn’t know or know a bit of scripting to hire some moderators into your map,"['gameutil', 'admin']",gameutil,https://github.com/blandrice/blandlibs/tree/master/libs/gameutil/admin
+25,admin,KG07,https://github.com/KG07/admin_system_version1,yes,,,Admin system code: for map makers who doesnâ€™t know or know a bit of scripting to hire some moderators into your map,"['gameutil', 'admin']",gameutil,https://github.com/blandrice/blandlibs/tree/master/libs/gameutil/admin
 26,admin,KG07,https://github.com/KG07/admin_system_version1,,yes,,,"['gameutil', 'admin']",gameutil,https://github.com/blandrice/blandlibs/tree/master/libs/gameutil/admin
 27,checkpoint,Sakurasou,,,,yes,"Changes the names of the Checkpoints on the Speedrun Timer in the bottom right (Point 1, Point 2, ...)","['gameutil', 'checkpoint']",gameutil,https://github.com/blandrice/blandlibs/tree/master/libs/gameutil/checkpoint
 28,gamestart,blandrice,,yes,,,Detect game start in a map with a countdown.,"['gameutil', 'gamestart']",gameutil,https://github.com/blandrice/blandlibs/tree/master/libs/gameutil/gamestart
