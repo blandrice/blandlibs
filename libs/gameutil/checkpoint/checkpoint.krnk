@@ -1,0 +1,35 @@
+# ===================================================================
+# Library: libs\gameutil\checkpoint\checkpoint.krnk
+# Author: Sakurasou
+# https://discord.com/channels/484192043833491487/575245801744498689/1045330962277486652
+# Description: Changes the names of the Checkpoints on the Speedrun Timer in the bottom right (Point 1, Point 2, ...)
+# How to use: Just change the names in the checkpoints Array at the top for all the points you want to have a custom name.
+# ===================================================================
+
+
+str[] checkpoints = str["NAME1", "NAME2", "NAME3", "NAME4", "NAME5"];
+
+bool action isChanged(str input, str index) {
+    str tmp = "";
+    for (num i = 0; i < lengthOf input; i++) {
+        tmp += input[i];
+        if (tmp == "Point " + (str)index) {
+            return false;
+        }
+    }
+    return true;
+}
+
+public action update(num delta) {
+    for (num i = 0; i < lengthOf checkpoints; i++) {
+        str index = (str)(i + 1);
+        str text = GAME.UI.getDIVText("spdRunI" + index);
+        
+        if ((str)text != "undefined" && !isChanged(text, index)) {
+            str time = GAME.UI.getDIVText("spdRunIVal" + index);
+            GAME.UI.updateDIVText("spdRunI" + index, (str)checkpoints[i]);
+            GAME.UI.addDIV("spdRunIVal" + index, true, "float:right;text-align:right;color:#fff;font-size:20px;", "spdRunI" + index);
+            GAME.UI.updateDIVText("spdRunIVal" + index, time);
+        }
+    }
+}

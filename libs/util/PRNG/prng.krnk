@@ -1,0 +1,76 @@
+# ===================================================================
+# Library: \libs\util\PRNG\prng.krnk
+# Author: Sakurasou
+# Discord: https://discord.com/channels/859947586005368862/862113777946984459/988841369529376839
+# Description: Custom Seed PRNG (Pseudorandom Number Generator) using SFC32 (Simple Fast Counter) and MurmurHash3 
+# ===================================================================
+str[][] Math_charCodes = str[][str[" ","32"],str["!","33"],str["\"","34"],str["#","35"],str["$","36"],str["%","37"],str["&","38"],str["\'","39"],str["(","40"],str[")","41"],str["*","42"],str["+","43"],str[",","44"],str["-","45"],str[".","46"],str["/","47"],str["0","48"],str["1","49"],str["2","50"],str["3","51"],str["4","52"],str["5","53"],str["6","54"],str["7","55"],str["8","56"],str["9","57"],str[":","58"],str[";","59"],str["<","60"],str["=","61"],str[">","62"],str["?","63"],str["@","64"],str["A","65"],str["B","66"],str["C","67"],str["D","68"],str["E","69"],str["F","70"],str["G","71"],str["H","72"],str["I","73"],str["J","74"],str["K","75"],str["L","76"],str["M","77"],str["N","78"],str["O","79"],str["P","80"],str["Q","81"],str["R","82"],str["S","83"],str["T","84"],str["U","85"],str["V","86"],str["W","87"],str["X","88"],str["Y","89"],str["Z","90"],str["[","91"],str["\\","92"],str["]","93"],str["^","94"],str["_","95"],str["`","96"],str["a","97"],str["b","98"],str["c","99"],str["d","100"],str["e","101"],str["f","102"],str["g","103"],str["h","104"],str["i","105"],str["j","106"],str["k","107"],str["l","108"],str["m","109"],str["n","110"],str["o","111"],str["p","112"],str["q","113"],str["r","114"],str["s","115"],str["t","116"],str["u","117"],str["v","118"],str["w","119"],str["x","120"],str["y","121"],str["z","122"],str["{","123"],str["|","124"],str["}","125"],str["~","126"]];
+num Math_cLength = lengthOf Math_charCodes;
+
+num action Math_charCodeAt(str string, num index) {
+    num sLength = lengthOf string;
+
+    for (num i = 0; i < sLength; i++) {
+        for (num j = 0; j < Math_cLength; j++) {
+            if (Math_charCodes[j][0] == string[index]) {
+                return (num)Math_charCodes[j][1];
+            }
+        }
+    }
+    
+    return -1;
+}
+
+num action Math_imul(num a, num b) {
+    num aHi = (a >>> 16) & 0xffff;
+    num aLo = a & 0xffff;
+    num bHi = (b >>> 16) & 0xffff;
+    num bLo = b & 0xffff;
+    return ((aLo * bLo) + (((aHi * bLo + aLo * bHi) << 16) >>> 0) | 0);
+}
+
+num seed_hash = 0;
+num[] seed_arr = num[0, 0, 0, 0];
+
+num action seed_generate() {
+    seed_hash = Math_imul(seed_hash ^ (seed_hash >>> 16), 2246822507);
+    seed_hash = Math_imul(seed_hash ^ (seed_hash >>> 13), 3266489909);
+    seed_hash ^= (seed_hash >>> 16) >>> 0;
+    return seed_hash;
+}
+
+action Math_seed(str input) {
+    num iLength = lengthOf input;
+    seed_hash = 1779033703 ^ iLength;
+    for (num i = 0; i < iLength; i++) {
+        num bitwise_xfc = seed_hash ^ Math_charCodeAt(input, i);
+        seed_hash = Math_imul(bitwise_xfc, 3432918353);
+        seed_hash = seed_hash << 13 | seed_hash >>> 19;
+    }
+    for (num i = 0; i < 4; i++) {
+        seed_arr[i] = seed_generate();
+    }
+}
+
+num action Math_random() {
+    for (num i = 0; i < 4; i++) {
+        seed_arr[i] >>>= 0;
+    }
+    num cast32 = (seed_arr[0] + seed_arr[1]) | 0;
+    seed_arr[0] = seed_arr[1] ^ seed_arr[1] >>> 9;
+    seed_arr[1] = seed_arr[2] + (seed_arr[2] << 3) | 0;
+    seed_arr[2] = (seed_arr[2] << 21 | seed_arr[2] >>> 11);
+    seed_arr[3] = seed_arr[3] + 1 | 0;
+    cast32 = cast32 + seed_arr[3] | 0;
+    seed_arr[2] = seed_arr[2] + cast32 | 0;
+    return (cast32 >>> 0) / 4294967296;
+}
+
+public action start() {
+    Math_seed("uwu");
+    
+    GAME.log(Math_random());
+    GAME.log(Math_random());
+    GAME.log(Math_random());
+    GAME.log(Math_random());
+}

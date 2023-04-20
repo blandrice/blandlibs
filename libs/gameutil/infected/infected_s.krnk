@@ -1,0 +1,39 @@
+# ===================================================================
+# Library: \libs\gameutil\infected\infected_s.krnk
+# Author: DukeV
+# Discord: https://discord.com/channels/859947586005368862/862113777946984459/909435501298204713
+# Description: a way to find out whether a player is infected or not
+# ===================================================================
+bool isInfected = false;
+num countdown = 30000; # time until warmuptime, match starting time, infection timer is over
+bool countdownOver = false;
+
+obj player = {};
+
+public action update(num delta) {
+    if (lengthOf GAME.PLAYERS.list() > 1) {
+        countdown -= delta;
+        if (countdown <= 0) {
+            countdownOver = true;
+        }
+    }
+}
+
+public action onPlayerSpawn(str id) {
+    player = GAME.PLAYERS.findByID(id);
+    player.isInfected = false;
+    if (lengthOf GAME.PLAYERS.list() > 1) {
+        if (countdownOver) {
+            player.isInfected = true;
+        } else {
+            player.isInfected = false;
+        }
+    }
+
+    if ((bool)player.isInfected) {
+        #do stuff
+        player.assetID = "33380g"; #update player asset (must have existing asset to work)
+    }
+
+    GAME.log("isInfected: " + toStr player.isInfected + "  isCountdownOver: " + toStr countdownOver);
+}

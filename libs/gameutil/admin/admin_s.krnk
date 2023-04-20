@@ -1,0 +1,59 @@
+# ===================================================================
+# Library: \libs\gameutil\admin\admin_s.krnk
+# Author: KG07
+# Discord: https://discord.com/channels/484192043833491487/575245801744498689/907320771288907846
+# Description: 
+# Admin system code: for map makers who doesn’t know or know a bit of scripting to hire some moderators into your map
+# setup guide: copy 2 files to both 2 sides and edit admins array on both sides to the usernames you want to add as your map moderator. You can extend the array as much as you want.
+# admin using guide:
+# press 0 to open menu, press 9 to move the box to the right, press 8 to move the box to move to the left, scroll to move the box up and down, press 7 to do the action to the player. note that you cannot do actions to person if person is a moderator.
+# Link: https://github.com/KG07/admin_system_version1
+# ===================================================================
+
+
+# Server Script runs only on Hosted server & not in test mode
+# KrunkScript Copyright (C) Yendis Entertainment Pty Ltd
+# 
+# Add custom actions here
+
+# Runs when the game starts
+str[] admins = str["Khow!_Ha"];
+bool check = false;
+
+# Server receives network message
+public action onNetworkMessage(str id, obj data, str playerID) {
+	obj player = GAME.PLAYERS.findByID(data.playerSelected);
+	check = false;
+	obj[] players = GAME.PLAYERS.list();
+	for(num i = 0; i < lengthOf admins; i++){
+		if(toStr player.username == admins[i]){
+			check = true;
+		}
+	}
+	if(!check){
+		obj player1 = GAME.PLAYERS.findByID(playerID);
+		obj player2 = GAME.PLAYERS.findByID(data.playerSelected);
+		if(id == "3"){
+			(num) player.health -= 200;
+		}
+		if(id == "4"){
+			GAME.ADMIN.kick(data.playerSelected);
+		}
+		if(id == "5"){
+			GAME.ADMIN.ban(data.playerSelected);
+		}
+		if(id == "0"){
+			player1.position.x = player2.position.x;
+			player1.position.y = player2.position.y;
+			player1.position.z = player2.position.z;
+		}
+		if(id == "1"){
+			player2.position.x = player1.position.x;
+			player2.position.y = player1.position.y;
+			player2.position.z = player1.position.z;
+		}
+		if(id == "2"){
+			player2.defaultMovement = false;
+		}
+	}
+}

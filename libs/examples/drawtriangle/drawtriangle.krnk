@@ -1,0 +1,51 @@
+# ===================================================================
+# Library: libs\overlay\cameraSway\camsway_c.krnk
+# Author: bub_lap
+# https://discord.com/channels/484192043833491487/575245801744498689/913314916637749258
+# Description: Basic drawTriangle action (KrunkScript example)
+#              EDIT: Simplified it a bit according to https://www.kirupa.com/html5/drawing_triangles_on_the_canvas.htm
+# ===================================================================
+action drawTriangle(
+    num x1,
+    num y1,
+    num x2,
+    num y2,
+    num x3,
+    num y3,
+    num outlineWidth,
+    str outlineColor,
+    str fillColor
+){    
+    static obj ctx = GAME.OVERLAY; 
+
+    ctx.beginPath();
+    ctx.moveTo(x1, y1);
+    ctx.lineTo(x2, y2);
+    ctx.lineTo(x3, y3);
+    ctx.closePath();
+
+    ctx.lineWidth(outlineWidth);
+    ctx.strokeStyle(outlineColor);
+    ctx.fillStyle(fillColor);
+
+    ctx.stroke();
+
+    if(!!fillColor){
+        ctx.fill();
+    }
+}
+
+# Add rendering logic in here
+public action render(num delta) {
+    drawTriangle(
+        50,
+        50,
+        200,
+        200,
+        150,
+        400,
+        5,
+        "", # defaults to white
+        ""
+    );
+}

@@ -1,0 +1,50 @@
+# ===================================================================
+# Library: \libs\gameutil\spectator\spectator.krnk
+# Author: SlxTnT
+# Discord: https://discord.com/channels/859947586005368862/862113777946984459/900998093300969473
+# Description: My attempt at server side spectator checks. Can check the value with player.properties.isSpectator 
+# ===================================================================
+obj[] playerProperties = obj[];
+
+obj action setPlayerProperty(obj player) {
+    obj newPlayerProperty = {};
+    
+    while(lengthOf playerProperties < (num)player.sid) {
+        addTo playerProperties {};
+    }
+    
+    playerProperties[(num)player.sid - 1] = newPlayerProperty;
+    
+    return newPlayerProperty;
+}
+
+obj action getPlayerProperties(obj player) {
+    return playerProperties[(num)player.sid - 1];
+}
+
+# Player spawns in
+public action onPlayerSpawn(str id) {
+    obj player = GAME.PLAYERS.findByID(id);
+
+    if(!player.properties) {
+        player.properties = setPlayerProperty(player);
+    }
+
+    obj properties = getPlayerProperties(player);
+    properties.isSpectator = true;
+    properties.spawnPosition = {x: player.position.x, y: player.position.y, z: player.position.z };
+}
+
+public action onPlayerUpdate(str id, num delta, static obj inputs) {
+        obj player = GAME.PLAYERS.findByID(id);
+
+        if(!!player.properties.isSpectator) {
+            obj spawnLocation = (obj)player.properties.spawnPosition;
+            bool positionChanged = (num)spawnLocation.x != (num)player.position.x || (num)spawnLocation.y != (num)player.position.y || (num)spawnLocation.z != (num)player.position.z;
+            
+            if (positionChanged) {
+                obj properties = getPlayerProperties(player);
+                properties.isSpectator = false;
+        }
+    }
+}

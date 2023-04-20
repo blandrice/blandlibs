@@ -1,0 +1,48 @@
+# ===================================================================
+# Library: libs\overlay\cameraSway\camsway_c.krnk
+# Author: creepycats
+# https://discord.com/channels/484192043833491487/575245801744498689/1055269916330168341
+# Description: sway camera when moving left and right
+# ===================================================================
+obj smoothCam = {
+	leanAmt:0.0,
+	leanMult:60,
+	lerpAmt:0.02,
+	camRotDist:0.0,
+	prevCamRot:0.0
+};
+num action lerp(num start, num end, num weight) {
+  return start + (end - start) * weight;
+}
+num action clamp(num val, num min, num max){
+	if(val > max){
+		val = max;
+	}
+	if(val < min){
+		val = min;
+	}
+	return val;
+}
+
+# Player update
+public action onPlayerUpdate(str id, num delta, obj inputs) {
+	obj plr = GAME.PLAYERS.findByID(id);
+	obj myself = GAME.PLAYERS.getSelf();
+	if((str)plr.id == (str)myself.id){
+		num heading = UTILS.getDir2D(0, 0, (num)plr.velocity.x, (num)plr.velocity.z);
+		num velocity = UTILS.getDist2D((num)plr.position.x, (num)plr.position.z, (num)plr.position.x + (num)plr.velocity.x, (num)plr.position.z + (num)plr.velocity.z);
+		num sinHeading = Math.sin(heading);
+		num cosHeading = Math.cos(heading);
+	
+		num sinCamera = Math.sin((num)plr.rotation.x);
+		num cosCamera = Math.cos((num)plr.rotation.x);
+		
+		GAME.log((num)smoothCam.camRotDist);
+		smoothCam.camRotDist = clamp(lerp((num)smoothCam.camRotDist,UTILS.anglDst((num)smoothCam.prevCamRot, (num)plr.rotation.x), (((num)smoothCam.lerpAmt/2)*1000)*(delta/1000)),-0.05,0.05);
+		smoothCam.prevCamRot = (num)plr.rotation.x;
+
+		smoothCam.leanAmt = (((num)smoothCam.leanMult/50)*(num)smoothCam.camRotDist) + (velocity * cosHeading * cosCamera - velocity * sinHeading * sinCamera);
+	
+		GAME.CAMERA.rotation.z = lerp(GAME.CAMERA.rotation.z, Math.toRad((num)smoothCam.leanAmt * (num)smoothCam.leanMult), ((num)smoothCam.lerpAmt*1000)*(delta/1000));	
+	}
+}
