@@ -48,7 +48,7 @@ for root, dirs, files in os.walk(r"C:\Users\Justi\Documents\GitHub\blandlibs\lib
             else: 
                 newdict["other"] = "yes"
             
-            newdict["script_name"] = name.replace("_client.","").replace("_server.","").replace("_c.","").replace("_s.","").replace("krnk","")
+            newdict["script_name"] = name.replace("_client.","").replace("_server.","").replace("_c.","").replace("_s.","").replace(".krnk","").replace("krnk","").lower()
             fullpath = os.path.join(root, name)
             with open(fullpath, 'r') as infile:
                 for line in infile:
