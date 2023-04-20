@@ -1,3 +1,9 @@
+# ===================================================================
+# Library: libs\database\clansrank\RANKSMAINMAP_server.krnk
+# Author: blandrice
+# Link: https://github.com/blandrice/krunkerClansPlus
+# Description: This is a shareable script to display popular Krunker Commmunity Clans Ranks in-game.
+# ===================================================================
 # Server Script runs only on Hosted server & not in test mode
 # KrunkScript Copyright (C) Yendis Entertainment Pty Ltd
 # 

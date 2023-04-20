@@ -1,5 +1,13 @@
 # Blandrice's Library
+## The State of Blandlibs!
+[Table of all Libraries](PrettyTable.md)
 
+Category                   |  Author
+:-------------------------:|:-------------------------:
+![](category.png)  |  ![](author.png)
+
+
+## Description
 📖☕ Hi friends, welcome to my library ☕📖
 
 I made a quick script to do Krunkscript Library. I'm hoping it makes scripting easier and more portable for now.
