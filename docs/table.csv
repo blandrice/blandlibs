@@ -1,68 +1,65 @@
 ,script_name,author,link,client,server,other,description,tags,category,path
-0,RANKSMAINMAP,blandrice,https://github.com/blandrice/krunkerClansPlus,yes,,,Calculate camera shift between 1st person to 3rd person staring at a subject,"['database', 'clansrank']",database,https://github.com/blandrice/blandlibs/tree/master/libs/database/clansrank
-1,RANKSMAINMAP,blandrice,https://github.com/blandrice/krunkerClansPlus,,yes,,This is a shareable script to display popular Krunker Commmunity Clans Ranks in-game.,"['database', 'clansrank']",database,https://github.com/blandrice/blandlibs/tree/master/libs/database/clansrank
-2,RANKS,,,yes,,,,"['database', 'clansrank']",database,https://github.com/blandrice/blandlibs/tree/master/libs/database/clansrank
-3,RANKS,,,,yes,,,"['database', 'clansrank']",database,https://github.com/blandrice/blandlibs/tree/master/libs/database/clansrank
+0,ranksmainmap,blandrice,https://github.com/blandrice/krunkerClansPlus,yes,,,Calculate camera shift between 1st person to 3rd person staring at a subject,"['database', 'clansrank']",database,https://github.com/blandrice/blandlibs/tree/master/libs/database/clansrank
+1,ranksmainmap,blandrice,https://github.com/blandrice/krunkerClansPlus,,yes,,This is a shareable script to display popular Krunker Commmunity Clans Ranks in-game.,"['database', 'clansrank']",database,https://github.com/blandrice/blandlibs/tree/master/libs/database/clansrank
+2,ranks,blandrice,https://github.com/blandrice/krunkerClansPlus,yes,,,Create a map in Krunker and copy the client & server scripts from this github to your new map.,"['database', 'clansrank']",database,https://github.com/blandrice/blandlibs/tree/master/libs/database/clansrank
+3,ranks,,,,yes,,,"['database', 'clansrank']",database,https://github.com/blandrice/blandlibs/tree/master/libs/database/clansrank
 4,drawtriangle,bub_lap,,,,yes,Basic drawTriangle action (KrunkScript example),"['examples', 'drawtriangle']",examples,https://github.com/blandrice/blandlibs/tree/master/libs/examples/drawtriangle
-5,DJconfig,,,,,yes,,"['game', 'custommovement', 'doublejump', 'djregistersync']",game,https://github.com/blandrice/blandlibs/tree/master/libs/game/custommovement/doublejump/djregistersync
-6,r_djumpclient,DQ_Swat + blandrice,,,,yes,,"['game', 'custommovement', 'doublejump', 'djregistersync']",game,https://github.com/blandrice/blandlibs/tree/master/libs/game/custommovement/doublejump/djregistersync
-7,DJcfg_nodes,,,,,yes,,"['game', 'custommovement', 'doublejump', 'djregistersync_nodes']",game,https://github.com/blandrice/blandlibs/tree/master/libs/game/custommovement/doublejump/djregistersync_nodes
-8,r_djumpnode,DQ_Swat + blandrice,,,,yes,,"['game', 'custommovement', 'doublejump', 'djregistersync_nodes']",game,https://github.com/blandrice/blandlibs/tree/master/libs/game/custommovement/doublejump/djregistersync_nodes
-9,r_djumpnode,DQ_Swat + blandrice,,yes,,,,"['game', 'custommovement', 'doublejump', 'djregistersync_nodes']",game,https://github.com/blandrice/blandlibs/tree/master/libs/game/custommovement/doublejump/djregistersync_nodes
-10,r_djumpnode,blandrice,,,yes,,,"['game', 'custommovement', 'doublejump', 'djregistersync_nodes']",game,https://github.com/blandrice/blandlibs/tree/master/libs/game/custommovement/doublejump/djregistersync_nodes
-11,old_djump,blandrice,,yes,,,,"['game', 'custommovement', 'doublejump', 'dj_oldsync']",game,https://github.com/blandrice/blandlibs/tree/master/libs/game/custommovement/doublejump/dj_oldsync
-12,old_djump,blandrice,,,yes,,,"['game', 'custommovement', 'doublejump', 'dj_oldsync']",game,https://github.com/blandrice/blandlibs/tree/master/libs/game/custommovement/doublejump/dj_oldsync
-13,old_DJ_head,blandrice,,,,yes,,"['game', 'custommovement', 'doublejump', 'dj_oldsync']",game,https://github.com/blandrice/blandlibs/tree/master/libs/game/custommovement/doublejump/dj_oldsync
-14,customWeapons,DQ Swat,,,,yes,custom weapon script.,"['game', 'customWeapons']",game,https://github.com/blandrice/blandlibs/tree/master/libs/game/customWeapons
-15,aibhvr,blandrice,,,,yes,,"['game', 'ECS', 'components', 'aibehavior']",game,https://github.com/blandrice/blandlibs/tree/master/libs/game/ECS/components/aibehavior
-16,color,blandrice,,,,yes,,"['game', 'ECS', 'components', 'color']",game,https://github.com/blandrice/blandlibs/tree/master/libs/game/ECS/components/color
-17,hitbox,blandrice,,,yes,,,"['game', 'ECS', 'components', 'hitbox']",game,https://github.com/blandrice/blandlibs/tree/master/libs/game/ECS/components/hitbox
-18,lifetime,blandrice,,,,yes,,"['game', 'ECS', 'components', 'lifetime']",game,https://github.com/blandrice/blandlibs/tree/master/libs/game/ECS/components/lifetime
-19,ecsbounce,blandrice,,,,yes,,"['game', 'ECS', 'components', 'movement', 'bounce']",game,https://github.com/blandrice/blandlibs/tree/master/libs/game/ECS/components/movement/bounce
-20,floating,blandrice,,,,yes,,"['game', 'ECS', 'components', 'movement', 'floating']",game,https://github.com/blandrice/blandlibs/tree/master/libs/game/ECS/components/movement/floating
-21,ecsgrav,blandrice,,,,yes,,"['game', 'ECS', 'components', 'movement', 'gravity']",game,https://github.com/blandrice/blandlibs/tree/master/libs/game/ECS/components/movement/gravity
-22,ecsphysics,blandrice,,,,yes,,"['game', 'ECS', 'components', 'movement', 'physics']",game,https://github.com/blandrice/blandlibs/tree/master/libs/game/ECS/components/movement/physics
-23,shake,blandrice,,,yes,,,"['game', 'ECS', 'components', 'movement', 'shake']",game,https://github.com/blandrice/blandlibs/tree/master/libs/game/ECS/components/movement/shake
-24,item,blandrice,,,yes,,,"['game', 'ECS', 'entities', 'item']",game,https://github.com/blandrice/blandlibs/tree/master/libs/game/ECS/entities/item
-25,platform,blandrice,,,,yes,,"['game', 'ECS', 'entities', 'platform']",game,https://github.com/blandrice/blandlibs/tree/master/libs/game/ECS/entities/platform
-26,ecs,blandrice,,yes,,,,"['game', 'ECS', 'system']",game,https://github.com/blandrice/blandlibs/tree/master/libs/game/ECS/system
-27,ecs,blandrice,,,yes,,,"['game', 'ECS', 'system']",game,https://github.com/blandrice/blandlibs/tree/master/libs/game/ECS/system
-28,admin,KG07,https://github.com/KG07/admin_system_version1,yes,,,,"['gameutil', 'admin']",gameutil,https://github.com/blandrice/blandlibs/tree/master/libs/gameutil/admin
-29,admin,KG07,https://github.com/KG07/admin_system_version1,,yes,,,"['gameutil', 'admin']",gameutil,https://github.com/blandrice/blandlibs/tree/master/libs/gameutil/admin
-30,checkpoint,Sakurasou,,,,yes,"Changes the names of the Checkpoints on the Speedrun Timer in the bottom right (Point 1, Point 2, ...)","['gameutil', 'checkpoint']",gameutil,https://github.com/blandrice/blandlibs/tree/master/libs/gameutil/checkpoint
-31,gamestart,blandrice,,yes,,,,"['gameutil', 'gamestart']",gameutil,https://github.com/blandrice/blandlibs/tree/master/libs/gameutil/gamestart
-32,gamestart,blandrice,,,yes,,,"['gameutil', 'gamestart']",gameutil,https://github.com/blandrice/blandlibs/tree/master/libs/gameutil/gamestart
-33,g,blandrice,,,,yes,,"['gameutil', 'global']",gameutil,https://github.com/blandrice/blandlibs/tree/master/libs/gameutil/global
-34,infected,DukeV,https://discord.com/channels/859947586005368862/862113777946984459/909435501298204713,,yes,,a way to find out whether a player is infected or not,"['gameutil', 'infected']",gameutil,https://github.com/blandrice/blandlibs/tree/master/libs/gameutil/infected
-35,plrutil,blandrice,,,,yes,,"['gameutil', 'plrutil']",gameutil,https://github.com/blandrice/blandlibs/tree/master/libs/gameutil/plrutil
-36,plrutil,blandrice,,yes,,,,"['gameutil', 'plrutil']",gameutil,https://github.com/blandrice/blandlibs/tree/master/libs/gameutil/plrutil
-37,plrutil,blandrice,,,yes,,,"['gameutil', 'plrutil']",gameutil,https://github.com/blandrice/blandlibs/tree/master/libs/gameutil/plrutil
-38,spectator,SlxTnT,https://discord.com/channels/859947586005368862/862113777946984459/900998093300969473,,,yes,My attempt at server side spectator checks. Can check the value with player.properties.isSpectator,"['gameutil', 'spectator']",gameutil,https://github.com/blandrice/blandlibs/tree/master/libs/gameutil/spectator
-39,wi,blandrice,,,,yes,,"['gameutil', 'weaponinfo']",gameutil,https://github.com/blandrice/blandlibs/tree/master/libs/gameutil/weaponinfo
-40,wpninfo,blandrice,,yes,,,,"['gameutil', 'weaponinfo']",gameutil,https://github.com/blandrice/blandlibs/tree/master/libs/gameutil/weaponinfo
-41,plrbhvr,blandrice,,yes,,,,"['network', 'plrbehavior']",network,https://github.com/blandrice/blandlibs/tree/master/libs/network/plrbehavior
-42,plrbhvr,blandrice,,,yes,,,"['network', 'plrbehavior']",network,https://github.com/blandrice/blandlibs/tree/master/libs/network/plrbehavior
-43,syncobjs,blandrice,,yes,,,,"['network', 'syncobjs']",network,https://github.com/blandrice/blandlibs/tree/master/libs/network/syncobjs
-44,syncobjs,blandrice,,,yes,,,"['network', 'syncobjs']",network,https://github.com/blandrice/blandlibs/tree/master/libs/network/syncobjs
-45,camsway,creepycats,,yes,,,sway camera when moving left and right,"['overlay', 'cameraSway']",overlay,https://github.com/blandrice/blandlibs/tree/master/libs/overlay/cameraSway
-46,gamescore,blandrice,,yes,,,show points incrementing UI through krunkscript,"['overlay', 'customgamescoreUI']",overlay,https://github.com/blandrice/blandlibs/tree/master/libs/overlay/customgamescoreUI
-47,fnitecam,CreepyCats,,,,yes,,"['overlay', 'fiveNightsCamera']",overlay,https://github.com/blandrice/blandlibs/tree/master/libs/overlay/fiveNightsCamera
-48,kbobub_default,Bub Lap,,,,yes,,"['overlay', 'keyboardoverlay', 'bub']",overlay,https://github.com/blandrice/blandlibs/tree/master/libs/overlay/keyboardoverlay/bub
-49,kbobub_green,"Bub Lap, theme by Blandrice",,,,yes,,"['overlay', 'keyboardoverlay', 'bub']",overlay,https://github.com/blandrice/blandlibs/tree/master/libs/overlay/keyboardoverlay/bub
-50,kbo_luca,L-U-C-A,,,,yes,Basic HTML Div-based keyboard,"['overlay', 'keyboardoverlay', 'luca']",overlay,https://github.com/blandrice/blandlibs/tree/master/libs/overlay/keyboardoverlay/luca
-51,radar,Andrii,,yes,,,,"['overlay', 'radar']",overlay,https://github.com/blandrice/blandlibs/tree/master/libs/overlay/radar
-52,timer,blandrice,,yes,,,,"['overlay', 'timer']",overlay,https://github.com/blandrice/blandlibs/tree/master/libs/overlay/timer
-53,timer,blandrice,,,yes,,Timer utility (syncs Client to Server),"['overlay', 'timer']",overlay,https://github.com/blandrice/blandlibs/tree/master/libs/overlay/timer
-54,AABB,KG07 (modified by blandrice),,,,yes,AABB (axis-aligned bounding box-box) collision + resolution,"['physics', 'collisions']",physics,https://github.com/blandrice/blandlibs/tree/master/libs/physics/collisions
-55,raybox,blandrice,,,,yes,Ray-box intersections in Krunker.,"['physics', 'collisions']",physics,https://github.com/blandrice/blandlibs/tree/master/libs/physics/collisions
-56,rotbox,blandrice,,,,yes,rotated bounding box collision,"['physics', 'collisions']",physics,https://github.com/blandrice/blandlibs/tree/master/libs/physics/collisions
-57,fade,Andrii,,yes,,,,"['scene', 'fade']",scene,https://github.com/blandrice/blandlibs/tree/master/libs/scene/fade
-58,fade,Andrii,,,yes,,,"['scene', 'fade']",scene,https://github.com/blandrice/blandlibs/tree/master/libs/scene/fade
-59,b91,SlxTnT,,,,yes,Base91 decoding converted from https://github.com/KvanTTT/BaseNcoding,"['util', 'b91encoding']",util,https://github.com/blandrice/blandlibs/tree/master/libs/util/b91encoding
-60,GPTtrutils,blandrice (with ChatGPT),,,yes,,ChatGPT test on generating string utilities,"['util', 'ChatGPT']",util,https://github.com/blandrice/blandlibs/tree/master/libs/util/ChatGPT
-61,GPT_vec,blandrice (with ChatGPT),,,,yes,ChatGPT test on generating vector functions,"['util', 'ChatGPT']",util,https://github.com/blandrice/blandlibs/tree/master/libs/util/ChatGPT
-62,dtypes,blandrice,,,,yes,,"['util', 'dtypes']",util,https://github.com/blandrice/blandlibs/tree/master/libs/util/dtypes
-63,listutil,blandrice,,,,yes,Additional string utilities,"['util', 'lists']",util,https://github.com/blandrice/blandlibs/tree/master/libs/util/lists
-64,prng,Sakurasou,https://discord.com/channels/859947586005368862/862113777946984459/988841369529376839,,,yes,Custom Seed PRNG (Pseudorandom Number Generator) using SFC32 (Simple Fast Counter) and MurmurHash3,"['util', 'PRNG']",util,https://github.com/blandrice/blandlibs/tree/master/libs/util/PRNG
-65,strutils,"blandrice, ProfNoob (replaceall), ManiaMapper (Splice)",,,,yes,Additional String utilities,"['util', 'strutil']",util,https://github.com/blandrice/blandlibs/tree/master/libs/util/strutil
-66,vec,blandrice,,,,yes,vector math,"['util', 'vectors']",util,https://github.com/blandrice/blandlibs/tree/master/libs/util/vectors
+5,r_djumpclient,blandrice,,,,yes,double-jump using registersync feature,"['game', 'custommovement', 'doublejump', 'djregistersync']",game,https://github.com/blandrice/blandlibs/tree/master/libs/game/custommovement/doublejump/djregistersync
+6,r_djumpnode,DQ_Swat + blandrice,,,,yes,,"['game', 'custommovement', 'doublejump', 'djregistersync_nodes']",game,https://github.com/blandrice/blandlibs/tree/master/libs/game/custommovement/doublejump/djregistersync_nodes
+7,r_djumpnode,DQ_Swat + blandrice,,yes,,,Doublejump with crystals,"['game', 'custommovement', 'doublejump', 'djregistersync_nodes']",game,https://github.com/blandrice/blandlibs/tree/master/libs/game/custommovement/doublejump/djregistersync_nodes
+8,r_djumpnode,blandrice,,,yes,,Doublejump with crystals,"['game', 'custommovement', 'doublejump', 'djregistersync_nodes']",game,https://github.com/blandrice/blandlibs/tree/master/libs/game/custommovement/doublejump/djregistersync_nodes
+9,old_djump,blandrice,,yes,,,old doublejump by blandrice before registersync was introduced.,"['game', 'custommovement', 'doublejump', 'dj_oldsync']",game,https://github.com/blandrice/blandlibs/tree/master/libs/game/custommovement/doublejump/dj_oldsync
+10,old_djump,blandrice,,,yes,,,"['game', 'custommovement', 'doublejump', 'dj_oldsync']",game,https://github.com/blandrice/blandlibs/tree/master/libs/game/custommovement/doublejump/dj_oldsync
+11,customWeapons,DQ Swat,,,,yes,custom weapon script.,"['game', 'customWeapons']",game,https://github.com/blandrice/blandlibs/tree/master/libs/game/customWeapons
+12,aibhvr,blandrice,,,,yes,,"['game', 'ECS', 'components', 'aibehavior']",game,https://github.com/blandrice/blandlibs/tree/master/libs/game/ECS/components/aibehavior
+13,color,blandrice,,,,yes,,"['game', 'ECS', 'components', 'color']",game,https://github.com/blandrice/blandlibs/tree/master/libs/game/ECS/components/color
+14,hitbox,blandrice,,,yes,,ECS hitbox that can be assigned to a specific object.,"['game', 'ECS', 'components', 'hitbox']",game,https://github.com/blandrice/blandlibs/tree/master/libs/game/ECS/components/hitbox
+15,lifetime,blandrice,,,,yes,,"['game', 'ECS', 'components', 'lifetime']",game,https://github.com/blandrice/blandlibs/tree/master/libs/game/ECS/components/lifetime
+16,ecsbounce,blandrice,,,,yes,,"['game', 'ECS', 'components', 'movement', 'bounce']",game,https://github.com/blandrice/blandlibs/tree/master/libs/game/ECS/components/movement/bounce
+17,floating,blandrice,,,,yes,,"['game', 'ECS', 'components', 'movement', 'floating']",game,https://github.com/blandrice/blandlibs/tree/master/libs/game/ECS/components/movement/floating
+18,ecsgrav,blandrice,,,,yes,,"['game', 'ECS', 'components', 'movement', 'gravity']",game,https://github.com/blandrice/blandlibs/tree/master/libs/game/ECS/components/movement/gravity
+19,ecsphysics,blandrice,,,,yes,,"['game', 'ECS', 'components', 'movement', 'physics']",game,https://github.com/blandrice/blandlibs/tree/master/libs/game/ECS/components/movement/physics
+20,shake,blandrice,,,yes,,ECS shake feature,"['game', 'ECS', 'components', 'movement', 'shake']",game,https://github.com/blandrice/blandlibs/tree/master/libs/game/ECS/components/movement/shake
+21,item,blandrice,,,yes,,ECS item that can be picked up :D collides with the world and other objects,"['game', 'ECS', 'entities', 'item']",game,https://github.com/blandrice/blandlibs/tree/master/libs/game/ECS/entities/item
+22,platform,blandrice,,,,yes,,"['game', 'ECS', 'entities', 'platform']",game,https://github.com/blandrice/blandlibs/tree/master/libs/game/ECS/entities/platform
+23,ecs,blandrice,,yes,,,Entity Component System,"['game', 'ECS', 'system']",game,https://github.com/blandrice/blandlibs/tree/master/libs/game/ECS/system
+24,ecs,blandrice,,,yes,,,"['game', 'ECS', 'system']",game,https://github.com/blandrice/blandlibs/tree/master/libs/game/ECS/system
+25,admin,KG07,https://github.com/KG07/admin_system_version1,yes,,,Admin system code: for map makers who doesn’t know or know a bit of scripting to hire some moderators into your map,"['gameutil', 'admin']",gameutil,https://github.com/blandrice/blandlibs/tree/master/libs/gameutil/admin
+26,admin,KG07,https://github.com/KG07/admin_system_version1,,yes,,,"['gameutil', 'admin']",gameutil,https://github.com/blandrice/blandlibs/tree/master/libs/gameutil/admin
+27,checkpoint,Sakurasou,,,,yes,"Changes the names of the Checkpoints on the Speedrun Timer in the bottom right (Point 1, Point 2, ...)","['gameutil', 'checkpoint']",gameutil,https://github.com/blandrice/blandlibs/tree/master/libs/gameutil/checkpoint
+28,gamestart,blandrice,,yes,,,Detect game start in a map with a countdown.,"['gameutil', 'gamestart']",gameutil,https://github.com/blandrice/blandlibs/tree/master/libs/gameutil/gamestart
+29,gamestart,blandrice,,,yes,,,"['gameutil', 'gamestart']",gameutil,https://github.com/blandrice/blandlibs/tree/master/libs/gameutil/gamestart
+30,g,blandrice,,,,yes,,"['gameutil', 'global']",gameutil,https://github.com/blandrice/blandlibs/tree/master/libs/gameutil/global
+31,infected,DukeV,https://discord.com/channels/859947586005368862/862113777946984459/909435501298204713,,yes,,a way to find out whether a player is infected or not,"['gameutil', 'infected']",gameutil,https://github.com/blandrice/blandlibs/tree/master/libs/gameutil/infected
+32,plrutil,blandrice,,,,yes,,"['gameutil', 'plrutil']",gameutil,https://github.com/blandrice/blandlibs/tree/master/libs/gameutil/plrutil
+33,plrutil,blandrice,,yes,,,workaround to check how many players are spawned in,"['gameutil', 'plrutil']",gameutil,https://github.com/blandrice/blandlibs/tree/master/libs/gameutil/plrutil
+34,plrutil,blandrice,,,yes,,,"['gameutil', 'plrutil']",gameutil,https://github.com/blandrice/blandlibs/tree/master/libs/gameutil/plrutil
+35,spectator,SlxTnT,https://discord.com/channels/859947586005368862/862113777946984459/900998093300969473,,,yes,My attempt at server side spectator checks. Can check the value with player.properties.isSpectator,"['gameutil', 'spectator']",gameutil,https://github.com/blandrice/blandlibs/tree/master/libs/gameutil/spectator
+36,wi,blandrice,,,,yes,,"['gameutil', 'weaponinfo']",gameutil,https://github.com/blandrice/blandlibs/tree/master/libs/gameutil/weaponinfo
+37,wpninfo,blandrice,,yes,,,adds additional CLASS's PRIMARY weapon info to player object.,"['gameutil', 'weaponinfo']",gameutil,https://github.com/blandrice/blandlibs/tree/master/libs/gameutil/weaponinfo
+38,plrbhvr,blandrice,,yes,,,disable server sync + behavior for custom movement,"['network', 'plrbehavior']",network,https://github.com/blandrice/blandlibs/tree/master/libs/network/plrbehavior
+39,plrbhvr,blandrice,,,yes,,,"['network', 'plrbehavior']",network,https://github.com/blandrice/blandlibs/tree/master/libs/network/plrbehavior
+40,syncobjs,blandrice,,yes,,,Custom Server object syncing.,"['network', 'syncobjs']",network,https://github.com/blandrice/blandlibs/tree/master/libs/network/syncobjs
+41,syncobjs,blandrice,,,yes,,,"['network', 'syncobjs']",network,https://github.com/blandrice/blandlibs/tree/master/libs/network/syncobjs
+42,camsway,creepycats,,yes,,,sway camera when moving left and right,"['overlay', 'cameraSway']",overlay,https://github.com/blandrice/blandlibs/tree/master/libs/overlay/cameraSway
+43,gamescore,blandrice,,yes,,,show points incrementing UI through krunkscript,"['overlay', 'customgamescoreUI']",overlay,https://github.com/blandrice/blandlibs/tree/master/libs/overlay/customgamescoreUI
+44,fnitecam,CreepyCats,,,,yes,,"['overlay', 'fiveNightsCamera']",overlay,https://github.com/blandrice/blandlibs/tree/master/libs/overlay/fiveNightsCamera
+45,kbobub_default,Bub Lap,,,,yes,,"['overlay', 'keyboardoverlay', 'bub']",overlay,https://github.com/blandrice/blandlibs/tree/master/libs/overlay/keyboardoverlay/bub
+46,kbobub_green,"Bub Lap, theme by Blandrice",,,,yes,,"['overlay', 'keyboardoverlay', 'bub']",overlay,https://github.com/blandrice/blandlibs/tree/master/libs/overlay/keyboardoverlay/bub
+47,kbo_luca,L-U-C-A,,,,yes,Basic HTML Div-based keyboard,"['overlay', 'keyboardoverlay', 'luca']",overlay,https://github.com/blandrice/blandlibs/tree/master/libs/overlay/keyboardoverlay/luca
+48,radar,Andrii,,yes,,,Player radar overlay feature,"['overlay', 'radar']",overlay,https://github.com/blandrice/blandlibs/tree/master/libs/overlay/radar
+49,timer,blandrice,,yes,,,display a timer (total time given by server),"['overlay', 'timer']",overlay,https://github.com/blandrice/blandlibs/tree/master/libs/overlay/timer
+50,timer,blandrice,,,yes,,Timer utility (syncs Client to Server),"['overlay', 'timer']",overlay,https://github.com/blandrice/blandlibs/tree/master/libs/overlay/timer
+51,AABB,KG07 (modified by blandrice),,,,yes,AABB (axis-aligned bounding box-box) collision + resolution,"['physics', 'collisions']",physics,https://github.com/blandrice/blandlibs/tree/master/libs/physics/collisions
+52,raybox,blandrice,,,,yes,Ray-box intersections in Krunker.,"['physics', 'collisions']",physics,https://github.com/blandrice/blandlibs/tree/master/libs/physics/collisions
+53,rotbox,blandrice,,,,yes,rotated bounding box collision,"['physics', 'collisions']",physics,https://github.com/blandrice/blandlibs/tree/master/libs/physics/collisions
+54,fade,Andrii,,yes,,,,"['scene', 'fade']",scene,https://github.com/blandrice/blandlibs/tree/master/libs/scene/fade
+55,fade,Andrii,,,yes,,,"['scene', 'fade']",scene,https://github.com/blandrice/blandlibs/tree/master/libs/scene/fade
+56,b91,SlxTnT,,,,yes,Base91 decoding converted from https://github.com/KvanTTT/BaseNcoding,"['util', 'b91encoding']",util,https://github.com/blandrice/blandlibs/tree/master/libs/util/b91encoding
+57,GPTtrutils,blandrice (with ChatGPT),,,yes,,ChatGPT test on generating string utilities,"['util', 'ChatGPT']",util,https://github.com/blandrice/blandlibs/tree/master/libs/util/ChatGPT
+58,GPT_vec,blandrice (with ChatGPT),,,,yes,ChatGPT test on generating vector functions,"['util', 'ChatGPT']",util,https://github.com/blandrice/blandlibs/tree/master/libs/util/ChatGPT
+59,dtypes,blandrice,,,,yes,,"['util', 'dtypes']",util,https://github.com/blandrice/blandlibs/tree/master/libs/util/dtypes
+60,listutil,blandrice,,,,yes,Additional string utilities,"['util', 'lists']",util,https://github.com/blandrice/blandlibs/tree/master/libs/util/lists
+61,prng,Sakurasou,https://discord.com/channels/859947586005368862/862113777946984459/988841369529376839,,,yes,Custom Seed PRNG (Pseudorandom Number Generator) using SFC32 (Simple Fast Counter) and MurmurHash3,"['util', 'PRNG']",util,https://github.com/blandrice/blandlibs/tree/master/libs/util/PRNG
+62,strutils,"blandrice, ProfNoob (replaceall), ManiaMapper (Splice)",,,,yes,Additional String utilities,"['util', 'strutil']",util,https://github.com/blandrice/blandlibs/tree/master/libs/util/strutil
+63,vec,blandrice,,,,yes,vector math,"['util', 'vectors']",util,https://github.com/blandrice/blandlibs/tree/master/libs/util/vectors

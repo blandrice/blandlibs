@@ -1,4 +1,4 @@
-#include <DJ_head.krnk>
+#include <old_DJ_head_h.krnk>
 
 # ===================================================================
 # Library: doublejump\dj_oldsync\old_djump_client.krnk
@@ -80,20 +80,20 @@ public action onPlayerUpdate(str id, num delta, obj inputs) {
         player.timeLastCrouched = timeNow;
     }
     if((bool) player.onGround) {
-        currentPlayerState.jumpCount = DJ_head_MAX_JUMPCOUNT-1;
-    } else if (DJ_head_WALLJUMP_REFRESHS && (bool) player.onWall && (bool) inputs.jump) {
-        currentPlayerState.jumpCount = DJ_head_MAX_JUMPCOUNT-1;
+        currentPlayerState.jumpCount = old_DJ_head_h_MAX_JUMPCOUNT-1;
+    } else if (old_DJ_head_h_WALLJUMP_REFRESHS && (bool) player.onWall && (bool) inputs.jump) {
+        currentPlayerState.jumpCount = old_DJ_head_h_MAX_JUMPCOUNT-1;
     } 
     if((bool) inputs.jump) {
         if(!(bool)currentPlayerState.hasJumped  && (num)currentPlayerState.jumpCount > 0 && !(bool)player.onGround) {
-            if (!(bool) player.onWall && DJ_head_WALLJUMP_REFRESHS) {
-                if (DJ_head_ENABLE_CROUCHJUMP && ((timeNow - (num) player.timeLastCrouched) < DJ_head_MS_DURATION_UNCROUCH)) {
-                    player.velocity.y = Math.lerp(DJ_head_HEIGHT_CROUCHJUMP,DJ_head_HEIGHT_JUMP,(timeNow - (num)player.timeLastCrouched)/DJ_head_MS_DURATION_UNCROUCH);	# "moonjumping" calculation
+            if (!(bool) player.onWall && old_DJ_head_h_WALLJUMP_REFRESHS) {
+                if (old_DJ_head_h_ENABLE_CROUCHJUMP && ((timeNow - (num) player.timeLastCrouched) < old_DJ_head_h_MS_DURATION_UNCROUCH)) {
+                    player.velocity.y = Math.lerp(old_DJ_head_h_HEIGHT_CROUCHJUMP,old_DJ_head_h_HEIGHT_JUMP,(timeNow - (num)player.timeLastCrouched)/old_DJ_head_h_MS_DURATION_UNCROUCH);	# "moonjumping" calculation
                 } else {
-                    player.velocity.y = DJ_head_HEIGHT_JUMP;	
+                    player.velocity.y = old_DJ_head_h_HEIGHT_JUMP;	
                 }
-                if (DJ_head_SOUND > 0) {
-                    GAME.SOUND.play2D(32576, 1, 0.5, false); # jump DJ_head_SOUND
+                if (old_DJ_head_h_SOUND > 0) {
+                    GAME.SOUND.play2D(32576, 1, 0.5, false); # jump old_DJ_head_h_SOUND
                 }
                 (num)currentPlayerState.jumpCount--;
             }

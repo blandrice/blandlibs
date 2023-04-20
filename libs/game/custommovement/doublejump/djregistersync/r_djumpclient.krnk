@@ -4,7 +4,7 @@
 # Description: double-jump using registersync feature
 # ===================================================================
 
-#include <DJconfig.krnk>
+#include <DJconfig_h.krnk>
 
 # Add this both on the server and client side.
 
@@ -37,7 +37,7 @@ public action onPlayerUpdate(str id, num delta, obj inputs) {
     # reset jumpcount on ground
     if((bool) player.onGround) 
     {
-        player.jumpCount = (num) DJconfig_c.MAX_JUMPCOUNT-1;
+        player.jumpCount = (num) DJconfig_h_c.MAX_JUMPCOUNT-1;
         player.timeLastOnGround = 0;
     } 
     else
@@ -45,26 +45,26 @@ public action onPlayerUpdate(str id, num delta, obj inputs) {
         (num) player.timeLastOnGround += delta;
     } 
     #  reset jumpCount after walljump
-     if ((bool) DJconfig_c.WALLJUMP_REFRESHS && (bool) player.onWall && (bool) inputs.jump) 
+     if ((bool) DJconfig_h_c.WALLJUMP_REFRESHS && (bool) player.onWall && (bool) inputs.jump) 
     {
-        player.jumpCount = (num) DJconfig_c.MAX_JUMPCOUNT-1;
+        player.jumpCount = (num) DJconfig_h_c.MAX_JUMPCOUNT-1;
     } 
     # input jump logic
     if((bool) inputs.jump) {
         if(!(bool)player.hasJumped  && (num)player.jumpCount > 0 && !(bool)player.onGround && ((num)player.timeLastOnGround > 150)) 
         {
-            if (!(bool) player.onWall && (bool)DJconfig_c.WALLJUMP_REFRESHS) 
+            if (!(bool) player.onWall && (bool)DJconfig_h_c.WALLJUMP_REFRESHS) 
             {
-                if ((bool) DJconfig_c.ENABLE_CROUCHJUMP && ((num)player.timeLastCrouched < (num)DJconfig_c.MS_DURATION_UNCROUCH)) 
+                if ((bool) DJconfig_h_c.ENABLE_CROUCHJUMP && ((num)player.timeLastCrouched < (num)DJconfig_h_c.MS_DURATION_UNCROUCH)) 
                 {
-                    player.velocity.y = Math.lerp((num) DJconfig_c.VEL_CROUCHJUMP,(num) DJconfig_c.VEL_JUMP,(num)player.timeLastCrouched/(num) DJconfig_c.MS_DURATION_UNCROUCH);	# "moonjumping" calculation
+                    player.velocity.y = Math.lerp((num) DJconfig_h_c.VEL_CROUCHJUMP,(num) DJconfig_h_c.VEL_JUMP,(num)player.timeLastCrouched/(num) DJconfig_h_c.MS_DURATION_UNCROUCH);	# "moonjumping" calculation
                 } else 
                 {
-                    player.velocity.y = (num) DJconfig_c.VEL_JUMP;	
+                    player.velocity.y = (num) DJconfig_h_c.VEL_JUMP;	
                 }
-                if ((num) DJconfig_c.SOUND > 0) 
+                if ((num) DJconfig_h_c.SOUND > 0) 
                 {
-                    GAME.SOUND.play2D(32576, 1, 0.5, false); # jump DJconfig_c.SOUND
+                    GAME.SOUND.play2D(32576, 1, 0.5, false); # jump DJconfig_h_c.SOUND
                 }
 
                 (num)player.jumpCount--;
