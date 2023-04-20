@@ -1,5 +1,4 @@
 # Blandrice's Library
-## The State of Blandlibs!
 [Table of all Libraries](PrettyTable.md)
 
 Category                   |  Author
