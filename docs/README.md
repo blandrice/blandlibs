@@ -6,8 +6,7 @@ Category                   |  Author
 ![](category.png)  |  ![](author.png)
 
 
-## Description
-📖☕ Hi friends, welcome to my library ☕📖
+## 📖☕ Hi friends, welcome to my library! ☕📖
 
 I made a quick script to do Krunkscript Library. I'm hoping it makes scripting easier and more portable for now.
 
