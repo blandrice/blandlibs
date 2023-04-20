@@ -1,5 +1,5 @@
 # ===================================================================
-# Library: libs\ECS\components\shake\shake_s.krnk
+# Library: libs\ECS\components\shake\ECS_shake_s.krnk
 # Author: blandrice
 # Description: ECS shake feature
 # ===================================================================

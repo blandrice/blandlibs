@@ -1,6 +1,6 @@
 #include <plrbhvr_s.krnk>
 #include <gamestart_s.krnk>
-#include <platform.krnk>
+#include <ECS_platform_s.krnk>
 
 #include <ecs_s.krnk>
 
@@ -20,7 +20,7 @@ public action start(){
     for (num i = 0; i < dimplat; i++){
         for (num j = 0; j < dimplat; j++){
             for (num k = 0; k < LAYERS; k++){
-                platform_create(
+                ECS_platform_screate(
                     {
                         scale:{x:WIDTH,y:HEIGHT,z:WIDTH},
                         position:{x:i*(WIDTH + SEP) - offset,y:HEIGHT_START+k*LAYERS_OFFSET,z:j*(WIDTH + SEP) - offset},

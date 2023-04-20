@@ -1,5 +1,5 @@
 #include <plrbhvr_s.krnk>
-#include <platform.krnk>
+#include <ECS_platform_s.krnk>
 #include <ecs_s.krnk>
 
 
@@ -11,7 +11,7 @@ public action update(num delta){
     if (lengthOf plrutil_s_spawnedPlayers > 0) {
         if (created == 0){
             # crumbling platform
-            platform_create(
+            ECS_platform_s_create(
                 {
                     scale:{x:WIDTH,y:HEIGHT,z:WIDTH},
                     position:{x:50,y:10,z:0},
@@ -20,7 +20,7 @@ public action update(num delta){
                 }
             );
             # moving platform up & down
-            platform_create(
+            ECS_platform_s_create(
                 {
                     scale:{x:WIDTH,y:HEIGHT,z:WIDTH},
                     position:{x:100,y:10,z:0},

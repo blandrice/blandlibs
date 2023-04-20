@@ -1,5 +1,5 @@
 #include <plrbhvr_s.krnk>
-#include <platform.krnk>
+#include <ECS_ECS_platform_ss.krnk>
 #include <ecs_s.krnk>
 
 # dimensions of platforms
@@ -88,7 +88,7 @@ public action update(num delta){
                 
                 if (((num)inode.id >= N_X_LIN_PLATSTART) && ((num)inode.id <= N_X_LIN_PLATEND))
                 {
-                    platform_create(
+                    ECS_platform_screate(
                         {
                             color: PLATCOLOR,
                             aid: PLATAID,
@@ -106,7 +106,7 @@ public action update(num delta){
                 } 
                 else if (((num)inode.id >= N_X_LIN_0_5_PLATSTART) && ((num)inode.id <= N_X_LIN_0_5_PLATEND))
                 {
-                    platform_create(
+                    ECS_platform_screate(
                         {
                             color: PLATCOLOR,
                             aid: PLATAID,
@@ -125,7 +125,7 @@ public action update(num delta){
                 }
                 else if (((num)inode.id >= N_Y_LIN_PLATSTART) && ((num)inode.id <= N_Y_LIN_PLATEND))
                 {
-                    platform_create(
+                    ECS_platform_screate(
                         {
                             color: PLATCOLOR,
                             aid: PLATAID,
@@ -143,7 +143,7 @@ public action update(num delta){
                 }
                 else if (((num)inode.id >= N_Y_LIN_0_5_PLATSTART) && ((num)inode.id <= N_Y_LIN_0_5_PLATEND))
                 {
-                    platform_create(
+                    ECS_platform_screate(
                         {
                             color: PLATCOLOR,
                             aid: PLATAID,
@@ -162,7 +162,7 @@ public action update(num delta){
                 }
                 else if (((num)inode.id >= N_Z_LIN_PLATSTART) && ((num)inode.id <= N_Z_LIN_PLATEND))
                 {
-                    platform_create(
+                    ECS_platform_screate(
                         {
                             color: PLATCOLOR,
                             aid: PLATAID,
@@ -180,7 +180,7 @@ public action update(num delta){
                 }
                 else if (((num)inode.id >= N_Z_LIN_0_5_PLATSTART) && ((num)inode.id <= N_Z_LIN_0_5_PLATEND))
                 {
-                    platform_create(
+                    ECS_platform_screate(
                         {
                             color: PLATCOLOR,
                             aid: PLATAID,
@@ -199,7 +199,7 @@ public action update(num delta){
                 }
                 else if (((num)inode.id >= N_VERT_CIRCLEX_PLATSTART) && ((num)inode.id <= N_VERT_CIRCLEX_PLATEND))
                 {
-                    platform_create(
+                    ECS_platform_screate(
                         {
                             color: PLATCOLOR,
                             aid: PLATAID,
@@ -217,7 +217,7 @@ public action update(num delta){
                 }
                 else if (((num)inode.id >= N_VERT_CIRCLEX_0_5_PLATSTART) && ((num)inode.id <= N_VERT_CIRCLEX_0_5_PLATEND))
                 {
-                    platform_create(
+                    ECS_platform_screate(
                         {
                             color: PLATCOLOR,
                             aid: PLATAID,
@@ -236,7 +236,7 @@ public action update(num delta){
                 }
                 else if (((num)inode.id >= N_VERT_CIRCLEX_CC_PLATSTART) && ((num)inode.id <= N_VERT_CIRCLEX_CC_PLATEND))
                 {
-                    platform_create(
+                    ECS_platform_screate(
                         {
                             color: PLATCOLOR,
                             aid: PLATAID,
@@ -255,7 +255,7 @@ public action update(num delta){
                 }
                 else if (((num)inode.id >= N_VERT_CIRCLEX_CC_0_5_PLATSTART) && ((num)inode.id <= N_VERT_CIRCLEX_CC_0_5_PLATEND))
                 {
-                    platform_create(
+                    ECS_platform_screate(
                         {
                             color: PLATCOLOR,
                             aid: PLATAID,
@@ -275,7 +275,7 @@ public action update(num delta){
                 }
                 else if (((num)inode.id >= N_VERT_CIRCLEZ_PLATSTART) && ((num)inode.id <= N_VERT_CIRCLEZ_PLATEND))
                 {
-                    platform_create(
+                    ECS_platform_screate(
                         {
                             color: PLATCOLOR,
                             aid: PLATAID,
@@ -293,7 +293,7 @@ public action update(num delta){
                 }
                 else if (((num)inode.id >= N_VERT_CIRCLEZ_0_5_PLATSTART) && ((num)inode.id <= N_VERT_CIRCLEZ_0_5_PLATEND))
                 {
-                    platform_create(
+                    ECS_platform_screate(
                         {
                             color: PLATCOLOR,
                             aid: PLATAID,
@@ -312,7 +312,7 @@ public action update(num delta){
                 }
                 else if (((num)inode.id >= N_VERT_CIRCLEZ_CC_PLATSTART) && ((num)inode.id <= N_VERT_CIRCLEZ_CC_PLATEND))
                 {
-                    platform_create(
+                    ECS_platform_screate(
                         {
                             color: PLATCOLOR,
                             aid: PLATAID,
@@ -331,7 +331,7 @@ public action update(num delta){
                 }
                 else if (((num)inode.id >= N_VERT_CIRCLEZ_CC_0_5_PLATSTART) && ((num)inode.id <= N_VERT_CIRCLEZ_CC_0_5_PLATEND))
                 {
-                    platform_create(
+                    ECS_platform_screate(
                         {
                             color: PLATCOLOR,
                             aid: PLATAID,
@@ -351,7 +351,7 @@ public action update(num delta){
                 }
                 else if (((num)inode.id >= N_HOR_CIRCLE_PLATSTART) && ((num)inode.id <= N_HOR_CIRCLE_PLATEND))
                 {
-                    platform_create(
+                    ECS_platform_screate(
                         {
                             color: PLATCOLOR,
                             aid: PLATAID,
@@ -369,7 +369,7 @@ public action update(num delta){
                 }
                 else if (((num)inode.id >= N_HOR_CIRCLE_0_5_PLATSTART) && ((num)inode.id <= N_HOR_CIRCLE_0_5_PLATEND))
                 {
-                    platform_create(
+                    ECS_platform_screate(
                         {
                             color: PLATCOLOR,
                             aid: PLATAID,
@@ -388,7 +388,7 @@ public action update(num delta){
                 }
                 else if (((num)inode.id >= N_HOR_CIRCLE_CC_PLATSTART) && ((num)inode.id <= N_HOR_CIRCLE_CC_PLATEND))
                 {
-                    platform_create(
+                    ECS_platform_screate(
                         {
                             color: PLATCOLOR,
                             aid: PLATAID,
@@ -407,7 +407,7 @@ public action update(num delta){
                 }
                 else if (((num)inode.id >= N_HOR_CIRCLE_0_5_CC_PLATSTART) && ((num)inode.id <= N_HOR_CIRCLE_0_5_CC_PLATEND))
                 {
-                    platform_create(
+                    ECS_platform_screate(
                         {
                             color: PLATCOLOR,
                             aid: PLATAID,
