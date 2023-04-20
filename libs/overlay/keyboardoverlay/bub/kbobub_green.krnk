@@ -2,7 +2,7 @@
 
 # ===================================================================
 # Library: libs\keyboardoverlay\bub\kbobub_green.krnk
-# Author: Bub Lap, theme by Blandrice
+# Author: Bub Lap
 # ===================================================================
 
 public action start()  {

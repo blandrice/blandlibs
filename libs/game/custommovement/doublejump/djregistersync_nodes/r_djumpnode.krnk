@@ -1,6 +1,6 @@
 # ===================================================================
 # File: libs\doublejump\djregistersync\r_djumpclient.krnk
-# Author: DQ_Swat + blandrice
+# Author: blandrice
 # ===================================================================
 
 #include <DJcfg_nodes_h.krnk>

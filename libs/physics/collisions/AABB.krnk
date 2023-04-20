@@ -1,6 +1,7 @@
 # ===================================================================
 # Header: \libs\collisions\AABB.krnk
-# Author: KG07 (modified by blandrice)
+# Author: KG07
+# Contributors: blandrice
 # Description: AABB (axis-aligned bounding box-box) collision + resolution
 # ===================================================================
 

@@ -1,6 +1,6 @@
 # ===================================================================
 # Library: libs\fiveNightsCamera\fnitecam.krnk
-# Author: CreepyCats
+# Author: creepycats
 # ===================================================================
 
 str keypress = "u";

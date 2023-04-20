@@ -344,7 +344,8 @@ str action b91_encode(num[] data) {
 }
 # ===================================================================
 # Header: \strutils\strutils.krnk
-# Author: blandrice, ProfNoob (replaceall), ManiaMapper (Splice)
+# Author: ProfNoob 
+# Contributors: ManiaMapper (Splice)
 # Description: Additional String utilities
 # ===================================================================
 str action strutils_truncate(str text, num ln) {

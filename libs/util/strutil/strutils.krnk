@@ -1,6 +1,7 @@
 # ===================================================================
 # Header: \strutils\strutils.krnk
-# Author: blandrice, ProfNoob (replaceall), ManiaMapper (Splice)
+# Author: ProfNoob
+# Contributors: blandrice, ManiaMapper (splice), profnoob (replace all)
 # Description: Additional String utilities
 # ===================================================================
 str action truncate(str text, num ln) {

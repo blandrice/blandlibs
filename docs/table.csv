@@ -3,10 +3,10 @@
 1,ranksmainmap,blandrice,https://github.com/blandrice/krunkerClansPlus,,yes,,This is a shareable script to display popular Krunker Commmunity Clans Ranks in-game.,"['database', 'clansrank']",database,https://github.com/blandrice/blandlibs/tree/master/libs/database/clansrank
 2,ranks,blandrice,https://github.com/blandrice/krunkerClansPlus,yes,,,Create a map in Krunker and copy the client & server scripts from this github to your new map.,"['database', 'clansrank']",database,https://github.com/blandrice/blandlibs/tree/master/libs/database/clansrank
 3,ranks,,,,yes,,,"['database', 'clansrank']",database,https://github.com/blandrice/blandlibs/tree/master/libs/database/clansrank
-4,drawtriangle,bub_lap,,,,yes,Basic drawTriangle action (KrunkScript example),"['examples', 'drawtriangle']",examples,https://github.com/blandrice/blandlibs/tree/master/libs/examples/drawtriangle
+4,drawtriangle,Bub Lap,,,,yes,Basic drawTriangle action (KrunkScript example),"['examples', 'drawtriangle']",examples,https://github.com/blandrice/blandlibs/tree/master/libs/examples/drawtriangle
 5,r_djumpclient,blandrice,,,,yes,double-jump using registersync feature,"['game', 'custommovement', 'doublejump', 'djregistersync']",game,https://github.com/blandrice/blandlibs/tree/master/libs/game/custommovement/doublejump/djregistersync
-6,r_djumpnode,DQ_Swat + blandrice,,,,yes,,"['game', 'custommovement', 'doublejump', 'djregistersync_nodes']",game,https://github.com/blandrice/blandlibs/tree/master/libs/game/custommovement/doublejump/djregistersync_nodes
-7,r_djumpnode,DQ_Swat + blandrice,,yes,,,Doublejump with crystals,"['game', 'custommovement', 'doublejump', 'djregistersync_nodes']",game,https://github.com/blandrice/blandlibs/tree/master/libs/game/custommovement/doublejump/djregistersync_nodes
+6,r_djumpnode,blandrice,,,,yes,,"['game', 'custommovement', 'doublejump', 'djregistersync_nodes']",game,https://github.com/blandrice/blandlibs/tree/master/libs/game/custommovement/doublejump/djregistersync_nodes
+7,r_djumpnode,blandrice,,yes,,,Doublejump with crystals,"['game', 'custommovement', 'doublejump', 'djregistersync_nodes']",game,https://github.com/blandrice/blandlibs/tree/master/libs/game/custommovement/doublejump/djregistersync_nodes
 8,r_djumpnode,blandrice,,,yes,,Doublejump with crystals,"['game', 'custommovement', 'doublejump', 'djregistersync_nodes']",game,https://github.com/blandrice/blandlibs/tree/master/libs/game/custommovement/doublejump/djregistersync_nodes
 9,old_djump,blandrice,,yes,,,old doublejump by blandrice before registersync was introduced.,"['game', 'custommovement', 'doublejump', 'dj_oldsync']",game,https://github.com/blandrice/blandlibs/tree/master/libs/game/custommovement/doublejump/dj_oldsync
 10,old_djump,blandrice,,,yes,,,"['game', 'custommovement', 'doublejump', 'dj_oldsync']",game,https://github.com/blandrice/blandlibs/tree/master/libs/game/custommovement/doublejump/dj_oldsync
@@ -43,23 +43,23 @@
 41,syncobjs,blandrice,,,yes,,,"['network', 'syncobjs']",network,https://github.com/blandrice/blandlibs/tree/master/libs/network/syncobjs
 42,camsway,creepycats,,yes,,,sway camera when moving left and right,"['overlay', 'cameraSway']",overlay,https://github.com/blandrice/blandlibs/tree/master/libs/overlay/cameraSway
 43,gamescore,blandrice,,yes,,,show points incrementing UI through krunkscript,"['overlay', 'customgamescoreUI']",overlay,https://github.com/blandrice/blandlibs/tree/master/libs/overlay/customgamescoreUI
-44,fnitecam,CreepyCats,,,,yes,,"['overlay', 'fiveNightsCamera']",overlay,https://github.com/blandrice/blandlibs/tree/master/libs/overlay/fiveNightsCamera
+44,fnitecam,creepycats,,,,yes,,"['overlay', 'fiveNightsCamera']",overlay,https://github.com/blandrice/blandlibs/tree/master/libs/overlay/fiveNightsCamera
 45,kbobub_default,Bub Lap,,,,yes,,"['overlay', 'keyboardoverlay', 'bub']",overlay,https://github.com/blandrice/blandlibs/tree/master/libs/overlay/keyboardoverlay/bub
-46,kbobub_green,"Bub Lap, theme by Blandrice",,,,yes,,"['overlay', 'keyboardoverlay', 'bub']",overlay,https://github.com/blandrice/blandlibs/tree/master/libs/overlay/keyboardoverlay/bub
+46,kbobub_green,Bub Lap,,,,yes,,"['overlay', 'keyboardoverlay', 'bub']",overlay,https://github.com/blandrice/blandlibs/tree/master/libs/overlay/keyboardoverlay/bub
 47,kbo_luca,L-U-C-A,,,,yes,Basic HTML Div-based keyboard,"['overlay', 'keyboardoverlay', 'luca']",overlay,https://github.com/blandrice/blandlibs/tree/master/libs/overlay/keyboardoverlay/luca
 48,radar,Andrii,,yes,,,Player radar overlay feature,"['overlay', 'radar']",overlay,https://github.com/blandrice/blandlibs/tree/master/libs/overlay/radar
 49,timer,blandrice,,yes,,,display a timer (total time given by server),"['overlay', 'timer']",overlay,https://github.com/blandrice/blandlibs/tree/master/libs/overlay/timer
 50,timer,blandrice,,,yes,,Timer utility (syncs Client to Server),"['overlay', 'timer']",overlay,https://github.com/blandrice/blandlibs/tree/master/libs/overlay/timer
-51,AABB,KG07 (modified by blandrice),,,,yes,AABB (axis-aligned bounding box-box) collision + resolution,"['physics', 'collisions']",physics,https://github.com/blandrice/blandlibs/tree/master/libs/physics/collisions
+51,AABB,KG07,,,,yes,AABB (axis-aligned bounding box-box) collision + resolution,"['physics', 'collisions']",physics,https://github.com/blandrice/blandlibs/tree/master/libs/physics/collisions
 52,raybox,blandrice,,,,yes,Ray-box intersections in Krunker.,"['physics', 'collisions']",physics,https://github.com/blandrice/blandlibs/tree/master/libs/physics/collisions
 53,rotbox,blandrice,,,,yes,rotated bounding box collision,"['physics', 'collisions']",physics,https://github.com/blandrice/blandlibs/tree/master/libs/physics/collisions
 54,fade,Andrii,,yes,,,,"['scene', 'fade']",scene,https://github.com/blandrice/blandlibs/tree/master/libs/scene/fade
 55,fade,Andrii,,,yes,,,"['scene', 'fade']",scene,https://github.com/blandrice/blandlibs/tree/master/libs/scene/fade
 56,b91,SlxTnT,,,,yes,Base91 decoding converted from https://github.com/KvanTTT/BaseNcoding,"['util', 'b91encoding']",util,https://github.com/blandrice/blandlibs/tree/master/libs/util/b91encoding
-57,GPTtrutils,blandrice (with ChatGPT),,,,yes,ChatGPT test on generating string utilities,"['util', 'ChatGPT']",util,https://github.com/blandrice/blandlibs/tree/master/libs/util/ChatGPT
-58,GPT_vec,blandrice (with ChatGPT),,,,yes,ChatGPT test on generating vector functions,"['util', 'ChatGPT']",util,https://github.com/blandrice/blandlibs/tree/master/libs/util/ChatGPT
+57,GPTtrutils,ChatGPT,,,,yes,ChatGPT test on generating string utilities,"['util', 'ChatGPT']",util,https://github.com/blandrice/blandlibs/tree/master/libs/util/ChatGPT
+58,GPT_vec,ChatGPT,,,,yes,ChatGPT test on generating vector functions,"['util', 'ChatGPT']",util,https://github.com/blandrice/blandlibs/tree/master/libs/util/ChatGPT
 59,dtypes,blandrice,,,,yes,,"['util', 'dtypes']",util,https://github.com/blandrice/blandlibs/tree/master/libs/util/dtypes
 60,listutil,blandrice,,,,yes,Additional string utilities,"['util', 'lists']",util,https://github.com/blandrice/blandlibs/tree/master/libs/util/lists
 61,prng,Sakurasou,https://discord.com/channels/859947586005368862/862113777946984459/988841369529376839,,,yes,Custom Seed PRNG (Pseudorandom Number Generator) using SFC32 (Simple Fast Counter) and MurmurHash3,"['util', 'PRNG']",util,https://github.com/blandrice/blandlibs/tree/master/libs/util/PRNG
-62,strutils,"blandrice, ProfNoob (replaceall), ManiaMapper (Splice)",,,,yes,Additional String utilities,"['util', 'strutil']",util,https://github.com/blandrice/blandlibs/tree/master/libs/util/strutil
+62,strutils,ProfNoob,,,,yes,Additional String utilities,"['util', 'strutil']",util,https://github.com/blandrice/blandlibs/tree/master/libs/util/strutil
 63,vec,blandrice,,,,yes,vector math,"['util', 'vectors']",util,https://github.com/blandrice/blandlibs/tree/master/libs/util/vectors
