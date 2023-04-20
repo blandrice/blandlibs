@@ -1,9 +1,9 @@
 # Blandrice's Library
 [Table of all Libraries](PrettyTable.md)
 
-![](cnt_krunkscript.png)          |  ![](cnt_contributors.png)
+![](cnt_krunkscript.png?)          |  ![](cnt_contributors.png?)
 :-------------------------:|:-------------------------:
-![](category.png)  |  ![](author.png)
+![](category.png?)  |  ![](author.png?)
 
 
 ## 📖☕ Hi friends, welcome to my library! ☕📖
