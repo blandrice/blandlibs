@@ -1,5 +1,5 @@
 # Blandrice's Library
-[Table of all Libraries](PrettyTable.md)
+[Table of all Libraries](KrunkScriptTable.md)
 
 ![](cnt_krunkscript.png?)          |  ![](cnt_contributors.png?)
 :-------------------------:|:-------------------------:
