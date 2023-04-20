@@ -2,6 +2,7 @@
 # Library: libs\customWeapons\customWeapons.krnk
 # Author: DQ Swat
 # Description: custom weapon script.
+# Link: https://discord.com/channels/859947586005368862/862113777946984459/923687262724685887
 # Requirements in editor:
 # 1. Classes >> Runner only
 # 2. disable Server Preset >> Gameplay Logic >> Throwable Melees

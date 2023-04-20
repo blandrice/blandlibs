@@ -1,6 +1,6 @@
 # ===================================================================
 # Library: libs\UI\scene\fade_server.krnk
-# Author: Andrii
+# Author: blandrice
 # ===================================================================
 
 public action onCustomTrigger(str playerID, str customParam, num value) {

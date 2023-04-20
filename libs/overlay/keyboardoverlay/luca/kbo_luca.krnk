@@ -1,6 +1,7 @@
 # ===================================================================
 # Library: libs\keyboardoverlay\kboverlay_luca.krnk
 # Author: L-U-C-A
+# Link: https://discord.com/channels/484192043833491487/575245801744498689/965934487169028116
 # Description: Basic HTML Div-based keyboard
 # ===================================================================
 public action start() {

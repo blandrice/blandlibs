@@ -1,7 +1,7 @@
 # ===================================================================
 # Library: libs\overlay\cameraSway\camsway_c.krnk
 # Author: creepycats
-# https://discord.com/channels/484192043833491487/575245801744498689/1055269916330168341
+# Link: https://discord.com/channels/484192043833491487/575245801744498689/1055269916330168341
 # Description: sway camera when moving left and right
 # ===================================================================
 obj smoothCam = {

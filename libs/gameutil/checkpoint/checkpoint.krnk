@@ -1,7 +1,7 @@
 # ===================================================================
 # Library: libs\gameutil\checkpoint\checkpoint.krnk
 # Author: Sakurasou
-# https://discord.com/channels/484192043833491487/575245801744498689/1045330962277486652
+# Link: https://discord.com/channels/484192043833491487/575245801744498689/1045330962277486652
 # Description: Changes the names of the Checkpoints on the Speedrun Timer in the bottom right (Point 1, Point 2, ...)
 # How to use: Just change the names in the checkpoints Array at the top for all the points you want to have a custom name.
 # ===================================================================
