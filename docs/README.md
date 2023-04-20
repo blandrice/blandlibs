@@ -1,7 +1,7 @@
 # Blandrice's Library
 [Table of all Libraries](PrettyTable.md)
 
-Category                   |  Author
+![](cnt_krunkscript.png)          |  ![](cnt_contributors.png)
 :-------------------------:|:-------------------------:
 ![](category.png)  |  ![](author.png)
 
