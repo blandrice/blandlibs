@@ -1,6 +1,11 @@
 # ===================================================================
 # Library: libs\fiveNightsCamera\fnitecam.krnk
 # Author: creepycats
+# Description: This script was created for the Krunker Map Remake of Five Nights at Freddys. It has been modified for public use. It has been attached as a map save to provide the user with a demonstration of how it works.
+# The script is set currently to open a menu when the player presses the space bar. The user can then navigate using the buttons provided to them and can exit the camera panel at any time by clicking the "Exit Camera" button.
+# Any and all uses of this script must be credited to Gato/creepycats#6942
+# Removing the Credit Text from the Camera overlay is not permitted.
+# Resizing or moving it IS permitted as long as you leave it in plain view and not cut off. And No, I will never permit anybody to use my maps nor scripts without my name being sourced. You don't deserve the credit for what I make.
 # ===================================================================
 
 str keypress = "u";

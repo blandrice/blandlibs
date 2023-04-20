@@ -3,9 +3,9 @@
 #include <plrbhvr_s.krnk>
 #include <shake_s.krnk>
 #include <syncobjs_s.krnk>
-#include <floating.krnk>
-#include <ecsgrav.krnk>
-#include <ecsphysics.krnk>
+#include <ECS_floating_s.krnk>
+#include <ECS_grav_s.krnk>
+#include <ECS_physics_s.krnk>
 #include <ecs_h.krnk>
 
 # ===================================================================

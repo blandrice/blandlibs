@@ -1,5 +1,5 @@
 # ===================================================================
-# Library: libs\ECS\components\physics\ecsphysics.krnk
+# Library: libs\game\ECS\components\movement\physics\ECS_physics_s.krnk
 # Author: blandrice
 #   Description: classic position/velocity/(eventually acceleration)
 # ===================================================================

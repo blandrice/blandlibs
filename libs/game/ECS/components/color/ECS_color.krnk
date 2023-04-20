@@ -4,7 +4,7 @@
 # ===================================================================
 # Library: libs\ECS\components\movebehavior\aibhvr.krnk
 # Author: blandrice
-#   Description: basic movement - following player?
+# Description: ECS component to change color
 # ===================================================================
 
 private action onECSUpdate(num delta, obj tobj, obj[] objlist){

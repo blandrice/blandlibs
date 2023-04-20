@@ -1,7 +1,7 @@
 #include <hitbox_s.krnk>
 #include <g.krnk>
-#include <ecsphysics.krnk>
-#include <lifetime.krnk>
+#include <ECS_physics_s.krnk>
+#include <ECS_lifetime_s.krnk>
 #include <ecs_s.krnk>
 #include <gamestart_s.krnk>
 

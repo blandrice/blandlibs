@@ -1,8 +1,8 @@
 #include <g.krnk>
 # ===================================================================
-# Library: libs\ECS\components\movement\floating\floating.krnk
+# Library: libs\ECS\components\movement\floating\ECS_floating_s.krnk
 # Author: blandrice
-#   Description: floating platforms component
+# Description: floating platforms component
 # ===================================================================
 
 num action applysin(obj tobj, str dim, num t)

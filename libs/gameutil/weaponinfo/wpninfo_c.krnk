@@ -1,4 +1,4 @@
-#include <wi.krnk>
+#include <wi_h.krnk>
 
 # ===================================================================
 # Library: weaponinfo\wpninfo_c.krnk (client)
@@ -14,7 +14,7 @@ obj plr = {};
 
 action addWeaponInfo(obj plrobject) {
     num idx = (num) plrobject.classIndex;
-    obj weapon = wi_info[idx];
+    obj weapon = wi_h_info[idx];
     plrobject.weapon = weapon;
 }
 

@@ -1,2 +1,2 @@
-#include <ecsbounce.krnk>
+#include <ECS_bounce_s.krnk>
 #include <ecs_s.krnk>

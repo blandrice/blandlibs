@@ -1,8 +1,8 @@
 # ===================================================================
 # Library: libs\keyboardoverlay\kbobub_default.krnk
 # Author: Bub Lap
-#   Description: keyboard stuff much like L-U-C-A’s but parameterizable
-#   Implementation is done in the render() function
+# Description: keyboard stuff much like L-U-C-A’s but parameterizable
+# Implementation is done in the render() function
 # ===================================================================
 obj keyLogger = {
 	keySizeUnit: 75,

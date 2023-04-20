@@ -3,7 +3,7 @@
 # ===================================================================
 # Library: libs\ECS\components\movebehavior\aibhvr.krnk
 # Author: blandrice
-#   Description: basic movement - following player?
+# Description: NOT READY basic movement - following player?
 # ===================================================================
 
 private action onECSUpdate(num delta, obj tobj, obj[] objlist){

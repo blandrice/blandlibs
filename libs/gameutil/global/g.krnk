@@ -1,7 +1,7 @@
 # ===================================================================
 # Header: \libs\utils\global\g.krnk
 # Author: blandrice
-#   Description: some global vars that other libs can reference to reduce calls
+# Description: some global vars that other libs can reference to reduce calls
 # ===================================================================
 
 

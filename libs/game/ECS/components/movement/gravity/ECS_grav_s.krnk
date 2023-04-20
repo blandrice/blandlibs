@@ -1,7 +1,7 @@
 # ===================================================================
-# Library: libs\ECS\bounce\ecsgrav.krnk
+# Library: libs\ECS\bounce\ECS_grav_s.krnk
 # Author: blandrice
-#   Description: gravity
+# Description: ECS gravity system
 # ===================================================================
 
 num MAXYVEL = 100;

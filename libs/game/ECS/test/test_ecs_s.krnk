@@ -1,11 +1,11 @@
 #include <plrutil_s.krnk>
 #include <gamestart_s.krnk>
 #include <plrbhvr_s.krnk>
-#include <ecsbounce.krnk>
-#include <ecsgrav.krnk>
-#include <ecsphysics.krnk>
-#include <aibhvr.krnk>
-#include <color.krnk>
+#include <ECS_bounce_s.krnk>
+#include <ECS_grav_s.krnk>
+#include <ECS_physics_s.krnk>
+#include <ECS_aibhvr.krnk>
+#include <ECS_color.krnk>
 
 #include <ecs_s.krnk>
 

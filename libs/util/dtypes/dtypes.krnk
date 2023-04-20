@@ -1,7 +1,7 @@
 # ===================================================================
 # Header: \libs\float\dtypes.krnk
 # Author: blandrice
-#   Description: custom float data types--> binary representation calculations.
+# Description: custom float data types--> binary representation calculations.
 #   Goal was to pack float data into 16-bits and send over NetworkMessage 
 #   (much smaller than ASCII string representation)
 # ===================================================================

@@ -1,8 +1,8 @@
 #include <AABB.krnk>
 # ===================================================================
-# Library: \libs\ECS\components\bounce\ecsbounce.krnk
+# Library: \libs\game\ECS\components\movement\bounce\ECS_bounce_s.krnk
 # Author: blandrice
-#   Description: Trying bounce on ECS!!!!
+# Description: ECS bounce object feature
 # ===================================================================
 
 private action onCollideWorld(obj tobj, obj[] collist){
