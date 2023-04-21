@@ -7,11 +7,10 @@ str[] FADE_PARAMS = str["black", "clear", "inout"];
 
 public action onCustomTrigger(str playerID, str customParam, num value) {
     for(num i = 0; i < lengthOf FADE_PARAMS; i++) {
-        str FADE_PARAM = FADE_PARAMS[i];
-        str FADE_TOKEN = "fade";
+        str FADE_PARAM = "fade" + FADE_PARAMS[i];
 
         if(customParam == FADE_PARAM) {
-            GAME.NETWORK.send(FADE_TOKEN + FADE_PARAM, {}, playerID);
+            GAME.NETWORK.send(FADE_PARAM, {}, playerID);
             return;
         }
     }
