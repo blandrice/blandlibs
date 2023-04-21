@@ -3,17 +3,16 @@
 # Author: blandrice
 # ===================================================================
 
+str[] FADE_PARAMS = str["black", "clear", "inout"];
+
 public action onCustomTrigger(str playerID, str customParam, num value) {
-    if (customParam == "fadeblack")
-    {
-        GAME.NETWORK.send("fadeblack", {}, playerID);
-    }
-    else if (customParam == "fadeclear")
-    {
-        GAME.NETWORK.send("fadeclear", {}, playerID);
-    }
-    else if (customParam == "fadeinout")
-    {
-        GAME.NETWORK.send("fadeinout", {}, playerID);
+    for(num i = 0; i < lengthOf FADE_PARAMS; i++) {
+        str FADE_PARAM = FADE_PARAMS[i];
+        str FADE_TOKEN = "fade";
+
+        if(customParam == FADE_PARAM) {
+            GAME.NETWORK.send(FADE_TOKEN + FADE_PARAM, {}, playerID);
+            return;
+        }
     }
 }
