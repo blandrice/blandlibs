@@ -5,8 +5,10 @@
 <details>
   <summary>Other Links (Click to expand)</summary>
 
-- Place your bets! [Official library timeline](https://docs.google.com/spreadsheets/d/1ysqDV1_kGJhyxax1zC248JT9ipulUkxKbrl_HfEKm2Y/edit#gid=0)
-- SwatDoge (very improved) documentation: https://krdocs.swatdo.ge/#cameras
+- SwatDoge: Look at the [Official library timeline](https://site.swatdo.ge/timeline/libs)
+- ProfNoob: place your bets! [And guess the official release date](https://docs.google.com/spreadsheets/d/1ysqDV1_kGJhyxax1zC248JT9ipulUkxKbrl_HfEKm2Y/edit#gid=0)
+- DQ clans' page of [Bug Reports](https://docs.google.com/spreadsheets/d/1A55MUUNc7rAT2GhsyT2XGFhmOSeN0hxkzarcx1S3l8g/edit#gid=2065035438)
+- SwatDoge documentation: https://krdocs.swatdo.ge/#cameras
 - Krunker official documentation: https://docs.krunker.io/#/
 - Krunker game editor: https://krunker.io/editor.html
 
