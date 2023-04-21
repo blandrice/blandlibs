@@ -23,7 +23,7 @@
 21,plrutil,blandrice,,,,yes,,"['gameutil', 'plrutil']",gameutil,https://github.com/blandrice/blandlibs/tree/master/libs/gameutil/plrutil
 22,plrutil,blandrice,,yes,,,workaround to check how many players are spawned in,"['gameutil', 'plrutil']",gameutil,https://github.com/blandrice/blandlibs/tree/master/libs/gameutil/plrutil
 23,plrutil,blandrice,,,yes,,,"['gameutil', 'plrutil']",gameutil,https://github.com/blandrice/blandlibs/tree/master/libs/gameutil/plrutil
-24,spectator,SlxTnT,https://discord.com/channels/859947586005368862/862113777946984459/900998093300969473,,,yes,My attempt at server side spectator checks. Can check the value with player.properties.isSpectator,"['gameutil', 'spectator']",gameutil,https://github.com/blandrice/blandlibs/tree/master/libs/gameutil/spectator
+24,spectator,SlxTnT,https://discord.com/channels/859947586005368862/862113777946984459/900998093300969473,,yes,,My attempt at server side spectator checks. Can check the value with player.properties.isSpectator,"['gameutil', 'spectator']",gameutil,https://github.com/blandrice/blandlibs/tree/master/libs/gameutil/spectator
 25,wpninfo,blandrice,,yes,,,adds additional CLASS's PRIMARY weapon info to player object.,"['gameutil', 'weaponinfo']",gameutil,https://github.com/blandrice/blandlibs/tree/master/libs/gameutil/weaponinfo
 26,plrbhvr,blandrice,,yes,,,disable server sync + behavior for custom movement,"['network', 'plrbehavior']",network,https://github.com/blandrice/blandlibs/tree/master/libs/network/plrbehavior
 27,plrbhvr,blandrice,,,yes,,,"['network', 'plrbehavior']",network,https://github.com/blandrice/blandlibs/tree/master/libs/network/plrbehavior

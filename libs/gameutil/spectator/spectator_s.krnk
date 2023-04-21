@@ -1,5 +1,5 @@
 # ===================================================================
-# Library: \libs\gameutil\spectator\spectator.krnk
+# Library: \libs\gameutil\spectator\spectator_s.krnk
 # Author: SlxTnT
 # Discord: https://discord.com/channels/859947586005368862/862113777946984459/900998093300969473
 # Description: My attempt at server side spectator checks. Can check the value with player.properties.isSpectator 
