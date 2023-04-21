@@ -1,0 +1,16 @@
+#include <test_library_c.krnk>
+
+# ==================================================
+# test_map_c.krnk
+# ==================================================
+
+str map_str = "";
+
+public action start() {
+    test_library_c_libraryString = "a";
+    GAME.log("test_library_givestr():",test_library_c_givestr());
+    
+    # map start
+    GAME.log("map_str",map_str);
+
+}

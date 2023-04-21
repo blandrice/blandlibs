@@ -19,7 +19,7 @@ This is just a quick job to get some sort of library feature before Krunker actu
 
 # Library Example!
 
-[Example HEADER](/libs/doublejump/DJ_head.krnk) --> [Example LIBRARY](/libs/doublejump/djump_client.krnk) --> [Example MAP SCRIPT](/libs/doublejump/test/testdjump_client.krnk) --> [Example FINAL SCRIPT](/out/o_testdjump_client.krnk)
+[Example HEADER](/libs/test/test_header_h.krnk) --> [Example LIBRARY](/libs/test/test_library_c.krnk) --> [Example MAP SCRIPT](/libs/test/test_map_c.krnk) --> [Example FINAL SCRIPT](/libs/test/o_test_map_c.krnk)
 
 
 # How it Works

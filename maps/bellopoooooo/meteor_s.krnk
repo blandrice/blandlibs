@@ -54,7 +54,7 @@ action create_UFO()
         color:0xFFFFFF,
         collide:{type:(num)(AABB_COL_WORLD),geometry:AABB_GEO_CUBE,resolve:AABB_RES_NONE}
     });
-    lifetime_addComponent(linkObj,15000);
+    ECS_lifetime_s_addComponent(linkObj,15000);
                 
     # obj hitbox = ECS_hitbox_s_create(
     #     linkObj,
@@ -82,7 +82,7 @@ action create_stone()
         color:0xFFFFFF,
         collide:{type:(num)(AABB_COL_PLRS),geometry:AABB_GEO_CUBE,resolve:AABB_RES_NONE}
     });
-    lifetime_addComponent(linkObj,15000);
+    ECS_lifetime_s_addComponent(linkObj,15000);
                 
     obj hitbox = ECS_hitbox_s_create(
         linkObj,

@@ -1,0 +1,39 @@
+# ==================================================
+# test_header_h.krnk
+# ==================================================
+
+num test_header_h_HEADER_CONSTANT = 0;
+
+
+# ==================================================
+# test_library_c.krnk
+# ==================================================
+str test_library_c_libraryString = "";
+
+str action test_library_c_givestr() {
+    return test_library_c_libraryString;
+}
+
+action test_library_c_start() {
+    # library start
+    GAME.log("test_header_h_num:",test_header_h_HEADER_CONSTANT);
+
+}
+
+# ==================================================
+# test_map_c.krnk
+# ==================================================
+
+str map_str = "";
+
+public action start(){
+    test_library_c_start();
+
+    test_library_c_libraryString = "a";
+    GAME.log("test_library_givestr():",test_library_c_givestr());
+    
+    # map start
+    GAME.log("map_str",map_str);
+
+
+}

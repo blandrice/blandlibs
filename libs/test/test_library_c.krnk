@@ -1,0 +1,16 @@
+#include <test_header_h.krnk>
+
+# ==================================================
+# test_library_c.krnk
+# ==================================================
+str libraryString = "";
+
+str action givestr() {
+    return libraryString;
+}
+
+public action start() {
+    # library start
+    GAME.log("test_header_h_num:",test_header_h_HEADER_CONSTANT);
+
+}
