@@ -2,7 +2,13 @@
 
 # ==================================================
 # test_map_c.krnk
+# BTW I recommend separating files for client "_c.krnk" 
+#                                  and server "_s.krnk"
 # ==================================================
+
+#include <test_header_h.krnk>
+# ^^^ notice ^^^ cannot import twice: "test_header_h.krnk"
+
 
 str map_str = "";
 

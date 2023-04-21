@@ -3,3 +3,8 @@
 # ==================================================
 
 num HEADER_CONSTANT = 0;
+
+obj HEADER_CFG = {
+    CONSTANT1: 5
+    STR1: "ASDF"
+}

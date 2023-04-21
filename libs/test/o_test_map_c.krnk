@@ -4,6 +4,10 @@
 
 num test_header_h_HEADER_CONSTANT = 0;
 
+obj test_header_h_HEADER_CFG = {
+    CONSTANT1: 5
+    STR1: "ASDF"
+}
 
 # ==================================================
 # test_library_c.krnk
@@ -22,7 +26,13 @@ action test_library_c_start() {
 
 # ==================================================
 # test_map_c.krnk
+# BTW I recommend separating files for client "_c.krnk" 
+#                                  and server "_s.krnk"
 # ==================================================
+
+#include <test_header_h.krnk>
+# ^^^ notice ^^^ cannot import twice: "test_header_h.krnk"
+
 
 str map_str = "";
 
