@@ -5,7 +5,7 @@
 #include <strutils.krnk>
 
 # ===================================================================
-# Library: libs\ECS\components\hitbox\hitbox_s.krnk
+# Library: libs\game\ECS\components\hitbox\ECS_hitbox_s.krnk
 # Author: blandrice
 # Description: ECS hitbox that can be assigned to a specific object.
 #   - once hit, can do a callback

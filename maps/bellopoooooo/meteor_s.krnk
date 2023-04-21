@@ -1,4 +1,4 @@
-#include <hitbox_s.krnk>
+#include <ECS_hitbox_s.krnk>
 #include <g.krnk>
 #include <ECS_physics_s.krnk>
 #include <ECS_lifetime_s.krnk>
@@ -56,7 +56,7 @@ action create_UFO()
     });
     lifetime_addComponent(linkObj,15000);
                 
-    # obj hitbox = hitbox_s_create(
+    # obj hitbox = ECS_hitbox_s_create(
     #     linkObj,
     #     {
     #         scale:{x:15,y:15,z:15},
@@ -84,7 +84,7 @@ action create_stone()
     });
     lifetime_addComponent(linkObj,15000);
                 
-    obj hitbox = hitbox_s_create(
+    obj hitbox = ECS_hitbox_s_create(
         linkObj,
         {
             scale:{x:15,y:15,z:15},

@@ -30,7 +30,7 @@ for root, dirs, files in os.walk(r"C:\Users\Justi\Documents\GitHub\blandlibs\lib
         if "_h.krnk" in name:
             print("skipping", os.path.join(root, name))
             continue
-        if "ecs_" in name.lower():
+        if "ecs_" in name.lower() and name not in ['ecs_s.krnk','ecs_c.krnk']:
             print("skipping", os.path.join(root, name))
             continue
         else:

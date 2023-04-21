@@ -1,4 +1,4 @@
-#include <hitbox_s.krnk>
+#include <ECS_hitbox_s.krnk>
 #include <g.krnk>
 #include <ECS_physics_s.krnk>
 #include <ECS_lifetime_s.krnk>
@@ -59,7 +59,7 @@ action create_gold(obj coords)
                 
     # moving platform up & down
     # resolve: str["increaseplrscore20","destroyself"]
-    obj hitbox = hitbox_s_create(
+    obj hitbox = ECS_hitbox_s_create(
         linkObj,
         {
             scale:{x:10,y:10,z:10},
@@ -104,7 +104,7 @@ action create_fruit()
                 
     # moving platform up & down
     # resolve: str["increaseplrscore20","destroyself"]
-    obj hitbox = hitbox_s_create(
+    obj hitbox = ECS_hitbox_s_create(
         linkObj,
         {
             scale:{x:fruitscale,y:fruitscale,z:fruitscale},
@@ -133,7 +133,7 @@ action create_stone()
                 
     # moving platform up & down
     # resolve: str["increaseplrscore20","destroyself"]
-    obj hitbox = hitbox_s_create(
+    obj hitbox = ECS_hitbox_s_create(
         linkObj,
         {
             scale:{x:30,y:30,z:30},
