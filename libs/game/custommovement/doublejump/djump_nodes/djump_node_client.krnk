@@ -1,10 +1,10 @@
 # ===================================================================
-# File: libs\game\custommovement\doublejump\djregistersync_nodes\r_djumpnode_client.krnk
+# File: libs\game\custommovement\doublejump\djregistersync_nodes\djump_node_client.krnk
 # Author: blandrice
 # Description: Doublejump with crystals
 # ===================================================================
 
-#include <r_djumpnode.krnk>
+#include <djump_node.krnk>
 
 num COOLDOWN = 2000;
 num W = 0.3;
@@ -43,28 +43,6 @@ public action render(num delta) {
     # GAME.OVERLAY.drawRect(x, y, w, h, r, color, opac, center)
 }
 
-
-# public action onPlayerUpdate(str id, num delta, obj inputs) {
-#     obj player = GAME.PLAYERS.findByID(id);
-#     # decrement nodes cooldown and color
-#     for (num i = 0; i < lengthOf (obj[]) player.nodes; i++) {
-#         obj inode = ((obj[]) player.nodes)[i];
-#         # color
-#         if ((num) inode.tCooldown > 0)
-#         {
-#             nodeslist[i].opacity = 0.1;
-#         } 
-#         else
-#         {
-#             nodeslist[i].opacity = 1;
-#         }
-#     }
-# }
-
-# ===================================================================
-# File: libs\doublejump\djregistersync\r_djumpclient.krnk
-# Author: blandrice
-# ===================================================================
 
 #include <DJcfg_nodes_h.krnk>
 #include <AABB.krnk>

@@ -5,4 +5,4 @@
 #include <ecs_c.krnk>
 
 #DOUBLJUMP
-#include <r_djumpclient.krnk>
+#include <djump_registersync_c.krnk>

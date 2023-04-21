@@ -1,7 +1,7 @@
 #include <old_DJ_head_h.krnk>
 
 # ===================================================================
-# Library: doublejump\dj_oldsync\old_djump_server.krnk
+# Library: libs\game\custommovement\doublejump\djump_old\djump_old_server.krnk
 # Author: blandrice
 # ===================================================================
 

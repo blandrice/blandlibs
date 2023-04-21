@@ -1,7 +1,11 @@
 # ===================================================================
-# File: libs\game\custommovement\doublejump\djregistersync_nodes\r_djumpnode_server.krnk
+# File: libs\doublejump\dj_oldsync\test\testdjump_server.krnk
 # Author: blandrice
-# Description: Doublejump with crystals
 # ===================================================================
 
-#include <r_djumpnode.krnk>
+#include <djump_old_server.krnk>
+
+public action start()
+{
+    # nothing to see here
+}

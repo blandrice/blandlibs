@@ -2,7 +2,7 @@
 #include <ECS_platform_s.krnk>
 #include <ecs_s.krnk>
 
-#include <r_djumpclient.krnk>
+#include <djump_registersync_c.krnk>
 
 # dimensions of ECS_platform_ss
 num WIDTH = 30;

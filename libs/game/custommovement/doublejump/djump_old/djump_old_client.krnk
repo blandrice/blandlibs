@@ -1,7 +1,7 @@
 #include <old_DJ_head_h.krnk>
 
 # ===================================================================
-# Library: doublejump\dj_oldsync\old_djump_client.krnk
+# Library: libs\game\custommovement\doublejump\djump_old\djump_old_client.krnk
 # Author: blandrice
 # Description: old doublejump by blandrice before registersync was introduced.
 # ===================================================================

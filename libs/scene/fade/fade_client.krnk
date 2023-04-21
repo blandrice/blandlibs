@@ -1,6 +1,8 @@
 # ===================================================================
 # Library: libs\UI\scene\fade_client.krnk
 # Author: blandrice
+# Description: screen fade in/out using triggers https://streamable.com/x5oi68
+# Link: https://discord.com/channels/484192043833491487/575245801744498689/1098317407061299261
 # ===================================================================
 
 num t_alpha = 0;

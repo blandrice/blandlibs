@@ -1,4 +1,4 @@
-#include <old_djump_client.krnk>
+#include <djump_old_client.krnk>
 
 # ===================================================================
 # File: maps/test_djump/testdjump_client.krnk

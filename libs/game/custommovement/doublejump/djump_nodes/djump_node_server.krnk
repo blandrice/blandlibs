@@ -1,0 +1,7 @@
+# ===================================================================
+# File: libs\game\custommovement\doublejump\djregistersync_nodes\djump_node_server.krnk
+# Author: blandrice
+# Description: Doublejump, but with using path nodes to collect a crystal for a double-jump
+# ===================================================================
+
+#include <djump_node.krnk>
