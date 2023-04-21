@@ -8,13 +8,15 @@
 
 ## 📖☕ Hi friends, welcome to my library! ☕📖
 
+<p align="center">
+  <img src="blandlib.png?" />
+</p>
+
 I made a quick script to do Krunkscript Library. I'm hoping it makes scripting easier and more portable for now.
 
 This is just a quick job to get some sort of library feature before Krunker actually implements the official version, and so I can start packaging my own libraries. But hopefully it is useful to other KrunkScripters 😊
 
-<p align="center">
-  <img src="blandlib.png?" />
-</p>
+
 
 
 # Library Example!
