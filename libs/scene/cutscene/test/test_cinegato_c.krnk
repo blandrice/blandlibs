@@ -1,0 +1,32 @@
+#include <cinegato_c.krnk>
+
+public action start()
+{
+	cinegato_c_MS_DURATION_TEXTWAIT = 1500;
+}
+
+public action onNetworkMessage(str id, obj data) {
+	if(id == "cts_1"){
+		cinegato_c_newCutscene();	# REQUIRED TO REGISTER A NEW CUTSCENE
+		cinegato_c_hide_arms();	# Hides the player model's arms so that moving the camera does not mess up the view model
+		
+		cinegato_c_dialogue_createBox();
+		cinegato_c_dialogue_add("This is a text box!", "Speaker Name", 20, true);
+		cinegato_c_dialogue_add("This is also a text box. Nothing special about it, but theres no speaker", "", 20, true);
+		cinegato_c_camera_glideTo(false, 0, 20, 0, 0, 0, 0, 1000); 
+		cinegato_c_dialogue_waitForFinish();
+		cinegato_c_fade_out(500);									
+		cinegato_c_camera_glideTo(true, 0, 0, 0, 0, 0, 0, 100);
+		cinegato_c_fade_in(500);									
+		cinegato_c_camera_glideTo(true, 0, 30, 0, 0, 0, 0, 1000);
+		cinegato_c_dialogue_createBox();
+		cinegato_c_dialogue_add("This is a text box that is pretty long and will require you press the button. Funny right? I know it is dude just laugh cmon pls", "Sidney DeVries", 20, false);
+		cinegato_c_dialogue_add("Cool, right?", "", 20, true);
+		cinegato_c_dialogue_waitForFinish();
+		cinegato_c_show_arms();									
+		cinegato_c_camera_glideTo(true, 0, 0, 0, 0, 0, 0, 1000);
+		
+		cinegato_c_playEvents(true); # Plays the cutscene, which CAN be skipped
+		#cinegato_c_playEvents(false); # Uncomment this line if you want to force the player to watch the cutscene
+	}
+}

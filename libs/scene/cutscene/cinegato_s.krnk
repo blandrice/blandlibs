@@ -1,0 +1,36 @@
+# ===================================================================
+# Library: libs\scene\cutscene\cinegato_c.krnk
+# Author: creepycats
+# Description: Gato Cutscene Handler
+# Script by creepycats
+# Method inspired by some random GMS2 Tutorial
+# DO NOT REDISTRIBUTE WITHOUT PROPER CREDIT | Feel Free to Create your Own Events and Send them to Me to Add
+# Link: https://discord.com/channels/484192043833491487/575245801744498689/967883995377442836
+# ===================================================================
+
+# === Server-side Event Helper ===
+public action onNetworkMessage(str id, obj data, str playerID) {
+	obj player = GAME.PLAYERS.findByID(playerID);
+	if(id == "cts_start"){
+		# Disable movement mechanics and velocity so player cannot move in cutscene
+		player.defaultMovement = false;
+		player.defaultVelocity = false;
+		player.disableShooting = true;
+		player.disableMelee = true;
+		player.velocity.x = 0;
+		player.velocity.y = 0;
+		player.velocity.z = 0;
+	}
+	if(id == "cts_end"){
+		# Re-enable movement mechanics and velocity so player can move after cutscene
+		player.defaultMovement = true;
+		player.defaultVelocity = true;
+		player.disableShooting = false;
+		player.disableMelee = false;
+	}
+	if(id == "cts_tp"){
+		player.position.x = (num)data.pos.x;
+		player.position.y = (num)data.pos.y;
+		player.position.z = (num)data.pos.z;
+	}
+}

@@ -1,0 +1,463 @@
+# ===================================================================
+# Library: libs\scene\cutscene\cinegato_c.krnk
+# Author: creepycats
+# Description: Gato Cutscene Handler
+# Script by creepycats
+# Method inspired by some random GMS2 Tutorial
+# DO NOT REDISTRIBUTE WITHOUT PROPER CREDIT | Feel Free to Create your Own Events and Send them to Me to Add
+# Link: https://discord.com/channels/484192043833491487/575245801744498689/967883995377442836
+# ===================================================================
+
+num MS_DURATION_TEXTWAIT = 3000; # duration to wait between text boxes
+
+# === Cutscene Initialization ===
+obj cutscenes = {
+	started: false,
+	currentIndex: 0,
+	eventTimer: 0
+};
+obj dialogue = {
+	currentChar: 0,
+	nextCharTimer: 0,
+	lines: obj[]
+};
+obj[] cutsceneEvents = obj[]; # This is the list we will reference for cutscene events and their variables
+# ===============================
+
+# === Cutscene Actions ===
+action playEvents(bool _canSkip) {
+	cutscenes.started = true; # Start running cutscene functions in the Update action
+	cutscenes.currentIndex = 0; # Set the event index to the beginning of the array
+	GAME.CAMERA.detach(); # Cutscenes most likely will use custom camera motion, so detach the camera
+
+	obj myself = GAME.PLAYERS.getSelf();
+	# Disable movement mechanics and velocity so player cannot move in cutscene
+	myself.defaultMovement = false;
+	myself.defaultVelocity = false;
+	myself.disableShooting = true;
+	myself.disableMelee = true;
+	myself.velocity.x = 0;
+	myself.velocity.y = 0;
+	myself.velocity.z = 0;
+	GAME.UI.addDIV("cts_blocker", "visible", "position:absolute;top:0%;left:0%;width:999999px;height:999999px;background-color:rgba(0,0,0,0);");
+	if(_canSkip){
+		GAME.UI.addDIV('cts_skipbutton', true,
+			'color:#f1f1f1;position:absolute;bottom:3%;left:25%;' +
+			'font-size: 24px;' +
+			'border:solid 2px #fff;border-radius:4px;' +
+			'padding:10px 30px 10px 30px;background-color: rgba(0,0,0,0.4);'
+		);
+	}
+	GAME.UI.updateDIVText('cts_skipbutton', 'Skip Cutscene');
+	GAME.INPUTS.unlockMouse();
+
+	# Set up first event duration
+	cutscenes.eventTimer = (num)cutsceneEvents[(num)cutscenes.currentIndex].duration;
+
+	if((str)cutsceneEvents[(num)cutscenes.currentIndex].event == "camera_glideTo"){
+		cutsceneEvents[(num)cutscenes.currentIndex].previous = {
+			position: {
+				x: GAME.CAMERA.position.x,
+				y: GAME.CAMERA.position.y,
+				z: GAME.CAMERA.position.z
+			},
+			rotation: {
+				x: GAME.CAMERA.rotation.x,
+				y: GAME.CAMERA.rotation.y,
+				z: GAME.CAMERA.rotation.z
+			}
+		};
+	}
+	
+	# Let the server know the player is in a cutscene
+	GAME.NETWORK.send("cts_start", {});
+}
+action endEvents() {
+	cutscenes.started = false; # Stop running cutscene functions in the Update action
+	GAME.CAMERA.attach(); # Cutscenes most likely will use custom camera motion, so attach the camera
+
+	obj myself = GAME.PLAYERS.getSelf();
+	# Re-enable movement mechanics and velocity so player can move after cutscene
+	myself.defaultMovement = true;
+	myself.defaultVelocity = true;
+	myself.visible = true;
+	myself.disableShooting = false;
+	myself.disableMelee = false;
+	GAME.NETWORK.send("cts_end", {});
+	GAME.UI.removeDIV("cts_blocker");
+	GAME.UI.removeDIV("cts_skipbutton");
+	GAME.INPUTS.lockMouse();
+	GAME.CAMERA.rotation.z = 0;
+	
+	dialogue = {
+		currentChar: 0,
+		nextCharTimer: 0,
+		lines: obj[]
+	};
+	if(!!GAME.UI.getDIVText("cts_dialogueBox")){
+		GAME.UI.removeDIV("cts_dialogueBox");
+		GAME.UI.removeDIV("cts_speakerBox");
+		GAME.UI.removeDIV("cts_nextButton");
+	}
+}
+
+action newCutscene() {
+	cutsceneEvents = obj[]; # Reset the cutscene events list
+}
+
+action player_bringToCamera(){
+	addTo cutsceneEvents {
+		event: "player_bringToCamera",
+		duration: 0.00001
+	};
+}
+action camera_shake(num _shake, num _duration){
+	addTo cutsceneEvents {
+		event: "camera_shake",
+		duration: _duration,
+		intensity: _shake
+	};
+}
+action camera_glideTo(bool _isRelative,num _posX, num _posY, num _posZ,num _rotX, num _rotY, num _rotZ, num _duration){
+	addTo cutsceneEvents {
+		event: "camera_glideTo",
+		duration: _duration,
+		relative: _isRelative,
+		position: {
+			x: _posX,
+			y: _posY,
+			z: _posZ
+		},
+		rotation: {
+			x: Math.toRad(_rotX),
+			y: Math.toRad(_rotY),
+			z: Math.toRad(_rotZ)
+		},
+		original: {
+			position: {
+				x: GAME.CAMERA.position.x,
+				y: GAME.CAMERA.position.y,
+				z: GAME.CAMERA.position.z
+			},
+			rotation: {
+				x: GAME.CAMERA.rotation.x,
+				y: GAME.CAMERA.rotation.y,
+				z: GAME.CAMERA.rotation.z
+			}
+		}
+	};
+}
+action sound_play(str _assetID, num _volume, num _rate){
+	addTo cutsceneEvents {
+		event: "sound_play",
+		duration: 0.00001,
+		asset: _assetID,
+		volume: _volume,
+		rate: _rate
+	};
+}
+action time_wait(num _duration){
+	addTo cutsceneEvents {
+		event: "time_wait",
+		duration: _duration
+	};
+}
+action show_arms(){
+	addTo cutsceneEvents {
+		event: "show_arms",
+		duration: 0.00001
+	};
+}
+action hide_arms(){
+	addTo cutsceneEvents {
+		event: "hide_arms",
+		duration: 0.00001
+	};
+}
+action fade_in(num _duration){
+	addTo cutsceneEvents {
+		event: "fade_in",
+		duration: _duration
+	};
+}
+action fade_out(num _duration){
+	addTo cutsceneEvents {
+		event: "fade_out",
+		duration: _duration
+	};
+}
+
+action dialogue_createBox(){
+	addTo cutsceneEvents {
+		event: "dialogue_createBox",
+		duration: 0.00001
+	};
+}
+action dialogue_add(str _dialogue, str _speaker, num _speed, bool _autoClose){
+	addTo cutsceneEvents {
+		event: "dialogue_add",
+		duration: 0.00001,
+		text: _dialogue,
+		speed: _speed,
+		speaker: _speaker,
+		autoClose: _autoClose
+	};
+}
+action dialogue_waitForFinish(){
+	addTo cutsceneEvents {
+		event: "dialogue_waitForFinish",
+		duration: 1
+	};
+}
+# ========================
+
+# === Easing Function ===
+num action BezierBlend(num t){
+    return t * t * (3.0 - 2.0 * t);
+}	# Feel free to replace with your own easing function
+# ========================
+
+# === Imports ===
+str action splice(str input, num start, num end) {	# Thx ManiaMapper
+    num charsLen = lengthOf input;
+    if(charsLen == 0 || start >= charsLen || start >= end) {
+        return '';
+    }
+    if(end > charsLen) {
+        end = charsLen;
+    }
+    str output = '';
+    for(num i = start; i < end; i++) {
+        output += input[i];
+    }
+    return output;
+}
+# ===============
+
+public action update(num delta) {
+	# === Fix Camera Rotation ===
+	if(GAME.CAMERA.rotation.y > 6.28319){
+		GAME.CAMERA.rotation.y = GAME.CAMERA.rotation.y - 6.28319;
+	}
+	if(GAME.CAMERA.rotation.y < -6.28319){
+		GAME.CAMERA.rotation.y = GAME.CAMERA.rotation.y + 6.28319;
+	}
+	# ===========================
+	
+	# === Cutscene Update Functions ===
+	if((bool)cutscenes.started){ # Start running cutscene events if started
+		
+		# First, run through all possible events and perform their actions
+		if((str)cutsceneEvents[(num)cutscenes.currentIndex].event == "camera_glideTo"){	# camera_glideTo
+			# Do the stupidest camera tween yet
+			if(!cutsceneEvents[(num)cutscenes.currentIndex].relative){
+				GAME.CAMERA.move((num)cutsceneEvents[(num)cutscenes.currentIndex].previous.position.x + ((num)cutsceneEvents[(num)cutscenes.currentIndex].position.x - (num)cutsceneEvents[(num)cutscenes.currentIndex].previous.position.x) * BezierBlend(1 - (num)cutscenes.eventTimer / (num)cutsceneEvents[(num)cutscenes.currentIndex].duration), (num)cutsceneEvents[(num)cutscenes.currentIndex].previous.position.y + ((num)cutsceneEvents[(num)cutscenes.currentIndex].position.y - (num)cutsceneEvents[(num)cutscenes.currentIndex].previous.position.y) * BezierBlend(1 - (num)cutscenes.eventTimer / (num)cutsceneEvents[(num)cutscenes.currentIndex].duration), (num)cutsceneEvents[(num)cutscenes.currentIndex].previous.position.z + ((num)cutsceneEvents[(num)cutscenes.currentIndex].position.z - (num)cutsceneEvents[(num)cutscenes.currentIndex].previous.position.z) * BezierBlend(1 - (num)cutscenes.eventTimer / (num)cutsceneEvents[(num)cutscenes.currentIndex].duration));
+				GAME.CAMERA.rotation.x = (num)cutsceneEvents[(num)cutscenes.currentIndex].previous.rotation.x + ((num)cutsceneEvents[(num)cutscenes.currentIndex].rotation.x - (num)cutsceneEvents[(num)cutscenes.currentIndex].previous.rotation.x) * BezierBlend(1 - (num)cutscenes.eventTimer / (num)cutsceneEvents[(num)cutscenes.currentIndex].duration);
+				GAME.CAMERA.rotation.y = (num)cutsceneEvents[(num)cutscenes.currentIndex].previous.rotation.y + ((num)cutsceneEvents[(num)cutscenes.currentIndex].rotation.y - (num)cutsceneEvents[(num)cutscenes.currentIndex].previous.rotation.y) * BezierBlend(1 - (num)cutscenes.eventTimer / (num)cutsceneEvents[(num)cutscenes.currentIndex].duration);
+				GAME.CAMERA.rotation.z = (num)cutsceneEvents[(num)cutscenes.currentIndex].previous.rotation.z + ((num)cutsceneEvents[(num)cutscenes.currentIndex].rotation.z - (num)cutsceneEvents[(num)cutscenes.currentIndex].previous.rotation.z) * BezierBlend(1 - (num)cutscenes.eventTimer / (num)cutsceneEvents[(num)cutscenes.currentIndex].duration);
+			} else {
+				GAME.CAMERA.move((num)cutsceneEvents[(num)cutscenes.currentIndex].previous.position.x + (((num)cutsceneEvents[(num)cutscenes.currentIndex].original.position.x + (num)cutsceneEvents[(num)cutscenes.currentIndex].position.x) - (num)cutsceneEvents[(num)cutscenes.currentIndex].previous.position.x) * BezierBlend(1 - (num)cutscenes.eventTimer / (num)cutsceneEvents[(num)cutscenes.currentIndex].duration), (num)cutsceneEvents[(num)cutscenes.currentIndex].previous.position.y + (((num)cutsceneEvents[(num)cutscenes.currentIndex].original.position.y + (num)cutsceneEvents[(num)cutscenes.currentIndex].position.y) - (num)cutsceneEvents[(num)cutscenes.currentIndex].previous.position.y) * BezierBlend(1 - (num)cutscenes.eventTimer / (num)cutsceneEvents[(num)cutscenes.currentIndex].duration), (num)cutsceneEvents[(num)cutscenes.currentIndex].previous.position.z + (((num)cutsceneEvents[(num)cutscenes.currentIndex].original.position.z + (num)cutsceneEvents[(num)cutscenes.currentIndex].position.z) - (num)cutsceneEvents[(num)cutscenes.currentIndex].previous.position.z) * BezierBlend(1 - (num)cutscenes.eventTimer / (num)cutsceneEvents[(num)cutscenes.currentIndex].duration));
+				GAME.CAMERA.rotation.x = (num)cutsceneEvents[(num)cutscenes.currentIndex].previous.rotation.x + (((num)cutsceneEvents[(num)cutscenes.currentIndex].original.rotation.x + (num)cutsceneEvents[(num)cutscenes.currentIndex].rotation.x) - (num)cutsceneEvents[(num)cutscenes.currentIndex].previous.rotation.x) * BezierBlend(1 - (num)cutscenes.eventTimer / (num)cutsceneEvents[(num)cutscenes.currentIndex].duration);
+				GAME.CAMERA.rotation.y = (num)cutsceneEvents[(num)cutscenes.currentIndex].previous.rotation.y + (((num)cutsceneEvents[(num)cutscenes.currentIndex].original.rotation.y + (num)cutsceneEvents[(num)cutscenes.currentIndex].rotation.y) - (num)cutsceneEvents[(num)cutscenes.currentIndex].previous.rotation.y) * BezierBlend(1 - (num)cutscenes.eventTimer / (num)cutsceneEvents[(num)cutscenes.currentIndex].duration);
+				GAME.CAMERA.rotation.z = (num)cutsceneEvents[(num)cutscenes.currentIndex].previous.rotation.z + (((num)cutsceneEvents[(num)cutscenes.currentIndex].original.rotation.z + (num)cutsceneEvents[(num)cutscenes.currentIndex].rotation.z) - (num)cutsceneEvents[(num)cutscenes.currentIndex].previous.rotation.z) * BezierBlend(1 - (num)cutscenes.eventTimer / (num)cutsceneEvents[(num)cutscenes.currentIndex].duration);
+			}
+		}
+		else if ((str)cutsceneEvents[(num)cutscenes.currentIndex].event == "sound_play") {	# sound_play
+			# Play sound
+			GAME.SOUND.play2D((str)cutsceneEvents[(num)cutscenes.currentIndex].asset, (num)cutsceneEvents[(num)cutscenes.currentIndex].volume, (num)cutsceneEvents[(num)cutscenes.currentIndex].rate, false);
+		}
+		else if((str)cutsceneEvents[(num)cutscenes.currentIndex].event == "time_wait"){	# time_wait
+			# Do nothing, since its just waiting on time
+		} 
+		else if((str)cutsceneEvents[(num)cutscenes.currentIndex].event == "show_arms") {
+			obj myself = GAME.PLAYERS.getSelf();
+			myself.visible = true;
+		} 
+		else if((str)cutsceneEvents[(num)cutscenes.currentIndex].event == "hide_arms") {
+			obj myself = GAME.PLAYERS.getSelf();
+			myself.visible = false;
+		}
+		else if((str)cutsceneEvents[(num)cutscenes.currentIndex].event == "player_bringToCamera"){
+			GAME.NETWORK.send("cts_tp", {pos:{x:GAME.CAMERA.position.x,y:GAME.CAMERA.position.y - 9.5,z:GAME.CAMERA.position.z}});
+			obj myself = GAME.PLAYERS.getSelf();
+			myself.position.x = GAME.CAMERA.position.x;
+			myself.position.y = GAME.CAMERA.position.y - 9.5;
+			myself.position.z = GAME.CAMERA.position.z;
+			myself.velocity.x = 0;
+			myself.velocity.y = 0;
+			myself.velocity.z = 0;
+		}
+		else if((str)cutsceneEvents[(num)cutscenes.currentIndex].event == "camera_shake"){
+			GAME.CAMERA.shake((num)cutsceneEvents[(num)cutscenes.currentIndex].intensity);
+		}
+		else if((str)cutsceneEvents[(num)cutscenes.currentIndex].event == "fade_in"){
+			GAME.UI.updateDIV("cts_blocker", "background-color", "rgba(0,0,0," + toStr ((num)cutscenes.eventTimer / (num)cutsceneEvents[(num)cutscenes.currentIndex].duration) + ")");
+		}
+		else if((str)cutsceneEvents[(num)cutscenes.currentIndex].event == "fade_out"){
+			GAME.UI.updateDIV("cts_blocker", "background-color", "rgba(0,0,0," + toStr (1 - (num)cutscenes.eventTimer / (num)cutsceneEvents[(num)cutscenes.currentIndex].duration) + ")");
+		}
+		else if((str)cutsceneEvents[(num)cutscenes.currentIndex].event == "dialogue_createBox"){
+			# Create Text Box
+			GAME.UI.addDIV('cts_dialogueBox', true,
+				'color:#f1f1f1;position:absolute;bottom:10%;left:50%;' +
+				'transform: translate(-50%,0%);font-size: 24px;' +
+				'border:solid 2px #fff;border-radius:4px;' +
+				'padding:10px 30px 10px 30px;background-color: rgba(0,0,0,0.4);' +
+				'width:50%;height:20%;text-align:left;'
+			);
+			GAME.UI.addDIV('cts_speakerBox', true,
+			'color:#f1f1f1;position:absolute;bottom:34%;left:25%;' +
+			'font-size: 24px;' +
+			'border:solid 2px #fff;border-radius:4px;' +
+			'padding:10px 30px 10px 30px;background-color: rgba(0,0,0,0.4);'
+			);
+			GAME.UI.addDIV('cts_nextButton', true,
+				'color:#f1f1f1;position:absolute;bottom:3%;left:75%;' +
+				'font-size: 24px;transform:translate(-100%, 0%);' +
+				'border:solid 2px #fff;border-radius:4px;' +
+				'padding:10px 30px 10px 30px;background-color: rgba(0,0,0,0.4);'
+			);
+			GAME.UI.updateDIVText("cts_nextButton", "Next");
+			# Set Initial Stuff
+			dialogue = {
+				currentChar: 0,
+				nextCharTimer: 0,
+				lines: obj[]
+			};
+		}
+		else if((str)cutsceneEvents[(num)cutscenes.currentIndex].event == "dialogue_add"){
+			addTo (obj[])dialogue.lines {
+				text: cutsceneEvents[(num)cutscenes.currentIndex].text,
+				speed: cutsceneEvents[(num)cutscenes.currentIndex].speed,
+				speaker: cutsceneEvents[(num)cutscenes.currentIndex].speaker,
+				autoClose: cutsceneEvents[(num)cutscenes.currentIndex].autoClose
+			};
+		}
+		else if((str)cutsceneEvents[(num)cutscenes.currentIndex].event == "dialogue_waitForFinish"){
+			# Do nothing since its not controlling anything outside of the duration
+		}
+		else {	# Invalid Event
+			GAME.log("ERROR: Unknown Event in cutsceneEvents array");
+			endEvents();
+		}
+
+		(num)cutscenes.eventTimer -= delta; # Lower the time left for the event
+		if((num)cutscenes.eventTimer <= 0 && !((str)cutsceneEvents[(num)cutscenes.currentIndex].event == "dialogue_waitForFinish" && lengthOf dialogue.lines != 0)) {	# If current event timer ends
+			if((str)cutsceneEvents[(num)cutscenes.currentIndex].event == "fade_in"){
+				GAME.UI.updateDIV("cts_blocker", "background-color", "rgba(0,0,0,0)");
+			}
+			if((str)cutsceneEvents[(num)cutscenes.currentIndex].event == "fade_out"){
+				GAME.UI.updateDIV("cts_blocker", "background-color", "rgba(0,0,0,1)");
+			}
+			
+			(num)cutscenes.currentIndex++; # Next event
+		
+			if((num)cutscenes.currentIndex >= lengthOf cutsceneEvents){	# If there are no more events
+				endEvents(); # End the cutscene
+			} else {
+				cutscenes.eventTimer = (num)cutsceneEvents[(num)cutscenes.currentIndex].duration;
+				
+				if((str)cutsceneEvents[(num)cutscenes.currentIndex].event == "camera_glideTo"){
+					cutsceneEvents[(num)cutscenes.currentIndex].previous = {
+						position: {
+							x: GAME.CAMERA.position.x,
+							y: GAME.CAMERA.position.y,
+							z: GAME.CAMERA.position.z
+						},
+						rotation: {
+							x: GAME.CAMERA.rotation.x,
+							y: GAME.CAMERA.rotation.y,
+							z: GAME.CAMERA.rotation.z
+						}
+					};
+				}
+			}
+		}
+	}
+	# =================================
+	
+	# === Dialogue Update Functions ===
+	if(lengthOf dialogue.lines != 0){
+		GAME.UI.updateDIVText("cts_dialogueBox", splice((str)dialogue.lines[0].text, 0, (num)dialogue.currentChar));
+		if((num)dialogue.currentChar == 0){
+			if((str)dialogue.lines[0].speaker == ""){
+				GAME.UI.updateDIV("cts_speakerBox", "visibility", "hidden");
+			} else {
+				GAME.UI.updateDIVText("cts_speakerBox", (str)dialogue.lines[0].speaker);
+				GAME.UI.updateDIV("cts_speakerBox", "visibility", "visible");
+			}
+			if((bool)dialogue.lines[0].autoClose){
+				GAME.UI.updateDIV("cts_nextButton", "visibility", "hidden");
+			} else {
+				GAME.UI.updateDIV("cts_nextButton", "visibility", "visible");
+			}
+		}
+
+		(num)dialogue.nextCharTimer -= delta; # Lower the time left for current character
+		if((num)dialogue.nextCharTimer <= 0 && !((num)dialogue.currentChar == lengthOf (str)dialogue.lines[0].text && !dialogue.lines[0].autoClose)){
+			dialogue.nextCharTimer = (num)dialogue.lines[0].speed;
+			(num)dialogue.currentChar++;
+			
+			if((num)dialogue.currentChar == lengthOf (str)dialogue.lines[0].text){
+				dialogue.nextCharTimer = MS_DURATION_TEXTWAIT;
+			}
+			if((num)dialogue.currentChar > lengthOf (str)dialogue.lines[0].text){
+				remove dialogue.lines[0];
+				if (lengthOf dialogue.lines < 1) {
+					GAME.UI.removeDIV("cts_dialogueBox");
+					GAME.UI.removeDIV("cts_speakerBox");
+					GAME.UI.removeDIV("cts_nextButton");
+				} else {
+					dialogue.nextCharTimer = (num)dialogue.lines[0].speed;
+					dialogue.currentChar = 0;
+				}
+			}
+		}
+	}
+	# =================================
+}
+
+# === Skip Button ===
+public action onDIVClicked(str id) {
+    if (id == "cts_skipbutton") {
+        endEvents();
+    };
+	if (id == "cts_nextButton") {
+		remove dialogue.lines[0];
+		if (lengthOf dialogue.lines < 1) {
+			GAME.UI.removeDIV("cts_dialogueBox");
+			GAME.UI.removeDIV("cts_speakerBox");
+			GAME.UI.removeDIV("cts_nextButton");
+		} else {
+			dialogue.nextCharTimer = (num)dialogue.lines[0].speed;
+			dialogue.currentChar = 0;
+		}
+    };
+}
+# ===================
+
+# === Functions List ===
+# 	- Control -
+#	newCutscene() - Creates a blank loaded cutscene
+#	playEvents(skippable (bool) ) - Starts the cutscene | If you aren't moving the player, feel free to make the cutscene skippable.
+#	endEvents() - Ends the cutscene. Is called automatically after all events
+
+#	 - Events -
+#	camera_glideTo(relative (bool), posX, posY, posZ, rotX, rotY, rotZ, duration (ms) ) - Glides the camera to the location provided
+#	camera_shake(intensity, duration) - Shakes the camera for the given values
+#	sound_play(assetID (str), volume, rate) - Plays a custom sound at the given volume and rate
+#	time_wait(duration (ms) ) - Waits the desired time given in milliseconds
+#	show_arms() - Shows player model's arms. Called automatically after cutscene ends
+#	hide_arms() - Hides player model's arms
+#	player_bringToCamera() - Brings the player to the camera's location
+#	fade_in(duration (ms) ) - Fades the camera back in over the duration given
+#	fade_out(duration (ms) ) - Fades the camera out over the duration given
+#
+#	- Dialogue -
+#	dialogue_createBox() - Creates the Dialogue Box (MUST BE RUN BEFORE STARTING A NEW BOX OR ADDING TEXT)
+#	dialogue_add(dialogue, speaker, speed (ms) , autoClose (bool) ) - Adds one page of text to the box. To hide speaker, leave it as a blank string
+#	dialogue_waitForFinish() - Stalls the cutscene until there is no more text box on screen
+#
+# 	- Triggers -
+# 	Since triggers cannot be easily controlled with scripts, please activate the cutscene with a trigger and add those trigger functions to make up for it
+# ======================
