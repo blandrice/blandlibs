@@ -48,9 +48,11 @@
 46,aabb,KG07,https://discord.com/channels/859947586005368862/862113777946984459/1020742895092891698,,,yes,AABB (axis-aligned bounding box-box) collision + resolution,"['physics', 'collisions']",physics,https://github.com/blandrice/blandlibs/tree/master/libs/physics/collisions
 47,raybox,blandrice,,,,yes,Ray-box intersections in Krunker.,"['physics', 'collisions']",physics,https://github.com/blandrice/blandlibs/tree/master/libs/physics/collisions
 48,rotbox,blandrice,,,,yes,rotated bounding box collision,"['physics', 'collisions']",physics,https://github.com/blandrice/blandlibs/tree/master/libs/physics/collisions
-49,fade,blandrice,https://discord.com/channels/484192043833491487/575245801744498689/1098317407061299261,yes,,,screen fade in/out using triggers https://streamable.com/x5oi68,"['scene', 'fade']",scene,https://github.com/blandrice/blandlibs/tree/master/libs/scene/fade
-50,fade,blandrice,,,yes,,,"['scene', 'fade']",scene,https://github.com/blandrice/blandlibs/tree/master/libs/scene/fade
-51,gpt_strutils,ChatGPT,,,,yes,ChatGPT test on generating string utilities,"['utils', 'ChatGPT']",utils,https://github.com/blandrice/blandlibs/tree/master/libs/utils/ChatGPT
-52,g,blandrice,,,,yes,some global vars that other libs can reference to reduce calls,"['utils', 'global']",utils,https://github.com/blandrice/blandlibs/tree/master/libs/utils/global
-53,listutil,blandrice,,,,yes,Additional string utilities,"['utils', 'lists']",utils,https://github.com/blandrice/blandlibs/tree/master/libs/utils/lists
-54,strutils,ProfNoob,https://discord.com/channels/859947586005368862/862113777946984459/957710191590268929,,,yes,Additional String utilities,"['utils', 'strutil']",utils,https://github.com/blandrice/blandlibs/tree/master/libs/utils/strutil
+49,cinegato,creepycats,https://discord.com/channels/484192043833491487/575245801744498689/967883995377442836,yes,,,Gato Cutscene Handler,"['scene', 'cutscene']",scene,https://github.com/blandrice/blandlibs/tree/master/libs/scene/cutscene
+50,cinegato,creepycats,https://discord.com/channels/484192043833491487/575245801744498689/967883995377442836,,yes,,Gato Cutscene Handler,"['scene', 'cutscene']",scene,https://github.com/blandrice/blandlibs/tree/master/libs/scene/cutscene
+51,fade,blandrice,https://discord.com/channels/484192043833491487/575245801744498689/1098317407061299261,yes,,,screen fade in/out using triggers https://streamable.com/x5oi68,"['scene', 'fade']",scene,https://github.com/blandrice/blandlibs/tree/master/libs/scene/fade
+52,fade,blandrice,,,yes,,,"['scene', 'fade']",scene,https://github.com/blandrice/blandlibs/tree/master/libs/scene/fade
+53,gpt_strutils,ChatGPT,,,,yes,ChatGPT test on generating string utilities,"['utils', 'ChatGPT']",utils,https://github.com/blandrice/blandlibs/tree/master/libs/utils/ChatGPT
+54,g,blandrice,,,,yes,some global vars that other libs can reference to reduce calls,"['utils', 'global']",utils,https://github.com/blandrice/blandlibs/tree/master/libs/utils/global
+55,listutil,blandrice,,,,yes,Additional string utilities,"['utils', 'lists']",utils,https://github.com/blandrice/blandlibs/tree/master/libs/utils/lists
+56,strutils,ProfNoob,https://discord.com/channels/859947586005368862/862113777946984459/957710191590268929,,,yes,Additional String utilities,"['utils', 'strutil']",utils,https://github.com/blandrice/blandlibs/tree/master/libs/utils/strutil
