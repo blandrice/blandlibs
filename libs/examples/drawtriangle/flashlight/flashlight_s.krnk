@@ -1,0 +1,23 @@
+#include <flashlight_h.krnk>
+
+# ===================================================================
+# Library: libs\examples\drawtriangle\flashlight\flashlight_c.krnk
+# Author: Krunker
+# Discord: https://discord.com/channels/859947586005368862/877996910902931466/1000198857877114950
+# Description: Flashlight script using Triggers. modified by blandrice
+# ===================================================================
+
+public action onCustomTrigger(str playerID, str customParam, num value) {
+    if ((customParam == "giveFlashlight") || (customParam == "giveFlashlightDefault") )
+    {
+        GAME.NETWORK.send("giveFlashlight", {lightType:flashlight_h_DEFAULT}, playerID);
+    } 
+    else if (customParam == "giveFlashlightCone") 
+    {
+        GAME.NETWORK.send("giveFlashlight", {lightType:flashlight_h_CONE}, playerID);
+    } 
+    else if (customParam == "removeFlashlight") 
+    {
+        GAME.NETWORK.send("removeFlashlight", {}, playerID);
+    }
+}

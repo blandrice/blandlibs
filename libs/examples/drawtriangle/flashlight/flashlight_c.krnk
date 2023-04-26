@@ -1,0 +1,125 @@
+#include <flashlight_h.krnk>
+
+# ===================================================================
+# Library: libs\examples\drawtriangle\flashlight\flashlight_c.krnk
+# Author: Krunker
+# Discord: https://discord.com/channels/859947586005368862/877996910902931466/1000198857877114950
+# Description: Flashlight script using Triggers. modified by blandrice/Profnoob/Rishabh
+# ===================================================================
+
+obj torch = {};
+str key_torchtoggle = "h";
+bool has_flashlight = false;
+bool torch_on = true;
+num t_getflashlight = 0;
+num duration_tutorial = 5000;
+num light_type = flashlight_h_DEFAULT;
+
+action flashlight_clicksound() {
+    # sound for flashlight click
+    GAME.SOUND.play2D(50653,1,1,false);
+}
+
+action flashlight_on() {
+    torch.visible = true;
+    torch_on = true;
+}
+
+action flashlight_off() {
+    torch.visible = false;
+    torch_on = false;
+}
+
+action get_flashlight(num light_type) {
+    if (notEmpty torch) {
+        torch.delete();
+    }
+    if (light_type == flashlight_h_DEFAULT)
+    {
+        torch = GAME.SCENE.addSpotLight("#fff", 0, 0, 0, 0, 0, 0, 60, 1, 1, 60, 0.5);
+    } 
+    else if (light_type == flashlight_h_CONE)
+    {
+        torch = GAME.SCENE.addSpotLight("#fff", 0, 0, 0, 0, 0, 0, 200, 1, 0.5, 30, 0.1);
+    }
+    torch.visible = true;
+    torch_on = true;
+    has_flashlight = true;
+    flashlight_clicksound();
+}
+
+action remove_flashlight() {
+    torch.visible = false;
+    torch_on = false;
+    has_flashlight = false;
+
+}
+
+# Runs when the game starts
+public action start() {
+    torch_on = false;
+    has_flashlight = false;
+    light_type = flashlight_h_CONE;
+    
+}
+
+
+# Runs every game tick
+public action update(num delta) {
+	obj plr = GAME.PLAYERS.getSelf();
+	if (notEmpty plr && notEmpty torch) {
+		num yPos = ((num) plr.position.y + 10);
+		torch.move(
+			plr.position.x, 
+			yPos, 
+			plr.position.z
+		);	
+		torch.lookAt(
+			((num) plr.position.x + (1000 * Math.sin((num) plr.rotation.x + Math.PI) * Math.cos((num) plr.rotation.y))), 
+			(yPos + (1000 * Math.sin((num) plr.rotation.y))), 
+			((num) plr.position.z + (1000 * Math.cos((num) plr.rotation.x + Math.PI) * Math.cos((num) plr.rotation.y)))
+		);
+	}
+}
+
+# User pressed a key
+public action onKeyPress(str key, num code) {
+    if (key == key_torchtoggle) {
+        if (has_flashlight)
+        {
+            if (torch_on) {
+                flashlight_off();
+            } else {
+                flashlight_on();
+            }
+            flashlight_clicksound();
+        } 
+    }
+}
+
+public action render(num delta) {
+    obj dimensions = GAME.OVERLAY.getSize();
+    if ((GAME.TIME.now() - t_getflashlight) < duration_tutorial)
+    {
+        GAME.OVERLAY.drawText("Press H to toggle flashlight! ", (num)dimensions.width / 2, (num)dimensions.height - 24, 0, 24, "center", "#666", 1);
+    }
+    
+}
+
+public action onNetworkMessage(str id, obj data) {
+    if (id == "giveFlashlight")
+    {
+        # change light type
+        if ((str)data.lightType != "undefined")
+        {
+            light_type = (num) data.lightType;
+        }
+        t_getflashlight = GAME.TIME.now();
+        get_flashlight(light_type);
+    } 
+    else if (id == "removeFlashlight")
+    {
+        remove_flashlight();
+    }
+    
+}

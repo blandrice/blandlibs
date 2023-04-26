@@ -1,0 +1,8 @@
+# ===================================================================
+# Library: libs\examples\drawtriangle\flashlight\flashlight_h.krnk
+# Author: Krunker
+# Discord: https://discord.com/channels/859947586005368862/877996910902931466/1000198857877114950
+# Description: Flashlight script using Triggers. modified by blandrice/Profnoob/Rishabh
+# ===================================================================
+num DEFAULT = 0;
+num CONE = 1;
