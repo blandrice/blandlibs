@@ -3,14 +3,6 @@
 # Author: blandrice
 # ===================================================================
 
-
-# obj skydomeTransitionData = {
-#     hex1: "FFFFFF",
-#     hex2: "FFFFFF",
-#     hex3: "FFFFFF",
-#     duration: 5000,
-# };
-
 public action onCustomTrigger(str playerID, str customParam, num value) {
     GAME.log(customParam);
     if (UTILS.textContains(customParam,"skydome")) 
@@ -22,6 +14,7 @@ public action onCustomTrigger(str playerID, str customParam, num value) {
                 hex1: "#000000",
                 hex2: "#000000",
                 hex3: "#000000",
+                ambientLight: 0.1,
                 duration: 5000
             };
         }
@@ -31,6 +24,7 @@ public action onCustomTrigger(str playerID, str customParam, num value) {
                 hex1: "#74A4B9",
                 hex2: "#DCE8ED",
                 hex3: "#DCE8ED",
+                ambientLight: 1.3,
                 duration: 5000
             };
         }
@@ -40,12 +34,14 @@ public action onCustomTrigger(str playerID, str customParam, num value) {
                 hex1: "#000000",
                 hex2: "#000000",
                 hex3: "#000000",
+                ambientLight: 0.1,
                 duration: 5000
             };
             addTo transitions {
                 hex1: "#74A4B9",
                 hex2: "#DCE8ED",
                 hex3: "#DCE8ED",
+                ambientLight: 1.3,
                 duration: 5000
             };
         }

@@ -1,0 +1,10 @@
+#include <skydome_s.krnk>
+#include <flashlight_s.krnk>
+
+#include <cinegato_s.krnk>
+# === Trigger Event with Custom Trigger Action ===
+public action onCustomTrigger(str playerID, str customParam, num value) {
+    if(customParam == "cts_1"){
+		GAME.NETWORK.send("cts_1", {}, playerID);
+	}
+}

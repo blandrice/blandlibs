@@ -1,0 +1,26 @@
+#include <skydome_c.krnk>
+#include <flashlight_c.krnk>
+
+#include <cinegato_c.krnk>
+
+public action start()
+{
+	cinegato_c_MS_DURATION_TEXTWAIT = 1500;
+}
+
+public action onNetworkMessage(str id, obj data) {
+	if(id == "cts_1"){
+		cinegato_c_newCutscene();	# REQUIRED TO REGISTER A NEW CUTSCENE
+		cinegato_c_hide_arms();	# Hides the player model's arms so that moving the camera does not mess up the view model
+		cinegato_c_camera_glideTo(false, 7, 37, 126, 0, 0, 0, 2000);
+		cinegato_c_dialogue_createBox();
+		cinegato_c_dialogue_add("Gostra is a game where you try to grab the flags from the wooden pole", "Malta", 20, false);
+		cinegato_c_dialogue_add("Knife the flags for points!", "Malta", 20, false);
+		cinegato_c_dialogue_waitForFinish();
+		cinegato_c_show_arms();									
+
+		
+		cinegato_c_playEvents(true); # Plays the cutscene, which CAN be skipped
+		#cinegato_c_playEvents(false); # Uncomment this line if you want to force the player to watch the cutscene
+	}
+}

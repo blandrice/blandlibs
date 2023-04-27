@@ -6,14 +6,14 @@
 
 obj[] transitions = obj[];
 
-
-
 str lastSkyHexColor1 = "#74A4B9";
 str lastSkyHexColor2 = "#DCE8ED";
 str lastSkyHexColor3 = "#DCE8ED";
+num lastAmbientLight = 1.3;
 str finalSkyHexColor1 = "#74A4B9";
 str finalSkyHexColor2 = "#DCE8ED";
 str finalSkyHexColor3 = "#DCE8ED";
+num finalAmbientLight = 1.3;
 
 num transitionTime = 0;
 
@@ -51,6 +51,7 @@ public action update(num delta) {
             lastSkyHexColor1 = finalSkyHexColor1;
             lastSkyHexColor2 = finalSkyHexColor2;
             lastSkyHexColor3 = finalSkyHexColor3;
+            lastAmbientLight = finalAmbientLight;
 
             remove transitions[0]; 
             
@@ -68,6 +69,7 @@ public action update(num delta) {
         finalSkyHexColor1 = (str) currentTransition.hex1;
         finalSkyHexColor2 = (str) currentTransition.hex2;
         finalSkyHexColor3 = (str) currentTransition.hex3;
+        finalAmbientLight = (num) currentTransition.ambientLight;
 
         # lerp sky color
         if (transitionTime < (num) currentTransition.duration)
@@ -76,7 +78,9 @@ public action update(num delta) {
             str SkyHexColor1 = lerphexval(lastSkyHexColor1,finalSkyHexColor1,lerpratio);
             str SkyHexColor2 = lerphexval(lastSkyHexColor2,finalSkyHexColor2,lerpratio);
             str SkyHexColor3 = lerphexval(lastSkyHexColor3,finalSkyHexColor3,lerpratio);
+            num ambientLight = Math.lerp(lastAmbientLight,finalAmbientLight,lerpratio);
 
+            GAME.SCENE.setAmbientLight("#A8A497", ambientLight);
             GAME.SCENE.removeSkyDome();
             GAME.SCENE.setSkyDome(SkyHexColor1, SkyHexColor2, SkyHexColor3);
         } 
