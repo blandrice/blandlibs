@@ -1,0 +1,54 @@
+# ===================================================================
+# Library: libs\scene\skydome\skydome_s.krnk
+# Author: blandrice
+# ===================================================================
+
+
+# obj skydomeTransitionData = {
+#     hex1: "FFFFFF",
+#     hex2: "FFFFFF",
+#     hex3: "FFFFFF",
+#     duration: 5000,
+# };
+
+public action onCustomTrigger(str playerID, str customParam, num value) {
+    GAME.log(customParam);
+    if (UTILS.textContains(customParam,"skydome")) 
+    {
+        obj[] transitions = obj[];
+        if (customParam == "skydome_black")
+        { 
+            addTo transitions {
+                hex1: "#000000",
+                hex2: "#000000",
+                hex3: "#000000",
+                duration: 5000
+            };
+        }
+        else if (customParam == "skydome_blue")
+        {
+            addTo transitions {
+                hex1: "#74A4B9",
+                hex2: "#DCE8ED",
+                hex3: "#DCE8ED",
+                duration: 5000
+            };
+        }
+        else if (customParam == "skydome_nightday")
+        {
+            addTo transitions {
+                hex1: "#000000",
+                hex2: "#000000",
+                hex3: "#000000",
+                duration: 5000
+            };
+            addTo transitions {
+                hex1: "#74A4B9",
+                hex2: "#DCE8ED",
+                hex3: "#DCE8ED",
+                duration: 5000
+            };
+        }
+        GAME.NETWORK.broadcast("skydometransition", {transitions:transitions});
+    }
+}

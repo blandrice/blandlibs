@@ -1,0 +1,93 @@
+# ===================================================================
+# Library: libs\scene\skydome\skydome_c.krnk
+# Author: blandrice
+# Description: send changes to skydome from server to client (can use triggers too)
+# ===================================================================
+
+obj[] transitions = obj[];
+
+
+
+str lastSkyHexColor1 = "#74A4B9";
+str lastSkyHexColor2 = "#DCE8ED";
+str lastSkyHexColor3 = "#DCE8ED";
+str finalSkyHexColor1 = "#74A4B9";
+str finalSkyHexColor2 = "#DCE8ED";
+str finalSkyHexColor3 = "#DCE8ED";
+
+num transitionTime = 0;
+
+str action lerphexval(str hex1, str hex2, num lerpratio) { 
+    obj rgb1 = GAME.UTILS.HEXtoRGB(hex1);
+    obj rgb2 = GAME.UTILS.HEXtoRGB(hex2);
+    
+    obj lrgb = {r:0,b:0, g:0};
+    lrgb.r = Math.lerp((num) rgb1.r, (num) rgb2.r, lerpratio);
+    lrgb.g = Math.lerp((num) rgb1.g, (num) rgb2.g, lerpratio);
+    lrgb.b = Math.lerp((num) rgb1.b, (num) rgb2.b, lerpratio);
+
+    return GAME.UTILS.RGBtoHEX((num) lrgb.r,(num) lrgb.g,(num) lrgb.b);
+}
+
+public action onNetworkMessage(str id, obj data) {
+    if (id == 'skydometransition')
+    {
+        obj[] network_transitions = (obj[])data.transitions;
+        for (num i = 0; i < lengthOf network_transitions; i++)
+        {
+            addTo transitions network_transitions[i];
+        }
+    }
+}
+
+public action update(num delta) {
+    # process transition data
+    if (lengthOf transitions > 0)
+    {
+        obj currentTransition = transitions[0];
+        # move on to next transition data
+        if (transitionTime == (num) currentTransition.duration)
+        {
+            lastSkyHexColor1 = finalSkyHexColor1;
+            lastSkyHexColor2 = finalSkyHexColor2;
+            lastSkyHexColor3 = finalSkyHexColor3;
+
+            remove transitions[0]; 
+            
+            transitionTime = 0;
+            if (lengthOf transitions > 0)
+            {
+                currentTransition = transitions[0];
+            } else
+            {
+                return;
+            }
+        }
+        
+        # set final color
+        finalSkyHexColor1 = (str) currentTransition.hex1;
+        finalSkyHexColor2 = (str) currentTransition.hex2;
+        finalSkyHexColor3 = (str) currentTransition.hex3;
+
+        # lerp sky color
+        if (transitionTime < (num) currentTransition.duration)
+        {
+            num lerpratio = transitionTime/(num) currentTransition.duration;
+            str SkyHexColor1 = lerphexval(lastSkyHexColor1,finalSkyHexColor1,lerpratio);
+            str SkyHexColor2 = lerphexval(lastSkyHexColor2,finalSkyHexColor2,lerpratio);
+            str SkyHexColor3 = lerphexval(lastSkyHexColor3,finalSkyHexColor3,lerpratio);
+
+            GAME.SCENE.removeSkyDome();
+            GAME.SCENE.setSkyDome(SkyHexColor1, SkyHexColor2, SkyHexColor3);
+        } 
+    
+        # increment transition time
+        transitionTime += delta;
+        if (transitionTime > (num) currentTransition.duration)
+        {
+            transitionTime = (num) currentTransition.duration;
+        }
+    }
+    
+
+}
