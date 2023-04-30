@@ -1,0 +1,192 @@
+# ===================================================================
+# File: libs\scene\lantern\lantern_c.krnk
+# Author: blandrice
+# Description: lantern that floats away like the lantern festival
+# ===================================================================
+
+num STATE_BOUYANT = 0;
+num STATE_FLOATING = 1;
+
+obj cfg = {
+    NODE:15,
+    count: 40,
+    spreadx: 100,
+    spready: 10,
+    spreadz: 100, # amount of spread for lanterns
+
+    scalex: 3,
+    scaley: 5,
+    scalez: 3,
+    emissive: "#988E40",
+    
+    # oscillating / bouyant
+    amplitudex: 0,
+    amplitudey: 5,
+    amplitudez: 0,
+    t_msinterval:5000,
+    offset_range:Math.PI2,
+    
+    # floating
+    idle_range: 2000,
+    lifetime_rangemin: 5000,
+    lifetime_rangemax: 10000,
+    xvel_range: 5,
+    yvel_rangemin: 10,
+    yvel_rangemax: 15,
+    zvel_range: 5,
+    
+};
+
+obj[] lanterns = obj[];
+
+num action applysin(obj tobj, str dim, num t)
+{
+    num offset = (num)tobj.oscillate.offset;
+    if (dim=="x")
+    {
+        return (num)tobj.oscillate.ogpos.x + ((num)tobj.oscillate.amplitude.x* Math.sin((((Math.PI2)*t) / (num)tobj.oscillate.t_msinterval)+(Math.PI2*offset)));
+    } 
+    else if (dim=="y")
+    {
+        return (num)tobj.oscillate.ogpos.y + ((num)tobj.oscillate.amplitude.y* Math.sin((((Math.PI2)*t) / (num)tobj.oscillate.t_msinterval)+(Math.PI2*offset)));
+    }
+    else if (dim=="z")
+    {
+        return (num)tobj.oscillate.ogpos.z + ((num)tobj.oscillate.amplitude.z* Math.sin((((Math.PI2)*t) / (num)tobj.oscillate.t_msinterval)+(Math.PI2*offset)));
+    }
+    return 0;
+}
+
+obj action getPathNodeByID(num id) {
+    obj[] nodes = GAME.OBJECTS.getPathNodes();
+    obj retnode = {};
+    for (num i = 0; i < lengthOf nodes; i++) {
+        if ((num) nodes[i].id == id)
+        {
+            retnode = nodes[i];
+        }
+    }
+    return retnode;
+}
+
+action addLantern() {
+    # location based on node
+    obj node = getPathNodeByID((num)cfg.NODE);
+    num x = UTILS.randInt((num)node.x - ((num)cfg.spreadx/2), (num)node.x + ((num)cfg.spreadx/2));
+    num y = UTILS.randInt((num)node.y - ((num)cfg.spready/2), (num)node.y + ((num)cfg.spready/2));
+    num z = UTILS.randInt((num)node.z - ((num)cfg.spreadz/2), (num)node.z + ((num)cfg.spreadz/2));
+    
+    # create object
+    obj lantern = GAME.SCENE.addCube("34379", "#FFED6A", x, y, z, (num)cfg.scalex, (num)cfg.scaley, (num)cfg.scalez);
+    lantern.emissive = (str)cfg.emissive;
+
+    # state (bouyant, floating)
+    lantern.state = STATE_BOUYANT;
+    
+    # bouyant properties
+    lantern.oscillate = {};
+    lantern.oscillate.ogpos = {x:0,y:0,z:0};
+    lantern.oscillate.ogpos.x = (num) lantern.position.x;
+    lantern.oscillate.ogpos.y = (num) lantern.position.y;
+    lantern.oscillate.ogpos.z = (num) lantern.position.z;
+    lantern.oscillate.amplitude={x:0,y:0,z:0};
+    lantern.oscillate.amplitude.x = (num)cfg.amplitudex;
+    lantern.oscillate.amplitude.y = (num)cfg.amplitudey;
+    lantern.oscillate.amplitude.z = (num)cfg.amplitudez;
+    lantern.oscillate.t_msinterval = (num)cfg.t_msinterval;
+    lantern.oscillate.offset = UTILS.randFloat(0, (num)cfg.offset_range);
+    lantern.oscillate._tstart = GAME.TIME.now();
+
+
+    # floating up properties
+    lantern.floating = {};
+    lantern.floating.t_idle = UTILS.randInt(0, (num)cfg.idle_range);
+
+    lantern.floating.velocity = {x:0,y:0,z:0};
+    lantern.floating.velocity.x = UTILS.randInt(-(num)cfg.xvel_range, (num)cfg.xvel_range);
+    lantern.floating.velocity.y = UTILS.randInt((num)cfg.yvel_rangemin, (num)cfg.yvel_rangemax);
+    lantern.floating.velocity.z = UTILS.randInt(-(num)cfg.zvel_range, (num)cfg.zvel_range);
+    lantern.floating.lifetime = UTILS.randInt((num)cfg.lifetime_rangemin,(num)cfg.lifetime_rangemax);
+
+
+    addTo lanterns lantern;
+}
+
+public action start() {
+    # for (num i = 0; i < (num) cfg.count; i++)
+    # {
+    #     addLantern();
+    # }
+
+}
+public action update(num delta) {
+    for (num i = (lengthOf lanterns)-1; i >= 0; i--)
+    {
+        obj lantern = lanterns[i];
+        num t = (GAME.TIME.now() - (num)lantern.oscillate._tstart);
+        # bouyant
+        if ((num)lantern.state == STATE_BOUYANT)
+        {
+            lantern.position.y = applysin(lantern,"y",t);        
+        }
+        else if ((num)lantern.state == STATE_FLOATING)
+        {
+            GAME.log((obj)lantern.floating);
+            # idle range
+            if ((num) lantern.floating.t_idle > 0)
+            {
+                lantern.position.y = applysin(lantern,"y",t);
+                (num) lantern.floating.t_idle -= delta;
+                if ((num) lantern.floating.t_idle < 0)
+                {
+                    lantern.floating.t_idle = 0;
+                }
+            }
+            # apply floating xz/ y  movement here 
+            else
+            {
+                # floating xz movement
+                (num) lantern.position.x += (num) lantern.floating.velocity.x * (delta/1000);
+                (num) lantern.position.z += (num) lantern.floating.velocity.z * (delta/1000);
+                
+                # floating y movement
+                (num) lantern.position.y += (num) lantern.floating.velocity.y * Math.log((delta/1000)+1); 
+            }
+            # decay lifetime
+            (num)lantern.floating.lifetime -= delta;
+            if ((num)lantern.floating.lifetime < 0)
+            {
+                lantern.delete();
+                remove lanterns[i];
+            }
+        }
+            
+    }
+}
+
+public action onNetworkMessage(str id, obj data) {
+    if (id == "createLanterns")
+    {
+        for (num i = 0; i < (num) cfg.count; i++)
+        {
+            addLantern();
+        }
+    }
+
+    if (id == "releaseLanterns")
+    {
+        for (num i = 0; i < lengthOf lanterns; i++) 
+        {
+            obj lantern = lanterns[i];
+            lantern.state = STATE_FLOATING;
+        }
+    }
+    
+}
+
+# public action onKeyPress(str key, num code) {
+#     if (key == "t")
+#     {
+#         GAME.log(lanterns);
+#     }
+# }

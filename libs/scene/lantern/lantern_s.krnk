@@ -1,0 +1,17 @@
+# ===================================================================
+# File: libs\scene\lantern\lantern_s.krnk
+# Author: blandrice
+# Description: lantern that floats away like the lantern festival
+# ===================================================================
+
+# Called from Custom Trigger Action
+public action onCustomTrigger(str playerID, str customParam, num value) {
+    if (customParam=="createLanterns")
+    {
+        GAME.NETWORK.broadcast("createLanterns", {});
+    }
+    if (customParam=="releaseLanterns")
+    {
+        GAME.NETWORK.broadcast("releaseLanterns", {});
+    }
+}

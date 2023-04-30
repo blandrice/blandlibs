@@ -54,9 +54,11 @@
 52,cinegato,creepycats,https://discord.com/channels/484192043833491487/575245801744498689/967883995377442836,,yes,,Gato Cutscene Handler,"['scene', 'cutscene']",scene,https://github.com/blandrice/blandlibs/tree/master/libs/scene/cutscene
 53,fade,blandrice,https://discord.com/channels/484192043833491487/575245801744498689/1098317407061299261,yes,,,screen fade in/out using triggers https://streamable.com/x5oi68,"['scene', 'fade']",scene,https://github.com/blandrice/blandlibs/tree/master/libs/scene/fade
 54,fade,blandrice,,,yes,,,"['scene', 'fade']",scene,https://github.com/blandrice/blandlibs/tree/master/libs/scene/fade
-55,skydome,blandrice,,yes,,,send changes to skydome from server to client (can use triggers too),"['scene', 'skydome']",scene,https://github.com/blandrice/blandlibs/tree/master/libs/scene/skydome
-56,skydome,blandrice,,,yes,,,"['scene', 'skydome']",scene,https://github.com/blandrice/blandlibs/tree/master/libs/scene/skydome
-57,gpt_strutils,ChatGPT,,,,yes,ChatGPT test on generating string utilities,"['utils', 'ChatGPT']",utils,https://github.com/blandrice/blandlibs/tree/master/libs/utils/ChatGPT
-58,g,blandrice,,,,yes,some global vars that other libs can reference to reduce calls,"['utils', 'global']",utils,https://github.com/blandrice/blandlibs/tree/master/libs/utils/global
-59,listutil,blandrice,,,,yes,Additional string utilities,"['utils', 'lists']",utils,https://github.com/blandrice/blandlibs/tree/master/libs/utils/lists
-60,strutils,ProfNoob,https://discord.com/channels/859947586005368862/862113777946984459/957710191590268929,,,yes,Additional String utilities,"['utils', 'strutil']",utils,https://github.com/blandrice/blandlibs/tree/master/libs/utils/strutil
+55,lantern,blandrice,,yes,,,lantern that floats away like the lantern festival,"['scene', 'lantern']",scene,https://github.com/blandrice/blandlibs/tree/master/libs/scene/lantern
+56,lantern,blandrice,,,yes,,lantern that floats away like the lantern festival,"['scene', 'lantern']",scene,https://github.com/blandrice/blandlibs/tree/master/libs/scene/lantern
+57,skydome,blandrice,,yes,,,send changes to skydome from server to client (can use triggers too),"['scene', 'skydome']",scene,https://github.com/blandrice/blandlibs/tree/master/libs/scene/skydome
+58,skydome,blandrice,,,yes,,,"['scene', 'skydome']",scene,https://github.com/blandrice/blandlibs/tree/master/libs/scene/skydome
+59,gpt_strutils,ChatGPT,,,,yes,ChatGPT test on generating string utilities,"['utils', 'ChatGPT']",utils,https://github.com/blandrice/blandlibs/tree/master/libs/utils/ChatGPT
+60,g,blandrice,,,,yes,some global vars that other libs can reference to reduce calls,"['utils', 'global']",utils,https://github.com/blandrice/blandlibs/tree/master/libs/utils/global
+61,listutil,blandrice,,,,yes,Additional string utilities,"['utils', 'lists']",utils,https://github.com/blandrice/blandlibs/tree/master/libs/utils/lists
+62,strutils,ProfNoob,https://discord.com/channels/859947586005368862/862113777946984459/957710191590268929,,,yes,Additional String utilities,"['utils', 'strutil']",utils,https://github.com/blandrice/blandlibs/tree/master/libs/utils/strutil
