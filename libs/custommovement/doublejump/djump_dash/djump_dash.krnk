@@ -1,0 +1,78 @@
+# ===================================================================
+# File: libs\game\custommovement\doublejump\djregistersync\djump_dash.krnk
+# Author: blandrice
+# Description: double-jump using registersync feature
+# ===================================================================
+
+#include <DJDashconfig_h.krnk>
+
+# Add this both on the server and client side.
+
+public action onPlayerSpawn(str id) {
+	obj player = GAME.PLAYERS.findByID(id);
+    player.timeLastCrouched = false;
+    player.jumpCount = false;
+    player.hasJumped = false;
+
+    player.registerSyncValues("timeLastCrouched");
+    player.registerSyncValues("timeLastOnGround");
+    player.registerSyncValues("jumpCount");
+    player.registerSyncValues("hasJumped");
+}
+
+public action onPlayerUpdate(str id, num delta, obj inputs) {
+	obj player = GAME.PLAYERS.findByID(id);
+	
+    # Double-Jump stuff
+
+    # crouch timestamp
+    if ((bool) inputs.crouch) 
+    {
+        player.timeLastCrouched = 0;
+    } 
+    else 
+    {
+        (num) player.timeLastCrouched += delta;
+    }
+    # reset jumpcount on ground
+    if((bool) player.onGround) 
+    {
+        player.jumpCount = (num) DJDashconfig_h_c.MAX_JUMPCOUNT-1;
+        player.timeLastOnGround = 0;
+    } 
+    else
+    {
+        (num) player.timeLastOnGround += delta;
+    } 
+    #  reset jumpCount after walljump
+     if ((bool) DJDashconfig_h_c.WALLJUMP_REFRESHS && (bool) player.onWall && (bool) inputs.jump) 
+    {
+        player.jumpCount = (num) DJDashconfig_h_c.MAX_JUMPCOUNT-1;
+    } 
+    # input jump logic
+    if((bool) inputs.jump) {
+        if(!(bool)player.hasJumped  && (num)player.jumpCount > 0 && !(bool)player.onGround && ((num)player.timeLastOnGround > 150)) 
+        {
+            if (!(bool) player.onWall && (bool)DJDashconfig_h_c.WALLJUMP_REFRESHS) 
+            {
+                if ((bool) DJDashconfig_h_c.ENABLE_CROUCHJUMP && ((num)player.timeLastCrouched < (num)DJDashconfig_h_c.MS_DURATION_UNCROUCH)) 
+                {
+                    player.velocity.y = Math.lerp((num) DJDashconfig_h_c.VEL_CROUCHJUMP,(num) DJDashconfig_h_c.VEL_JUMP,(num)player.timeLastCrouched/(num) DJDashconfig_h_c.MS_DURATION_UNCROUCH);	# "moonjumping" calculation
+                } else 
+                {
+                    player.velocity.y = (num) DJDashconfig_h_c.VEL_JUMP;	
+                }
+                if ((num) DJDashconfig_h_c.SOUND > 0) 
+                {
+                    GAME.SOUND.play2D(32576, 1, 0.5, false); # jump DJDashconfig_h_c.SOUND
+                }
+
+                (num)player.jumpCount--;
+            }
+        }
+        player.hasJumped = true;
+    }
+    else {
+        player.hasJumped = false;
+    }
+}

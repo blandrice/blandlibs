@@ -1,0 +1,7 @@
+#include <djump_dash.krnk>
+
+# ===================================================================
+# File: libs\game\custommovement\doublejump\djregistersync\djump_dash_s.krnk
+# Author: blandrice
+# Description: double-jump using registersync feature
+# ===================================================================
