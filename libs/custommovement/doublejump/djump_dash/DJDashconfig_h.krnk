@@ -2,7 +2,7 @@
 # SETTINGS:
 obj c = 
 {
-    MAX_JUMPCOUNT: 2, # 2 is "doublejump", 3 is "triplejump"
+    MAX_JUMPCOUNT: 4, # 2 is "doublejump", 3 is "triplejump"
     WALLJUMP_REFRESHS: true,
     ENABLE_CROUCHJUMP: true, # lower height for crouch jump, also applies "moonjump" mid-air physics
     SOUND: 31960, # sound ID. set to 0 if no sound desired
@@ -10,6 +10,10 @@ obj c =
     MS_DURATION_UNCROUCH: 166,
     VEL_JUMP: 0.0793, # 60FPS, max clearance 17.9 units
     VEL_CROUCHJUMP: 0.0595, # 60FPS, max clearance 10.2 units
+    MS_DURATION_DASH: 300,
+    MS_DURATION_HOVER: 40,
+    VEL_DASH: 0.125,
+    HALTRATIO: 1.2,
 };
 
 # ===================================================================
