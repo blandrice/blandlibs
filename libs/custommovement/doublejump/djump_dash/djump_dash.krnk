@@ -6,6 +6,8 @@
 
 #include <DJDashconfig_h.krnk>
 
+
+
 # Add this both on the server and client side.
 
 public action onPlayerSpawn(str id) {
@@ -13,11 +15,25 @@ public action onPlayerSpawn(str id) {
     player.timeLastCrouched = false;
     player.jumpCount = false;
     player.hasJumped = false;
-
     player.registerSyncValues("timeLastCrouched");
     player.registerSyncValues("timeLastOnGround");
     player.registerSyncValues("jumpCount");
     player.registerSyncValues("hasJumped");
+    # dashing
+    player.tLastDash = 50000;
+    player.haltedDash = false;
+    player.hasCrouched = false;
+    player.hasDashed = false;
+    player.movDir = 0;
+    player.dashRot = 0;
+    player.plrLastY = 0;
+    player.registerSyncValues("tLastDash");
+    player.registerSyncValues("haltedDash");
+    player.registerSyncValues("hasCrouched");
+    player.registerSyncValues("hasDashed");
+    player.registerSyncValues("movDir");
+    player.registerSyncValues("dashRot");
+    player.registerSyncValues("plrLastY");
 }
 
 public action onPlayerUpdate(str id, num delta, obj inputs) {
@@ -39,6 +55,7 @@ public action onPlayerUpdate(str id, num delta, obj inputs) {
     {
         player.jumpCount = (num) DJDashconfig_h_c.MAX_JUMPCOUNT-1;
         player.timeLastOnGround = 0;
+        player.hasDashed = false;
     } 
     else
     {
@@ -68,11 +85,56 @@ public action onPlayerUpdate(str id, num delta, obj inputs) {
                 }
 
                 (num)player.jumpCount--;
+                player.tLastDash = 50000;
+                player.haltedDash = true;
+                player.hasDashed = false;
             }
         }
         player.hasJumped = true;
     }
     else {
         player.hasJumped = false;
+    }
+
+    GAME.log("tLastDash",(num) player.tLastDash);
+    GAME.log("hasCrouched",(bool) player.hasCrouched);
+    GAME.log("hasDashed",(bool) player.hasDashed);
+    # input dash logic
+    if((bool)inputs.crouch && !(bool) player.onGround){
+        if((!(bool)player.hasCrouched) && (!(bool)player.hasDashed)) {
+            player.hasCrouched = true;
+            player.hasDashed = true;
+            player.tLastDash = 0;
+            GAME.log("init dash");
+            if((str) inputs.movDir == 'undefined'){
+                player.movDir = 0;
+            } else {
+                player.movDir = Math.PI2 - ((num)inputs.movDir + Math.PI/2);
+            }
+            
+            player.dashRot = (num)player.rotation.x + (num) player.movDir;
+            
+            # dashRot = (num)player.rotation.x;
+            player.haltedDash = false;
+        }
+    } else {
+        player.hasCrouched = false;
+    }
+    (num) player.tLastDash += delta;
+    if ((num) player.tLastDash < (num)DJDashconfig_h_c.MS_DURATION_DASH) {
+        player.position.y = player.plrLastY;
+        player.velocity.x = -(num)DJDashconfig_h_c.VEL_DASH * Math.sin((num)player.dashRot);
+        player.velocity.z = -(num)DJDashconfig_h_c.VEL_DASH * Math.cos((num)player.dashRot);
+        
+    } else if (!(bool)player.haltedDash){
+        player.velocity.x = (num)player.velocity.x / (num)DJDashconfig_h_c.HALTRATIO;
+        player.velocity.z = (num)player.velocity.z / (num)DJDashconfig_h_c.HALTRATIO;
+        
+        player.haltedDash = true;
+    } else if ((num)player.tLastDash < (num)DJDashconfig_h_c.MS_DURATION_DASH + (num)DJDashconfig_h_c.MS_DURATION_HOVER) {
+        # player.position.y = player.plrLastY;
+        player.velocity.y = 0;
+    } else {
+        player.plrLastY = (num)player.position.y;
     }
 }
