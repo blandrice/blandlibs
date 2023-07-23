@@ -85,8 +85,11 @@ public action onPlayerUpdate(str id, num delta, obj inputs) {
                 }
 
                 (num)player.jumpCount--;
-                player.tLastDash = 50000;
-                player.haltedDash = true;
+            }
+            player.tLastDash = 50000;
+            player.haltedDash = true;
+            if ((num)player.jumpCount > 0)
+            {
                 player.hasDashed = false;
             }
         }
@@ -96,44 +99,45 @@ public action onPlayerUpdate(str id, num delta, obj inputs) {
         player.hasJumped = false;
     }
 
-    GAME.log("tLastDash",(num) player.tLastDash);
-    GAME.log("hasCrouched",(bool) player.hasCrouched);
-    GAME.log("hasDashed",(bool) player.hasDashed);
     # input dash logic
     if((bool)inputs.crouch && !(bool) player.onGround){
         if((!(bool)player.hasCrouched) && (!(bool)player.hasDashed)) {
             player.hasCrouched = true;
+        }
+    } else if (!(bool) player.onGround){
+        if ((bool) player.hasCrouched == true)
+        {
+            player.movDir = 0;
+            # if((str) inputs.movDir == 'undefined'){
+            #     player.movDir = 0;
+            # } else {
+            #     player.movDir = Math.PI2 - ((num)inputs.movDir + Math.PI/2);
+            # }
+            player.dashRot = (num)player.rotation.x + (num) player.movDir;
+            player.haltedDash = false;
             player.hasDashed = true;
             player.tLastDash = 0;
-            GAME.log("init dash");
-            if((str) inputs.movDir == 'undefined'){
-                player.movDir = 0;
-            } else {
-                player.movDir = Math.PI2 - ((num)inputs.movDir + Math.PI/2);
-            }
-            
-            player.dashRot = (num)player.rotation.x + (num) player.movDir;
-            
-            # dashRot = (num)player.rotation.x;
-            player.haltedDash = false;
         }
-    } else {
+        player.hasCrouched = false;
+    } else
+    {
         player.hasCrouched = false;
     }
     (num) player.tLastDash += delta;
     if ((num) player.tLastDash < (num)DJDashconfig_h_c.MS_DURATION_DASH) {
-        player.position.y = player.plrLastY;
-        player.velocity.x = -(num)DJDashconfig_h_c.VEL_DASH * Math.sin((num)player.dashRot);
-        player.velocity.z = -(num)DJDashconfig_h_c.VEL_DASH * Math.cos((num)player.dashRot);
+        player.velocity.y = 0;
+        # player.position.y = player.plrLastY;
+        player.velocity.x = -(num)DJDashconfig_h_c.VEL_DASH * Math.sin((num)player.rotation.x);
+        player.velocity.z = -(num)DJDashconfig_h_c.VEL_DASH * Math.cos((num)player.rotation.x);
         
     } else if (!(bool)player.haltedDash){
-        player.velocity.x = (num)player.velocity.x / (num)DJDashconfig_h_c.HALTRATIO;
-        player.velocity.z = (num)player.velocity.z / (num)DJDashconfig_h_c.HALTRATIO;
-        
+               
         player.haltedDash = true;
     } else if ((num)player.tLastDash < (num)DJDashconfig_h_c.MS_DURATION_DASH + (num)DJDashconfig_h_c.MS_DURATION_HOVER) {
         # player.position.y = player.plrLastY;
         player.velocity.y = 0;
+        player.velocity.x = (num)player.velocity.x / Math.pow((num)DJDashconfig_h_c.HALTRATIO,delta);
+        player.velocity.z = (num)player.velocity.z / Math.pow((num)DJDashconfig_h_c.HALTRATIO,delta);
     } else {
         player.plrLastY = (num)player.position.y;
     }
