@@ -1,0 +1,73 @@
+# Client Script
+str[] default = str["abcd"]; # If you want custom default level names, fill in this list following the format in the example below
+# str[] default = str["Level 1","orange","triangle"]; <-- example
+str[] current = str[];
+num counter = 0;
+bool custom = false; # Change this to true if you used custom default level names
+bool default_initialized = false;
+
+bool action isUsed(str name) {
+	for(num i = 0; i < lengthOf current; i++) {
+		if(current[i] == name) {
+			return true;}
+	}
+	return false;
+}
+
+action updateCurrent(num i) {
+    str index = toStr (i + 1);
+    if(GAME.UI.getDIVText("spdRunI" + index) != "undefined") {
+            str time = GAME.UI.getDIVText("spdRunIVal" + index);
+            GAME.UI.updateDIVText("spdRunI" + index, current[i]);
+            GAME.UI.addDIV("spdRunIVal" + index, true, "float:right;text-align:right;color:#fff;font-size:20px;", "spdRunI" + index);
+            GAME.UI.updateDIVText("spdRunIVal" + index, time);
+	}
+}
+
+action default_init() {
+	for(num i = 0; i < lengthOf default; i++) {
+		addTo current default[i];
+        updateCurrent(i);
+	}
+}
+
+public action onPlayerSpawn(str id) {
+    if (!default_initialized)
+    {
+        default_init();
+        default_initialized=true;
+
+    }
+}
+
+public action onNetworkMessage(str id, obj data) {
+	if(id == "reset") {
+		num times = lengthOf current;
+		for(num i = 0; i < times; i++) {
+			if(custom) {
+				current[i] = default[i];
+			}
+			else {
+				remove current[0];
+			}		
+		}
+		counter = 0;
+        for (num i = 0; i < times; i++)
+        {
+            updateCurrent(i);
+        }
+	}
+	else if(UTILS.textContains(id, "point_")) {
+		str levelName = UTILS.replaceText(id, "point_", "");
+		if(!isUsed(levelName)) {
+			if(custom) {
+				current[counter] = levelName;
+			}
+			else {
+				addTo current levelName;
+			}	
+			updateCurrent(counter);
+            counter++;
+		}
+	}
+}

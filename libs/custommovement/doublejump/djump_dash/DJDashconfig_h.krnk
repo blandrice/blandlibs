@@ -8,12 +8,15 @@ obj c =
     SOUND: 31960, # sound ID. set to 0 if no sound desired
     # HARD-CODED NUMBERS - DON'T TOUCH
     MS_DURATION_UNCROUCH: 166,
-    VEL_JUMP: 0.0793, # 60FPS, max clearance 17.9 units
+    VEL_JUMP: 0.0893, # 60FPS, max clearance 17.9 units
+    # VEL_JUMP: 0.0793, # 60FPS, max clearance 17.9 units
     VEL_CROUCHJUMP: 0.0595, # 60FPS, max clearance 10.2 units
-    MS_DURATION_DASH: 300,
+    MS_DURATION_CROUCHSTRAFE: 400,
+    MS_DURATION_DASH: 500,
     MS_DURATION_HOVER: 40,
-    VEL_DASH: 0.125,
-    HALTRATIO: 1.2,
+    DASH_RATIO: 1.1, # 0.125
+    VEL_DASH: 0.110, # 0.125
+    HALTRATIO: 1.0002,
 };
 
 # ===================================================================

@@ -1,0 +1,6 @@
+num globalvalue = 0;
+
+# When a player leaves the server
+public action onPlayerLeave(str playerID) {
+    globalvalue -= 1;
+}

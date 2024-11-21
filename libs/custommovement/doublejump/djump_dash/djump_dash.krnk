@@ -21,6 +21,10 @@ public action onPlayerSpawn(str id) {
     player.registerSyncValues("hasJumped");
     # dashing
     player.tLastDash = 50000;
+    player.tLastAirStrafe = 50000;
+    player.tLastCrouchPress = 50000;
+    player.hasCrouchPressed = false;
+    player.tLastOnGround = 0;
     player.haltedDash = false;
     player.hasCrouched = false;
     player.hasDashed = false;
@@ -28,6 +32,10 @@ public action onPlayerSpawn(str id) {
     player.dashRot = 0;
     player.plrLastY = 0;
     player.registerSyncValues("tLastDash");
+    player.registerSyncValues("tLastAirStrafe");
+    player.registerSyncValues("tLastCrouchPress");
+    player.registerSyncValues("hasCrouchPressed");
+    player.registerSyncValues("tLastOnGround");
     player.registerSyncValues("haltedDash");
     player.registerSyncValues("hasCrouched");
     player.registerSyncValues("hasDashed");
@@ -45,10 +53,16 @@ public action onPlayerUpdate(str id, num delta, obj inputs) {
     if ((bool) inputs.crouch) 
     {
         player.timeLastCrouched = 0;
+        if (!(bool)player.hasCrouchPressed)
+        {
+            player.tLastCrouchPress = 0;
+            player.hasCrouchPressed = true;
+        }
     } 
     else 
     {
         (num) player.timeLastCrouched += delta;
+        player.hasCrouchPressed = false;
     }
     # reset jumpcount on ground
     if((bool) player.onGround) 
@@ -56,6 +70,7 @@ public action onPlayerUpdate(str id, num delta, obj inputs) {
         player.jumpCount = (num) DJDashconfig_h_c.MAX_JUMPCOUNT-1;
         player.timeLastOnGround = 0;
         player.hasDashed = false;
+        player.tLastOnGround = 0;
     } 
     else
     {
@@ -103,8 +118,11 @@ public action onPlayerUpdate(str id, num delta, obj inputs) {
     if((bool)inputs.crouch && !(bool) player.onGround){
         if((!(bool)player.hasCrouched) && (!(bool)player.hasDashed)) {
             player.hasCrouched = true;
+            player.tLastAirStrafe = 0;
         }
-    } else if (!(bool) player.onGround){
+    } 
+    else if (!(bool) player.onGround)
+    {
         if ((bool) player.hasCrouched == true)
         {
             player.movDir = 0;
@@ -113,27 +131,45 @@ public action onPlayerUpdate(str id, num delta, obj inputs) {
             # } else {
             #     player.movDir = Math.PI2 - ((num)inputs.movDir + Math.PI/2);
             # }
-            player.dashRot = (num)player.rotation.x + (num) player.movDir;
+            # player.dashRot = (num)player.rotation.x + (num) player.movDir;
             player.haltedDash = false;
             player.hasDashed = true;
             player.tLastDash = 0;
         }
         player.hasCrouched = false;
-    } else
+        player.tLastAirStrafe = 50000;
+    } 
+    else
     {
         player.hasCrouched = false;
+        player.tLastAirStrafe = 50000;
     }
+    
     (num) player.tLastDash += delta;
-    if ((num) player.tLastDash < (num)DJDashconfig_h_c.MS_DURATION_DASH) {
+    (num) player.tLastAirStrafe += delta;
+    (num) player.tLastOnGround += delta;
+    (num) player.tLastCrouchPress += delta;
+    # GAME.log((num) player.timeLastCrouched,(num) player.tLastOnGround);
+
+    # if ((num) player.tLastAirStrafe < (num)DJDashconfig_h_c.MS_DURATION_CROUCHSTRAFE) {
+    num curr_mag = Math.abs(Math.hypot((num)player.velocity.x,(num)player.velocity.z));
+    if ((bool)inputs.crouch) {
+        player.velocity.x = -curr_mag * Math.sin((num)player.rotation.x);
+        player.velocity.z = -curr_mag * Math.cos((num)player.rotation.x);
+    } 
+    if (((num) player.tLastDash < (num)DJDashconfig_h_c.MS_DURATION_DASH) && ((num) player.tLastCrouchPress < (num) player.tLastOnGround)) {
+        GAME.log("dash");
+        GAME.log((num) player.tLastCrouchPress,(num) player.tLastOnGround);
         player.velocity.y = 0;
         # player.position.y = player.plrLastY;
-        player.velocity.x = -(num)DJDashconfig_h_c.VEL_DASH * Math.sin((num)player.rotation.x);
-        player.velocity.z = -(num)DJDashconfig_h_c.VEL_DASH * Math.cos((num)player.rotation.x);
+        player.velocity.x = -Math.max(curr_mag,(num)DJDashconfig_h_c.VEL_DASH) * Math.sin((num)player.rotation.x);
+        player.velocity.z = -Math.max(curr_mag,(num)DJDashconfig_h_c.VEL_DASH) * Math.cos((num)player.rotation.x);
         
     } else if (!(bool)player.haltedDash){
-               
         player.haltedDash = true;
-    } else if ((num)player.tLastDash < (num)DJDashconfig_h_c.MS_DURATION_DASH + (num)DJDashconfig_h_c.MS_DURATION_HOVER) {
+    } else if (((num)player.tLastDash < (num)DJDashconfig_h_c.MS_DURATION_DASH + (num)DJDashconfig_h_c.MS_DURATION_HOVER) && ((num) player.tLastCrouchPress < (num) player.tLastOnGround)) {
+        GAME.log("hover");
+        GAME.log((num) player.tLastCrouchPress,(num) player.tLastOnGround);
         # player.position.y = player.plrLastY;
         player.velocity.y = 0;
         player.velocity.x = (num)player.velocity.x / Math.pow((num)DJDashconfig_h_c.HALTRATIO,delta);
